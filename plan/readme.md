@@ -31,13 +31,13 @@ A simple task scheduling app with authentication. Users register, log in and sch
 ---
 **DevOps review**
 Before delving into the specifics, we must first take a broad overview of our product, tools and technologies, and development pipeline. In order to produce a final product, companies must progress through a multi-stage pipeline, each stage operating seamlessly and continuously. Due to the numerous stages involved, we will only briefly cover those that are relevant to full-stack developers. [DevOps](https://en.wikipedia.org/wiki/DevOps)  is a software development approach that emphasizes collaboration and communication between developers and IT operations to speed up software delivery, increase reliability, and improve customer satisfaction. It involves a wide range of tools and practices, including automation, continuous integration and delivery, and agile development. Usually the lifecycle of DevOps is symbolized in the form of an infinity loop.  
-![DevOps life-cycle](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/uwlymslug7i10jfdj3ck.png)
+![DevOps infinity](devops_infinity.png)
 
 
 In DevOps, we continuously perform the following tasks:
 
 
-![DevOps phases](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/b7e5gm8otavif18aoknc.png)
+![DevOps lifr cycle](devops_lifecycle.png)
 To summarize the tasks performed in each phase, we can roughly state the following.
 
 - _**Continuous development:**_
@@ -108,7 +108,7 @@ How to design the microsystem architecture for our app? To design the architectu
 > An initial diagram of our design can be depicted as:
 
 
-![Initial diagram](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jpui1ki75qkcq1f32dvm.png)
+![Initial diagram](initial_service_diagram.png)
 
 
 - **Microsystem patterns**
@@ -137,7 +137,7 @@ Our application is based on a microservices architecture, and to simplify the de
 > - [_SOLID principles:_](https://en.wikipedia.org/wiki/SOLID)  Following these patterns ensures adherence to SOLID principles.
 
 
-![Microsystem patterns](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/tk8cs940gt2o7kyy7pvd.png)
+![Microsystem patterns](microservice_patterns.png)
 
 
 - **Choreography diagram**
@@ -145,7 +145,7 @@ Our application is based on a microservices architecture, and to simplify the de
 When we combine all of these components -- the services, their collaborations and connections, and the data flow -- we can represent the architecture of our app in the form of a diagram like this:
 
 
-![Choreography](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/a4svuxcgx5lhriskmy6g.png)
+![Choreography](choreography.png)
 
 
 - **DevOps diagram**
