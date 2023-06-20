@@ -1,6 +1,7 @@
 mod service;
 mod config;
-
+mod convert;
+mod models;
 
 use service::{UserService};
 use tonic::{transport::Server};
