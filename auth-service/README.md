@@ -79,7 +79,7 @@ When developing inside a Docker container, you only need to install Docker, Visu
 > - Create a file named .env in the root directory and set the content to `AUTH_POSTGRES_PORT=5432`.
 > - Inside root directory create a file named docker-compose.yml and add the following content.
 
-```
+```yaml
 version: '3'
 services:
 # database service for auth service
@@ -136,7 +136,7 @@ PGADMIN_DEFAULT_PASSWORD=password123
 ```
 > - Create a file named server.json and set the content to 
 
-```
+```json
 {
     "Servers": {
       "1": {
@@ -160,7 +160,7 @@ PGADMIN__PORT=5050
 ```
 > - Add the following to the service part of the docker-compose.yml.
 
-```
+```yaml
   pgadmin:
     build:
       context: ./pgadmin-service
@@ -200,7 +200,7 @@ Once inside pgAdmin, you should see that it has successfully connected to the au
 > - Add `AUTH_REDIS_PORT=6379` to the .env file of the docker-compose (the .env file at the root directory of the project.)
 > - Add the following to the service part of the docker-compose.yml.
 
-```
+```yaml
   auth-cache-service:
     build:
       context: ./auth-cache-service
@@ -218,7 +218,7 @@ Once inside pgAdmin, you should see that it has successfully connected to the au
 ```
 > - Add the following to the secrets part of the docker-compose.yml.
 
-```
+```yaml
   auth-redis-pass:
     file: auth-cache-service/pass.txt
   auth-redis-acl:
@@ -244,7 +244,7 @@ This service exists only in the development environment for debugging purposes. 
 > - Add `Auth_REDIS_COMMANDER_PORT=8081` to the .env file of the docker-compose (the .env file at the root directory of the project.)
 > - Add the following to the service part of the docker-compose.yml.
 
-```
+```yaml
   auth-redis-commander-service:
     build:
       context: ./auth-redis-commander-service
@@ -290,7 +290,7 @@ The next step is tying these two components(gRPC and Diesel models) together. Fo
 > - create a folder named auth-service inside root directory.
 > - create a Dockerfile and set the contents to the following code (Note: You can install rust at host machine first, then init a starter project and then dockerize your app. But here we do all the things inside a container without installing rust on the host machine):
 
-```
+```bash
 FROM rust:1.70.0 AS base
 ENV PROTOC_ZIP=protoc-3.13.0-linux-x86_64.zip
 RUN apt-get update && apt-get install -y unzip && apt-get install libpq-dev
@@ -307,7 +307,7 @@ RUN cargo install diesel_cli --no-default-features --features postgres
 > - Create a file named `.env` inside auth-service and set the contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/auth-service/.env). We will use this variables later, but we need to have it in this step because we have declared it inside docker-compose file.
 > - Add the following to the service part of the docker-compose.yml.
 
-```
+```yaml
   auth-service:
     build:
       context: ./auth-service
@@ -349,7 +349,7 @@ RUN cargo install diesel_cli --no-default-features --features postgres
 > - We will use tonic on top of Rust to deal with gRPC, so we need to add `tonic-build` dependency in the Cargo.toml. To do that run: `cargo add --build tonic-build` and `cargo add prost`. tonic build uses prost to compile .proto files.
 Now create a file named Build.rs inside auth-service folder add paste the following code:
 
-```
+```rust
 use std::{env, path::PathBuf};
 fn main()->Result<(),Box<dyn std::error::Error>>{
 
@@ -365,7 +365,7 @@ fn main()->Result<(),Box<dyn std::error::Error>>{
 ```
 > - Create a file inside src folder named `service.rs`. Add the following code:
 
-```
+```rust
 use tonic::{Request, Response, Status};
 use crate::proto::{
     user_server::User, CreateUserReply, CreateUserRequest,
@@ -451,7 +451,7 @@ To complete our gRPC service implementation, we need to define our own service c
 > - Run `cargo add tokio --features "macros sync rt-multi-thread"` [Tokio](https://tokio.rs/)  is a runtime for writing reliable asynchronous applications with Rust.
 > - add the following code to the main.rs
 
-```
+```rust
 mod service;
 mod config;
 
@@ -498,7 +498,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 > - Now our gRPC part is ready. Run `cargo run`. If everything goes according to plan, our service will start. Then stop the server (ctl + c).
 > - Next step is to prepare our database models and migrations. For this we need a running database server and the database_url to connect to it. For development environments it is common to pass this type of data via environment variables. Here we are following an approach that is more common in production environment and pass credentials via docker-compose secrets and then pass the location of the secrets via environment variables. If you run `printenv` you can see the list of environment variables. We can make the database_url using the environment variables provided to us. Actually, Inside config.rs, we generate database url using environment variables received via docker-compose.
 
-```
+```rust
 let database_name_file = get_env_var("POSTGRES_DB_FILE");
         let database_name = get_file_contents(&database_name_file);
         let database_user_file = get_env_var("POSTGRES_USER_FILE");
@@ -515,7 +515,7 @@ let database_name_file = get_env_var("POSTGRES_DB_FILE");
 ```
 > - In order to make database_url available in the terminal (to be used by diesel cli, we need to create it from the environment values we received via docker-compose. To do so, create a file named db_url_make.sh in the auth-service directory (beside cargo.toml). Then add the following code:
 
-```
+```bash
 db_name_file="${POSTGRES_DB_FILE}"
 db_name=$(cat "$db_name_file")
 db_user_file="${POSTGRES_USER_FILE}"
@@ -534,7 +534,7 @@ export DATABASE_URL=${db_url}
 > - Run `diesel setup` this will create a folder named migrations and diesel.toml file beside cargo.toml.
 > - Run `diesel migration generate create_users` This command creates two files named XXX_create_users/up.sql and XXX_create_users/down.sql. Edit up.sql to:
 
-```
+```sql
 CREATE TABLE users (
         id int NOT NULL PRIMARY KEY DEFAULT 1,
         name VARCHAR(100) NOT NULL,
@@ -547,14 +547,14 @@ CREATE INDEX users_email_idx ON users (email);
 ```
 > - Edit down.sql to
 
-```
+```sql
 DROP TABLE IF EXISTS "users";
 ```
 
 > - Run `diesel migration run` this will run the migrations against database_url and creates schema.rs inside src folder. In case of error `relation "users" already exists`, you can run  `diesel print-schema > src/schema.rs` to create the schema file for you.
 > - We did the migrations using cli. for production environments, we can run the migrations on start inside the code. To accomplish this, Run `cargo add diesel_migrations` and then add the following codes to the main.rs
 
-```
+```rust
 use diesel::{pg::PgConnection, prelude::*};
 use diesel_migrations::EmbeddedMigrations;
 use diesel_migrations::{embed_migrations, MigrationHarness};
@@ -575,7 +575,7 @@ pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 > - Now run `cargo run` This will runs the migrations against the database on app start. You can go to pgadmin panel and see users table under servers: auth-db-service: databases: users_db: schema: public: tables.
 > - Create a file named models.rs 
 
-```
+```rust
 //Our ORM models.
 use diesel::prelude::*;
 
@@ -602,7 +602,7 @@ pub struct NewUser {
 
 > - We have prepared proto side and ORM side of our models. Now it is time to create the converter. Create a file named convert.rs inside src directory.
 
-```
+```rust
 
 //ORM models (database models)
 use crate::models::{User, NewUser};
@@ -637,7 +637,7 @@ impl From<CreateUserRequest> for NewUser {
 > - whenever you create a new module, do not forget to include it at the start of your entry point file of your binary (main.rs) to make them accessible to the app.
 > - Now it is time to put all together. Change the UserService declaration to:
 
-```
+```rust
 type PgPool = Pool<ConnectionManager<PgConnection>>;
 type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
@@ -714,7 +714,7 @@ In order to connect to our auth-service we create a new service called Auth-grpc
 > - Create a Docker file and set contents to `FROM fullstorydev/grpcui:v1.3.1`
 > - Add the following to the services part of the docker-compose.yml file. 
 
-```
+```yaml
   auth-grpcui-service:
     build:
       context: ./auth-grpcui-service
@@ -746,7 +746,7 @@ In order to connect to our auth-service we create a new service called Auth-grpc
 
 > - One important note: for packages, we have used `cargo add package_name`, and this is not safe, as the packages may change in the future. In case of falling into dependency hell, here is the package versions inside my cargo.toml file:
 
-```
+```toml
 [package]
 name = "auth_service"
 version = "0.1.0"
