@@ -4,11 +4,11 @@
 
  > - Plan: [Read](https://dev.to/khaledhosseini/play-microservices-birds-eye-view-3d44)
  > - Authentication service: Rust [Read](https://dev.to/khaledhosseini/play-microservices-authentication-4di3)
- > - Scheduler service: Go 
- > - API gateway service: Rust
- > - Notification service: Python
- > - Report service: Python
- > - Client service: Typescript
+ > - Scheduler service: Go [Coming soon]()
+ > - API gateway service: Rust [Coming soon]()
+ > - Notification service: Python [Coming soon]()
+ > - Report service: Python [Coming soon]()
+ > - Client service: Typescript [Coming soon]()
 
 ---
 
