@@ -153,7 +153,7 @@ When we combine all of these components -- the services, their collaborations an
 We can sketch the DevOps pipeline of our app development as follows:
 
 
-![DevOps diagram](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/DevOps.png)
+![DevOps diagram](developement_environment.png)
 
 
 - **Tools and technologies**
