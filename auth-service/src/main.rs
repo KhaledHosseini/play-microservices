@@ -1,13 +1,19 @@
 mod service;
 mod config;
+
+
 use service::{UserService};
 use tonic::{transport::Server};
 use proto::user_server::{UserServer};
 mod proto {
-    include!("proto.rs");
+    tonic::include_proto!("proto");
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
         tonic::include_file_descriptor_set!("user_descriptor");
 }
+
+
+use config::Config;
+use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -25,10 +31,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
         .build()
         .unwrap();
+
+
     Server::builder()
         .add_service(UserServer::new(user_service))
         .add_service(reflection_service)
-        .serve(address)
+        .serve(addr)
         .await?;
     Ok(())
 }
