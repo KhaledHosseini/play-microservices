@@ -6,6 +6,7 @@ Welcome, everyone! This is the first article in a series called **"Play Microser
  
 As I am not going to get into the details of Microservices architecture, I suggest you to have a glance at [microservices.io](https://microservices.io/). I aim to introduce the steps involved in developing a typical microservices software; however, please note that the code and steps detailed throughout this series should not be considered complete nor of production-level quality.
 
+
 ---
 
 ## Contents:
