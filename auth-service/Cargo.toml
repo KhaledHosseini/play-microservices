@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 diesel = { version = "2.1.0", features = ["postgres", "r2d2"] }
+diesel_migrations = "2.1.0"
 dotenv = "0.15.0"
 prost = "0.11.9"
 tokio = { version = "1.28.2", features = ["macros", "sync", "rt-multi-thread"] }
