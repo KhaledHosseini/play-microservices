@@ -2,8 +2,8 @@
  ---
  A scheduler app using microservices architecture. Services are:
 
- > - Plan: []()
- > - Authentication service: Rust [] ()
+ > - Plan: [Read](https://dev.to/khaledhosseini/play-microservices-birds-eye-view-3d44)
+ > - Authentication service: Rust [Read] (https://dev.to/khaledhosseini/play-microservices-authentication-4di3)
  > - Scheduler service: Go 
  > - API gateway service: Rust
  > - Notification service: Python
@@ -22,8 +22,3 @@
 
  ![Choreography](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/developement_environment.png)
  
- ---
-
- ## links
- [Play microservices: Bird's eye view]()
- [Play microservices: Authentication service]()
