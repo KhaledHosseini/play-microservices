@@ -1,7 +1,7 @@
 -- Your SQL goes here
 CREATE TYPE role_type AS ENUM (
   'ADMIN',
-  'CUSTOMER',
+  'CUSTOMER'
 );
 
 CREATE TABLE users (
