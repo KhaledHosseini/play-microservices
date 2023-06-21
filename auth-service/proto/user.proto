@@ -20,7 +20,6 @@ enum RoleType {
     CUSTOMER = 1;
 }
 
-
 message UserRequest {
     int32 id = 1 ;
 }
