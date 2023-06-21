@@ -115,11 +115,11 @@ impl User for UserService {
     ) -> Result<Response<CreateUserReply>, Status> {
        println!("Got a request: {:#?}", &request);
        
-       let CreateUserRequest { name, email, password } = &request.into_inner();
-       
+    //    let CreateUserRequest { name, email, password, role } = &request.into_inner();
+       let create_user_request: CreateUserRequest = request.into_inner();
        let conn = &mut self.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
 
-       let email_exists = select(exists(users_table::table.filter(users_table::dsl::email.eq(&email))))
+       let email_exists = select(exists(users_table::table.filter(users_table::dsl::email.eq(&create_user_request.email))))
        .get_result::<bool>(conn);
        
        match email_exists {
@@ -137,15 +137,12 @@ impl User for UserService {
         //we do not save the password. but a hash of it.
         let salt = SaltString::generate(&mut OsRng);
         let hashed_password = Argon2::default()
-        .hash_password(password.as_bytes(), &salt)
+        .hash_password(create_user_request.password.as_bytes(), &salt)
         .expect("Error while hashing password")
         .to_string();
         
-        let new_user = NewUser {
-            name: name.to_string(),
-            email: email.to_string(),
-            password: hashed_password
-        };
+        let mut new_user: NewUser = create_user_request.into();
+        new_user.password = hashed_password;
 
         let insert_response = diesel::insert_into(users_table::dsl::users)
         .values(&new_user)
