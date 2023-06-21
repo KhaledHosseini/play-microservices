@@ -8,7 +8,7 @@ mod token;
 
 //proto
 use service::{UserService};
-use tonic::{transport::Server};
+use tonic::{transport::Server, Request, Response, Status};
 use proto::user_server::{UserServer};
 mod proto {
     tonic::include_proto!("proto");
@@ -43,6 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //user service
     let redis_url = config.redis_url.clone();
     let user_service = UserService::new(&database_url, &redis_url)?;
+    let user_server = UserServer::with_interceptor(user_service, intercept);
 
     //reflection service for user
     let reflection_service = tonic_reflection::server::Builder::configure()
@@ -59,9 +60,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Server listening on {}", addr);
 
     Server::builder()
-        .add_service(UserServer::new(user_service))
+        .add_service(user_server)
         .add_service(reflection_service)
         .serve(addr)
         .await?;
     Ok(())
+}
+
+fn intercept(mut req: Request<()>) -> Result<Request<()>, Status> {
+    println!("Intercepting request: {:?}", req);
+
+    // Set an extension that can be retrieved by `say_hello`
+    req.extensions_mut().insert(MyExtension {
+        some_piece_of_data: "foo".to_string(),
+    });
+
+    Ok(req)
+}
+
+struct MyExtension {
+    some_piece_of_data: String,
 }

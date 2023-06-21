@@ -17,6 +17,7 @@ use diesel::{pg::PgConnection, prelude::*};
 use diesel::r2d2::{ Pool, PooledConnection, ConnectionManager, PoolError };
 use diesel::dsl::select;
 use diesel::dsl::exists;
+use diesel::sql_query;
 
 //cache
 use redis::{Client, AsyncCommands};
@@ -143,9 +144,18 @@ impl User for UserService {
         
         let mut new_user: NewUser = create_user_request.into();
         new_user.password = hashed_password;
+        
+        println!("Inserting new user: {:#?}", &new_user);
 
-        let insert_response = diesel::insert_into(users_table::dsl::users)
-        .values(&new_user)
+        // I could not come up with a solution for storing enums via diesel native queries.
+        // let insert_response = diesel::insert_into(users_table::table)
+        // .values(&new_user)
+        // .execute(conn);
+
+        let role_enum_string = format!("{:?}", new_user.role);
+        let query = format!("INSERT INTO users (name, email, password, role) VALUES ('{}', '{}', '{}', '{}')",
+        &new_user.name,&new_user.email,&new_user.password,role_enum_string);
+        let insert_response = sql_query(query)
         .execute(conn);
 
         match insert_response {
@@ -154,7 +164,7 @@ impl User for UserService {
                 Ok(Response::new(reply))
             }
             Err (e) => {
-                return Err(Status::already_exists(format!("Problem creating user with error: {}",e)));
+                return Err(Status::internal(format!("Problem creating user with error: {}",e)));
             }
         }
        

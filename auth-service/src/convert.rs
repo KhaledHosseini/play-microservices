@@ -1,6 +1,6 @@
 
 //ORM models (database models)
-use crate::models::{User, NewUser, RoleTypeEnumRust};
+use crate::models::{User, NewUser, RoleType as RoleTypeEnumRust};
 
 
 //Proto models (gRPC)
