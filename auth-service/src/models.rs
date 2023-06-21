@@ -10,7 +10,7 @@ pub struct User {
     pub email: String,
     pub verified: bool,
     pub password: String,
-    pub role: String,
+    pub role: RoleType,
 }
 
 #[derive(Debug, Insertable, PartialEq)]
@@ -19,4 +19,12 @@ pub struct NewUser {
     pub name: String,
     pub email: String,
     pub password: String,
+    pub role: RoleType,
+}
+
+#[derive(diesel_derive_enum::DbEnum, Debug, Copy, Clone, PartialEq, Eq)]
+#[ExistingTypePath = "crate::schema::sql_types::RoleType"]
+pub enum RoleType {
+    ADMIN,
+    CUSTOMER,
 }
