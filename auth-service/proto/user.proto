@@ -15,7 +15,12 @@ service User {
 
 message Empty {}
 
-//Note: the data types and the data types in the migration file of postgres must be the same.
+enum RoleType {
+    ADMIN = 0;
+    CUSTOMER = 1;
+}
+
+
 message UserRequest {
     int32 id = 1 ;
 }
@@ -30,6 +35,7 @@ message CreateUserRequest {
     string name = 1;
     string email = 2;
     string password = 3;
+    RoleType role = 4;
 }
 
 message CreateUserReply {
