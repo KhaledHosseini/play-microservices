@@ -1,3 +1,6 @@
+use crate::token;
+
+use chrono::{DateTime, Duration, NaiveDateTime, Utc};
 use hyper::Body;
 use std::{
     task::{Context, Poll},
@@ -44,15 +47,27 @@ where
             let access_token = match headers.get("Authorization") {
                 Some(value) => value.to_str().map_err(|_| {
                     // Handle invalid header value
-                    unimplemented!()
+                    let access_token_details =
+                    match token::verify_jwt_token(self.context.env.refresh_token_public_key.to_owned(), &value)
+                    {
+                        Ok(token_details) => token_details,
+                        Err(e) => {
+                            return Err(Status::internal(format!("Token validation failed with error: {}", e)));
+                        }
+                    };
+                    
+                    //check expiration 
+                    let expires = DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp(access_token_details.expires_in, 0), Utc);
+                    if Utc::now() > expires {
+                        return Err(Status::unauthenticated("Token has expired"));
+                    }
                 })?,
                 None => {
                     // Handle missing header
-                    unimplemented!()
+                    return Err(Status::internal("No Auth header found"));
                 }
             };
-            
-            // Do extra async work here...
+
             let response = inner.call(req).await?;
 
             Ok(response)

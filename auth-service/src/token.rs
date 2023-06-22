@@ -70,11 +70,11 @@ pub fn verify_jwt_token(
 
     let user_id = decoded.claims.sub.as_str().parse::<i32>().unwrap();
     let token_uuid = Uuid::parse_str(decoded.claims.token_uuid.as_str()).unwrap();
-
+    let expr = decoded.claims.exp.clone();
     Ok(TokenDetails {
         token: None,
         token_uuid,
         user_id,
-        expires_in: None,
+        expires_in: Some(expr),
     })
 }
