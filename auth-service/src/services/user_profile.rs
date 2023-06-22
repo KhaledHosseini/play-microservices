@@ -1,3 +1,4 @@
+use crate::Context;
 //grpc models
 use tonic::{Request, Response, Status};
 use crate::proto::{
@@ -11,49 +12,13 @@ use crate::models:: {
 // users table
 use crate::schema::{users as users_table};
 
-use diesel::{pg::PgConnection, prelude::*};
-use diesel::r2d2::{ Pool, PooledConnection, ConnectionManager, PoolError };
+use diesel::{prelude::*};
 
-
-//others
-use crate::config::Config;
-
-type PgPool = Pool<ConnectionManager<PgConnection>>;
-type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
 // #[derive(Debug, Default)]
 pub struct UserProfileService {
-    db_pool: PgPool,
+    pub context: Context,
 }
-
-impl UserProfileService {
-    pub fn new(db_url: &str) -> Result<Self, Box<dyn std::error::Error>> {
-
-        let manager = ConnectionManager::<PgConnection>::new(db_url);
-        // let db_pool = Pool::builder().build(manager)?;
-        let db_pool = match Pool::builder().build(manager) {
-            Ok(pool) => {
-                println!("✅ Successfully created connection pool");
-                pool
-            }
-            Err(e) => {
-                println!("🔥 Error creating connection pool: {}", e);
-                return Err(Box::new(e))
-            }
-        };
-
-        Ok(Self {
-            db_pool,
-        })
-    }
-
-     // helper function to get a connection from the pool
-     fn get_conn(&self) -> Result<PgPooledConnection, PoolError> {
-        let _pool = self.db_pool.get().unwrap();
-        Ok(_pool)
-    }
-}
-
 
 // Implement User trait for Our UserService
 #[tonic::async_trait]
@@ -65,7 +30,7 @@ impl UserProfile for UserProfileService {
         let UserRequest { id } = request.into_inner();
 
         // get a connection from the pool
-        let conn = &mut self.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
+        let conn = &mut self.context.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
         // run a querry
         let user_result = users_table::table.find(id).get_result::<orm_user>(conn);
 

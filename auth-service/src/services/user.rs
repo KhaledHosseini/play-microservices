@@ -1,3 +1,4 @@
+use crate::Context;
 //grpc models
 use tonic::{Request, Response, Status};
 use crate::proto::{
@@ -13,73 +14,24 @@ use crate::models:: {
 // users table
 use crate::schema::{users as users_table};
 
-use diesel::{pg::PgConnection, prelude::*};
-use diesel::r2d2::{ Pool, PooledConnection, ConnectionManager, PoolError };
+use diesel::{ prelude::*};
 use diesel::dsl::select;
 use diesel::dsl::exists;
 use diesel::sql_query;
 
 //cache
-use redis::{Client, AsyncCommands};
+use redis::{ AsyncCommands};
 
 //others
 use crate::token;
-use crate::config::Config;
 use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
 
-
-type PgPool = Pool<ConnectionManager<PgConnection>>;
-type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
-
 // #[derive(Debug, Default)]
 pub struct UserService {
-    redis_client: Client,
-    db_pool: PgPool,
-    env: Config,
-}
-
-impl UserService {
-    pub fn new(db_url: &str, redis_url: &str) -> Result<Self, Box<dyn std::error::Error>> {
-        let redis_client = match redis::Client::open(redis_url) {
-            Ok(client) => {
-                println!("✅Connection to the redis is successful!");
-                client
-            }
-            Err(e) => {
-                println!("🔥 Error connecting to Redis: {}", e);
-                return Err(Box::new(e))
-            }
-        };
-
-        let manager = ConnectionManager::<PgConnection>::new(db_url);
-        // let db_pool = Pool::builder().build(manager)?;
-        let db_pool = match Pool::builder().build(manager) {
-            Ok(pool) => {
-                println!("✅ Successfully created connection pool");
-                pool
-            }
-            Err(e) => {
-                println!("🔥 Error creating connection pool: {}", e);
-                return Err(Box::new(e))
-            }
-        };
-
-        let env = Config::init();
-        Ok(Self {
-            redis_client,
-            db_pool,
-            env,
-        })
-    }
-
-     // helper function to get a connection from the pool
-     fn get_conn(&self) -> Result<PgPooledConnection, PoolError> {
-        let _pool = self.db_pool.get().unwrap();
-        Ok(_pool)
-    }
+   pub context: Context
 }
 
 
@@ -94,7 +46,7 @@ impl User for UserService {
        
     //    let CreateUserRequest { name, email, password, role } = &request.into_inner();
        let create_user_request: CreateUserRequest = request.into_inner();
-       let conn = &mut self.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
+       let conn = &mut self.context.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
 
        let email_exists = select(exists(users_table::table.filter(users_table::dsl::email.eq(&create_user_request.email))))
        .get_result::<bool>(conn);
@@ -155,7 +107,7 @@ impl User for UserService {
 
         let LoginUserRequest { email, password } = request.into_inner();
 
-        let conn = &mut self.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
+        let conn = &mut self.context.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
         let user_result = users_table::table.filter(users_table::dsl::email.eq(&email)).first::<orm_user>(conn).optional()
         .map_err(|err| Status::internal(err.to_string()))?;
         
@@ -178,8 +130,8 @@ impl User for UserService {
 
         let access_token_details = match token::generate_jwt_token(
             user.id,
-            self.env.access_token_max_age,
-            self.env.access_token_private_key.to_owned(),
+            self.context.env.access_token_max_age,
+            self.context.env.access_token_private_key.to_owned(),
         ) {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -189,8 +141,8 @@ impl User for UserService {
     
         let refresh_token_details = match token::generate_jwt_token(
             user.id,
-            self.env.refresh_token_max_age,
-            self.env.refresh_token_private_key.to_owned(),
+            self.context.env.refresh_token_max_age,
+            self.context.env.refresh_token_private_key.to_owned(),
         ) {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -198,7 +150,7 @@ impl User for UserService {
             }
         };
 
-        let mut redis_client = match self.redis_client.get_async_connection().await {
+        let mut redis_client = match self.context.redis_client.get_async_connection().await {
             Ok(redis_client) => redis_client,
             Err(e) => {
                 return Err(Status::internal(format!("Catching service retrival failed with error: {}", e)))
@@ -209,7 +161,7 @@ impl User for UserService {
             .set_ex(
                 access_token_details.token_uuid.to_string(),
                 user.id.to_string(),
-                (self.env.access_token_max_age * 60) as usize,
+                (self.context.env.access_token_max_age * 60) as usize,
             )
             .await;
     
@@ -221,7 +173,7 @@ impl User for UserService {
             .set_ex(
                 refresh_token_details.token_uuid.to_string(),
                 user.id.to_string(),
-                (self.env.refresh_token_max_age * 60) as usize,
+                (self.context.env.refresh_token_max_age * 60) as usize,
             )
             .await;
     
@@ -231,9 +183,9 @@ impl User for UserService {
 
         let reply = LoginUserReply {
             access_token : access_token_details.token.clone().unwrap(),
-            access_token_age : self.env.access_token_max_age * 60,
+            access_token_age : self.context.env.access_token_max_age * 60,
             refresh_token : refresh_token_details.token.unwrap(),
-            refresh_token_age : self.env.access_token_max_age * 60,
+            refresh_token_age : self.context.env.access_token_max_age * 60,
         };
 
         Ok(Response::new(reply))
@@ -248,7 +200,7 @@ impl User for UserService {
         let RefreshTokenRequest { refresh_token } = request.into_inner();
 
         let refresh_token_details =
-        match token::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &refresh_token)
+        match token::verify_jwt_token(self.context.env.refresh_token_public_key.to_owned(), &refresh_token)
         {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -256,7 +208,7 @@ impl User for UserService {
             }
         };
 
-        let result = self.redis_client.get_async_connection().await;
+        let result = self.context.redis_client.get_async_connection().await;
         let mut redis_client = match result {
             Ok(redis_client) => redis_client,
             Err(e) => {
@@ -276,7 +228,7 @@ impl User for UserService {
 
         let user_id = user_id_str.parse::<i32>().unwrap();
         // get a connection from the pool
-        let conn = &mut self.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
+        let conn = &mut self.context.get_conn().map_err(|e| Status::internal(format!("Error getting connection: {}", e)))?;
         // run a querry
         let user_result = users_table::table.find(user_id).get_result::<orm_user>(conn);
         let user = match user_result {
@@ -289,8 +241,8 @@ impl User for UserService {
 
         let access_token_details = match token::generate_jwt_token(
             user.id,
-            self.env.access_token_max_age,
-            self.env.access_token_private_key.to_owned(),
+            self.context.env.access_token_max_age,
+            self.context.env.access_token_private_key.to_owned(),
         ) {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -302,7 +254,7 @@ impl User for UserService {
             .set_ex(
                 access_token_details.token_uuid.to_string(),
                 user.id.to_string(),
-                (self.env.access_token_max_age * 60) as usize,
+                (self.context.env.access_token_max_age * 60) as usize,
             )
             .await;
 
@@ -312,7 +264,7 @@ impl User for UserService {
 
         let reply = RefreshTokenReply {
             access_token : access_token_details.token.clone().unwrap(),
-            access_token_age : self.env.access_token_max_age * 60,
+            access_token_age : self.context.env.access_token_max_age * 60,
         };
 
         Ok(Response::new(reply))
@@ -327,7 +279,7 @@ impl User for UserService {
         let LogOutRequest { refresh_token, access_token_uuid } = request.into_inner();
 
         let refresh_token_details =
-        match token::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &refresh_token)
+        match token::verify_jwt_token(self.context.env.refresh_token_public_key.to_owned(), &refresh_token)
         {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -335,7 +287,7 @@ impl User for UserService {
             }
         };
 
-        let result = self.redis_client.get_async_connection().await;
+        let result = self.context.redis_client.get_async_connection().await;
         let mut redis_client = match result {
             Ok(redis_client) => redis_client,
             Err(e) => {
