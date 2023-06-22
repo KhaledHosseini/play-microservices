@@ -1,13 +1,13 @@
 // in the main file, declare all modules of sibling files.
 mod config;
-mod service;
+mod services;
 mod convert;
 mod models;
 mod schema;
 mod token;
 
 //proto
-use service::{UserService};
+use services::user::{UserService};
 use tonic::{transport::Server, Request, Response, Status};
 use proto::user_server::{UserServer};
 mod proto {
@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //user service
     let redis_url = config.redis_url.clone();
     let user_service = UserService::new(&database_url, &redis_url)?;
-    let user_server = UserServer::with_interceptor(user_service, intercept);
+    let user_service_intercepted = UserServer::with_interceptor(user_service, intercept);
 
     //reflection service for user
     let reflection_service = tonic_reflection::server::Builder::configure()
@@ -57,27 +57,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     .parse()
     .expect("Unable to parse socket address");
 
-    println!("Server listening on {}", addr);
+    
 
-    Server::builder()
-        .add_service(user_server)
+    let svr = Server::builder()
+        .add_service(user_service_intercepted)
         .add_service(reflection_service)
-        .serve(addr)
-        .await?;
+        .serve(addr);
+    println!("Server listening on {}", addr);
+    svr.await?;
     Ok(())
 }
 
 fn intercept(mut req: Request<()>) -> Result<Request<()>, Status> {
     println!("Intercepting request: {:?}", req);
-
-    // Set an extension that can be retrieved by `say_hello`
-    req.extensions_mut().insert(MyExtension {
-        some_piece_of_data: "foo".to_string(),
-    });
-
-    Ok(req)
+    let mut result = tonic::Request::new(req.into_inner());
+    println!("Intercepting request: {:?}", result);
+    // Inspect the gRPC metadata.
+    // let auth_header_val = match req.metadata().get("x-my-auth-header") {
+    //     Some(val) => val,
+    //     None => return Err(Status::internal("Request missing creds")),
+    // };
+    
+    // // Insert an extension, which can be inspected by the service.
+    // req.extensions_mut().insert(UserContext { user_id: 2 });
+    
+    Ok(result)
 }
 
-struct MyExtension {
-    some_piece_of_data: String,
+struct UserContext{
+    pub user_id: i32
 }
