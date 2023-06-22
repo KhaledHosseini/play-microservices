@@ -8,7 +8,7 @@ mod token;
 
 //proto
 use services::user::{UserService};
-use tonic::{transport::Server, Request, Response, Status};
+use tonic::{transport::Server, Request, Status};
 use proto::user_server::{UserServer};
 mod proto {
     tonic::include_proto!("proto");
@@ -84,6 +84,6 @@ fn intercept(mut req: Request<()>) -> Result<Request<()>, Status> {
     Ok(result)
 }
 
-struct UserContext{
-    pub user_id: i32
-}
+// struct UserContext{
+//     pub user_id: i32
+// }

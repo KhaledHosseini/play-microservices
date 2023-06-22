@@ -6,11 +6,14 @@ syntax = "proto3";// see: https://protobuf.dev/programming-guides/proto3/
 package proto;
 
 service User {
-  rpc GetUser (UserRequest) returns (UserReply) {}
   rpc CreateUser (CreateUserRequest) returns (CreateUserReply) {}
   rpc LoginUser (LoginUserRequest) returns (LoginUserReply) {}
   rpc RefreshAccessToken (RefreshTokenRequest) returns (RefreshTokenReply) {}
   rpc LogOutUser (LogOutRequest) returns (LogOutReply) {}
+}
+
+service UserProfile {
+  rpc GetUser (UserRequest) returns (UserReply) {}
 }
 
 message Empty {}
