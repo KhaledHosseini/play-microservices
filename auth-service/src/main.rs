@@ -5,12 +5,15 @@ mod convert;
 mod models;
 mod schema;
 mod token;
+mod interceptors;
 
+use crate::interceptors::authenticate::{AuthenticatedService};
 //proto
 use services::user::{UserService};
 use services::user_profile::{UserProfileService};
 use tonic::{transport::Server};
 use proto::user_server::{UserServer};
+use proto::user_profile_server::{UserProfileServer};
 mod proto {
     tonic::include_proto!("proto");
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
@@ -87,20 +90,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //user service
     
     let my_user_service = UserService { context: Context {
-            db_pool: db_pool,
-            redis_client: redis_client,
-            env: config,
+            db_pool: db_pool.clone(),
+            redis_client: redis_client.clone(),
+            env: config.clone(),
         }
     };
 
     let user_service = UserServer::new(my_user_service);
 
-    // let ups = UserProfileService::new()
-    // let profile_service = AuthenticateMiddleware {
-    //     inner: domain::gateway::service::users_server::UsersServer::new(UsersServerImpl {}),
-    //     lock: cache.clone(),
-    // };
-
+    let my_user_profile_service = UserProfileService { context: Context {
+            db_pool: db_pool,
+            redis_client: redis_client,
+            env: config.clone(),
+        }
+    };
+    let profile_service = UserProfileServer::new(my_user_profile_service);
+    let profile_service_intercepted = AuthenticatedService {
+        inner: profile_service,
+        env: config,
+    };
     //reflection service for user
     let reflection_service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(proto::FILE_DESCRIPTOR_SET)
@@ -116,6 +124,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
 
     let svr = Server::builder()
+        .add_service(profile_service_intercepted)
         .add_service(user_service)
         .add_service(reflection_service)
         .serve(addr);
