@@ -91,13 +91,5 @@ fn authenticate(
         }
     }
     
-    // if claims.issuer_uid.len() == 0 {
-    //     return Err(Status::unauthenticated("Issuer UID empty"));
-    // }
-    // let uid = match HeaderValue::from_str(&claims.issuer_uid) {
-    //     Ok(uid) => uid,
-    //     Err(_) => return Err(Status::unknown("Internal service error")),
-    // };
-    // request.headers_mut().insert(METADATA_USER_ID, uid);
     Ok(request)
 }
