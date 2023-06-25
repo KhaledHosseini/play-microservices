@@ -1,1 +1,0 @@
-FROM fullstorydev/grpcui:v1.3.1
