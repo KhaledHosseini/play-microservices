@@ -1,0 +1,1 @@
+auth-db-service:5432:users_db:admin:password123
