@@ -114,9 +114,18 @@ func (jcg *JobsConsumerGroup) createJobWorker(
 			continue
 		}
 
-		_, err2 := jcg.jobDB.Update(ctx, &job)
+		jobID := job.JobID
+		job2, err2 := jcg.jobDB.GetByID(ctx, jobID)
 		if err2 != nil {
-			jcg.log.Errorf("JobService.JobFunction.Update: %v", err)
+			jcg.log.Errorf("JobsConsumerGroup.CreateJobWorker.GetByID: %v", err)
+			continue
+		}
+
+		job2.Status = job.Status
+
+		_, err3 := jcg.jobDB.Update(ctx, job2)
+		if err3 != nil {
+			jcg.log.Errorf("JobsConsumerGroup.CreateJobWorker.Update: %v", err)
 			continue
 		}
 

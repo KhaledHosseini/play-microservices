@@ -60,8 +60,8 @@ func (s *server) Run() error {
 	JobGRPCServiceProto.RegisterJobServiceServer(grpc_server, job_service)
 	reflection.Register(grpc_server)
 
-	productsCG := kafka.NewJobsConsumerGroup(s.log, job_db)
-	productsCG.Run(ctx, cancel, s.kafkaConn, s.cfg)
+	jobsConsumer := kafka.NewJobsConsumerGroup(s.log, job_db)
+	jobsConsumer.Run(ctx, cancel, s.kafkaConn, s.cfg)
 
 	log.Printf("server listening at %v", lis.Addr())
 	if err := grpc_server.Serve(lis); err != nil {
