@@ -68,13 +68,10 @@ type Config struct {
 }
 
 func goDotEnvVariable(key string) string {
-
 	value := os.Getenv(key)
-
 	if value == "" {
 		log.Fatalf("Error loading enironment variable for: %s.", key)
 	}
-
 	return value
 }
 
