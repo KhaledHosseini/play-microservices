@@ -24,16 +24,19 @@ const (
 	DATABASE_HOST_NAME    = "DATABASE_HOST_NAME"
 	DATABASE_PORT         = "DATABASE_PORT"
 
-	KAFKA_BROKERS               = "KAFKA_BROKERS"
-	TOPIC_JOB_CREATE            = "TOPIC_JOB_CREATE"
-	TOPIC_JOB_CREATE_PARTITIONS = "TOPIC_JOB_CREATE_PARTITIONS"
-	TOPIC_JOB_CREATE_REPLICAS   = "TOPIC_JOB_CREATE_REPLICAS"
-	TOPIC_JOB_UPDATE            = "TOPIC_JOB_UPDATE"
-	TOPIC_JOB_UPDATE_PARTITIONS = "TOPIC_JOB_UPDATE_PARTITIONS"
-	TOPIC_JOB_UPDATE_REPLICAS   = "TOPIC_JOB_UPDATE_REPLICAS"
-	TOPIC_JOB_RUN               = "TOPIC_JOB_RUN"
-	TOPIC_JOB_RUN_PARTITIONS    = "TOPIC_JOB_RUN_PARTITIONS"
-	TOPIC_JOB_RUN_REPLICAS      = "TOPIC_JOB_RUN_REPLICAS"
+	KAFKA_BROKERS                              = "KAFKA_BROKERS"
+	TOPIC_JOB_CREATE                           = "TOPIC_JOB_CREATE"
+	TOPIC_JOB_CREATE_PARTITIONS                = "TOPIC_JOB_CREATE_PARTITIONS"
+	TOPIC_JOB_CREATE_REPLICAS                  = "TOPIC_JOB_CREATE_REPLICAS"
+	TOPIC_JOB_UPDATE                           = "TOPIC_JOB_UPDATE"
+	TOPIC_JOB_UPDATE_PARTITIONS                = "TOPIC_JOB_UPDATE_PARTITIONS"
+	TOPIC_JOB_UPDATE_REPLICAS                  = "TOPIC_JOB_UPDATE_REPLICAS"
+	TOPIC_JOB_RUN                              = "TOPIC_JOB_RUN"
+	TOPIC_JOB_RUN_PARTITIONS                   = "TOPIC_JOB_RUN_PARTITIONS"
+	TOPIC_JOB_RUN_REPLICAS                     = "TOPIC_JOB_RUN_REPLICAS"
+	TOPIC_JOB_RUN_RESULT                       = "TOPIC_JOB_RUN_RESULT"
+	TOPIC_JOB_RUN_RESULT_CONSUMER_GROUP_ID     = "TOPIC_JOB_RUN_RESULT_CONSUMER_GROUP_ID"
+	TOPIC_JOB_RUN_RESULT_CONSUMER_WORKER_COUNT = "TOPIC_JOB_RUN_RESULT_CONSUMER_WORKER_COUNT"
 )
 
 type Config struct {
@@ -50,16 +53,19 @@ type Config struct {
 	DatabasePort     string
 	DatabaseURI      string
 
-	KafkaBrokers             []string
-	TopicJobCreate           string
-	TopicJobCreatePartitions int
-	TopicJobCreateReplicas   int
-	TopicJobUpdate           string
-	TopicJobUpdatePartitions int
-	TopicJobUpdateReplicas   int
-	TopicJobRun              string
-	TopicJobRunPartitions    int
-	TopicJobRunReplicas      int
+	KafkaBrokers                         []string
+	TopicJobCreate                       string
+	TopicJobCreatePartitions             int
+	TopicJobCreateReplicas               int
+	TopicJobUpdate                       string
+	TopicJobUpdatePartitions             int
+	TopicJobUpdateReplicas               int
+	TopicJobRun                          string
+	TopicJobRunPartitions                int
+	TopicJobRunReplicas                  int
+	TopicJobRunResult                    string
+	TopicJobRunResultConsumerGroupID     string
+	TopicJobRunResultConsumerWorkerCount int
 
 	Logger_DisableCaller     bool
 	Logger_DisableStacktrace bool
@@ -144,6 +150,9 @@ func InitConfig() (*Config, error) {
 	c.TopicJobRun = goDotEnvVariable(TOPIC_JOB_RUN)
 	c.TopicJobRunPartitions = goDotEnvVariableInteger(TOPIC_JOB_RUN_PARTITIONS)
 	c.TopicJobRunReplicas = goDotEnvVariableInteger(TOPIC_JOB_RUN_REPLICAS)
+	c.TopicJobRunResult = goDotEnvVariable(TOPIC_JOB_RUN_RESULT)
+	c.TopicJobRunResultConsumerGroupID = goDotEnvVariable(TOPIC_JOB_RUN_RESULT_CONSUMER_GROUP_ID)
+	c.TopicJobRunResultConsumerWorkerCount = goDotEnvVariableInteger(TOPIC_JOB_RUN_RESULT_CONSUMER_WORKER_COUNT)
 
 	c.Logger_DisableCaller = false
 	c.Logger_DisableStacktrace = false
