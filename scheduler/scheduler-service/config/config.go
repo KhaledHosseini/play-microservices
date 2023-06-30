@@ -13,6 +13,7 @@ const (
 	APP_VERSION = "APP_VERSION"
 
 	ENVIRONMENT = "ENVIRONMENT"
+	TOPICS_FILE = "TOPICS_FILE"
 
 	SERVER_PORT = "SERVER_PORT"
 
@@ -109,6 +110,15 @@ func InitConfig() (*Config, error) {
 	err := godotenv.Load("./config/.env")
 	if err != nil {
 		log.Fatalf("Error loading .env file")
+	}
+
+	topicsFile := os.Getenv(TOPICS_FILE)
+	if topicsFile == "" {
+		topicsFile = "./config/.env.topics"
+	}
+	err2 := godotenv.Load(topicsFile)
+	if err2 != nil {
+		log.Fatalf("Error loading topics file")
 	}
 
 	var c Config
