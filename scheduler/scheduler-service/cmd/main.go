@@ -1,31 +1,60 @@
 package main
 
 import (
-    "log"
+	"context"
+	"log"
 
-    "github.com/<your_username>/play-microservices/scheduler/scheduler-service/config"
-"github.com/<your_username>/play-microservices/scheduler/scheduler-service/pkg/logger"
-    "github.com/<your_username>/play-microservices/scheduler/scheduler-service/internal/server"
+	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/config"
+
+	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/internal/server"
+	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/kafka"
+	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/logger"
+	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/mongodb"
 )
 
 func main() {
+	log.Println("Starting jobs microservice")
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-    cfg, err := config.InitConfig()
-    if err != nil {
-        log.Fatal(err)
-    }
+	cfg, err := config.InitConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    appLogger := logger.NewApiLogger(cfg)
-    appLogger.InitLogger()
-    appLogger.Info("Starting user server")
-    appLogger.Infof(
-        "AppVersion: %s, LogLevel: %s, Environment: %s",
-        cfg.AppVersion,
-        cfg.Logger_Level,
-        cfg.Environment,
-    )
-    appLogger.Infof("Success parsed config: %#v", cfg.AppVersion)
+	appLogger := logger.NewApiLogger(cfg)
+	appLogger.InitLogger()
+	appLogger.Info("Starting user server")
+	appLogger.Infof(
+		"AppVersion: %s, LogLevel: %s, Environment: %s",
+		cfg.AppVersion,
+		cfg.Logger_Level,
+		cfg.Environment,
+	)
+	appLogger.Infof("Success parsed config: %#v", cfg.AppVersion)
 
-    s := server.NewServer(appLogger, cfg)
-    s.Run()
+	mongoDBConn, err := mongodb.NewMongoDBConn(ctx, cfg.DatabaseURI, cfg.DatabaseUser, cfg.DatabasePass)
+	if err != nil {
+		log.Fatalf("cannot connect mongodb. uri is %s and error is %s", cfg.DatabaseURI, err)
+	}
+	defer func() {
+		if err := mongoDBConn.Disconnect(ctx); err != nil {
+			log.Fatalf("mongoDBConn.Disconnect")
+		}
+	}()
+
+	conn, err := kafka.NewKafkaConn(cfg.KafkaBrokers[0])
+	if err != nil {
+		log.Fatalf("NewKafkaConn with error %s:", err)
+	}
+	defer conn.Close()
+
+	brokers, err := conn.Brokers()
+	if err != nil {
+		log.Fatalf("conn.Brokers with error %s", err)
+	}
+	log.Printf("Kafka connected: %v", brokers)
+
+	s := server.NewServer(appLogger, cfg, mongoDBConn, conn)
+	s.Run()
 }
