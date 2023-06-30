@@ -13,6 +13,13 @@ import (
 	"github.com/segmentio/kafka-go/compress"
 )
 
+const (
+	writerReadTimeout  = 10 * time.Second
+	writerWriteTimeout = 10 * time.Second
+	writerRequiredAcks = -1
+	writerMaxAttempts  = 3
+)
+
 type jobsProducer struct {
 	createWriter *kafka.Writer
 	updateWriter *kafka.Writer
