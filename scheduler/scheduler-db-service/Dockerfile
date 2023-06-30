@@ -1,1 +1,1 @@
-FROM postgres:15.3
+FROM mongo:7.0.0-rc5
