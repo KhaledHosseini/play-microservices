@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package jobsService;
+option go_package = ".;jobsService";
+// option java_package = "productsService";
+// option java_outer_classname = "productsService";
+
+import "google/protobuf/timestamp.proto";
+
+service JobService {
+  rpc CreateJob(CreateJobRequest) returns (CreateJobResponse) {}
+  rpc GetJob(GetJobRequest) returns (GetJobResponse) {}
+  rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {}
+  rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse) {}
+  rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse) {}
+}
+
+message CreateJobRequest {
+  string name = 1;
+  string description = 2;
+  google.protobuf.Timestamp schedule_time = 3;
+  JobType job_type = 4;
+  string job_data = 5;
+}
+
+message CreateJobResponse {
+  string id = 1;
+}
+
+message GetJobRequest {
+  string id = 1;
+}
+
+message GetJobResponse {
+  Job job = 1;
+}
+
+message ListJobsRequest {
+  string filter = 1;
+  int32 page_size = 2;
+  int32 page_token = 3;
+}
+
+message ListJobsResponse {
+  repeated Job jobs = 1;
+  string next_page_token = 2;
+}
+
+message UpdateJobRequest {
+  string id = 1;
+  Job job = 2;
+}
+
+message UpdateJobResponse {}
+
+message DeleteJobRequest {
+  string id = 1;
+}
+
+message DeleteJobResponse {}
+
+message Job {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  google.protobuf.Timestamp schedule_time = 4;
+  google.protobuf.Timestamp created_time = 5;
+  google.protobuf.Timestamp updated_time = 6;
+  JobStatus status = 7;
+  JobType job_type = 8;
+  string job_data = 9;
+}
+
+enum JobStatus {
+  UNKNOWN = 0;
+  PENDING = 1;
+  SCHEDULED = 2;
+  RUNNING = 3;
+  SUCCEEDED = 4;
+  FAILED = 5;
+}
+
+enum JobType {
+  EMAIL = 0;
+  SMS = 1;
+}
