@@ -51,7 +51,7 @@ func (s *server) Run() error {
 	grpc_server := grpc.NewServer()
 	job_db := JobDB.NewJobDBMongo(s.mongoDB)
 
-	job_producer := kafka.NewJobsProducer()
+	job_producer := kafka.NewJobsProducer(s.log)
 	job_producer.Run(s.kafkaConn, s.cfg)
 	defer job_producer.Close()
 
