@@ -7,6 +7,7 @@ import (
 
 	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/config"
 	models "github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/internal/models"
+	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/segmentio/kafka-go"
@@ -21,14 +22,15 @@ const (
 )
 
 type jobsProducer struct {
+	log          logger.Logger
 	createWriter *kafka.Writer
 	updateWriter *kafka.Writer
 	runWriter    *kafka.Writer
 }
 
 // NewJobsProducer constructor
-func NewJobsProducer() *jobsProducer {
-	return &jobsProducer{}
+func NewJobsProducer(log logger.Logger) *jobsProducer {
+	return &jobsProducer{log: log}
 }
 
 // Run init producers writers
@@ -47,15 +49,15 @@ func (p *jobsProducer) Run(conn *kafka.Conn, cfg *config.Config) {
 }
 
 // GetNewKafkaWriter Create new kafka writer
-func (p *jobsProducer) getNewKafkaWriter(topic string, brokers []string) *kafka.Writer {
+func (jp *jobsProducer) getNewKafkaWriter(topic string, brokers []string) *kafka.Writer {
 	w := &kafka.Writer{
 		Addr:         kafka.TCP(brokers...),
 		Topic:        topic,
 		Balancer:     &kafka.LeastBytes{},
 		RequiredAcks: writerRequiredAcks,
 		MaxAttempts:  writerMaxAttempts,
-		//Logger:       kafka.LoggerFunc(p.log.Debugf),
-		//ErrorLogger:  kafka.LoggerFunc(p.log.Errorf),
+		Logger:       kafka.LoggerFunc(jp.log.Debugf),
+		ErrorLogger:  kafka.LoggerFunc(jp.log.Errorf),
 		Compression:  compress.Snappy,
 		ReadTimeout:  writerReadTimeout,
 		WriteTimeout: writerWriteTimeout,
