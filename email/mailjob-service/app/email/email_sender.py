@@ -1,14 +1,19 @@
-from smtplib import SMTP, SMTPException
+from smtplib import SMTP
 from app.models.email_job import Email
 from config import Config
 import logging
+import threading
 
 class EmailSender:
     def __init__(self,config: Config):
         self.cfg = config
+        self.lock = threading.Lock()
     
     def send(self, email: Email):
+
         logging.info("Sending email...")
+        
+        self.lock.acquire()
 
         sender = self.cfg.SmtpUser + "@" + self.cfg.EMailDomain
         message_template = ("""From: <{0}>
@@ -23,3 +28,5 @@ class EmailSender:
         except Exception as e:
             logging.error("Sending email failed with error:", str(e))
             raise e
+        finally:
+            self.lock.release()

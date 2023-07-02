@@ -1,5 +1,6 @@
 import json
 import logging
+# from abc import ABC, abstractmethod
 
 class JsonObject:
     def toJsonData(self):
