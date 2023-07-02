@@ -1,6 +1,6 @@
 version: '3'
 services:
-# database service for auth service
+
   zk1:
     build:
       context: ./zookeeper-service
@@ -12,7 +12,7 @@ services:
       - ./zookeeper-service/.env
     environment:
       ZOO_SERVER_ID: 1
-      ZOO_SERVERS: zk1:${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT} #,zk2:{ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
+      ZOO_SERVERS: zk1-service:${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT} #,zk2:{ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
       ZOO_SERVER_PASSWORDS_FILE: /run/secrets/zoo-server-pass
       ZOO_ENABLE_ADMIN_SERVER: yes
       ZOO_ADMIN_SERVER_PORT_NUMBER: ${ZOOKEEPER_ADMIN_CONTAINER_PORT}
@@ -52,7 +52,7 @@ services:
       # KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:${KAFKA1_PORT},LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:${KAFKA1_PORT}
       # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
       # KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
-      KAFKA_CFG_ZOOKEEPER_CONNECT: zk1:${ZOOKEEPER_PORT}
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zk1-service:${ZOOKEEPER_PORT}
       KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT #if auth is enabled in zookeeper use one of: SASL, SASL_SSL see https://hub.docker.com/r/bitnami/kafka
       KAFKA_CFG_LISTENERS: PLAINTEXT://:${KAFKA1_PORT}
     depends_on:
@@ -68,7 +68,7 @@ services:
       - ${KAFKAUI_PORT}:${KAFKAUI_PORT}
     environment:
      KAFKA_CLUSTERS_0_NAME: local
-     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:${KAFKA1_PORT}
+     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1-service:${KAFKA1_PORT}
      DYNAMIC_CONFIG_ENABLED: 'true'
     depends_on:
       - kafka1
@@ -127,6 +127,7 @@ services:
       DATABASE_HOST_NAME: scheduler-db-service
       DATABASE_PORT: ${MONGODB_PORT}
       KAFKA_BROKERS: kafka1-service:${KAFKA1_PORT}
+      # TOPICS_FILE: ''
     ports:
       - ${SCHEDULER_PORT}:${SCHEDULER_PORT}
     volumes:

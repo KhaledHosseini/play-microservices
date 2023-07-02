@@ -64,7 +64,7 @@ func (j *JobService) CreateJob(ctx context.Context, req *pb.CreateJobRequest) (*
 			return 0, grpcErrors.ErrorResponse(err2, err2.Error())
 		}
 
-		j.jobsProducer.PublishRun(ctx, job)
+		j.jobsProducer.PublishRun(ctx, jb)
 
 		return 0, nil
 	})
