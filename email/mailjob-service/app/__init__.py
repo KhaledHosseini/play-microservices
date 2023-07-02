@@ -1,6 +1,6 @@
 import logging
 from config import Config
-from app.server.server import Server
+from app.server import Server
 
 def create_app():
     logging.info("Creating job-executor app")

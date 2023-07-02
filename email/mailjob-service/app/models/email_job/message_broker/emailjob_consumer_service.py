@@ -27,6 +27,7 @@ class EmailjobConsumerService:
 
             for t in worker_threads:
                 t.join()
+                
     def run_worker(self):
         job_consumer = JobConsumer(self.cfg, self.emailExecuter)
         job_consumer.run()
