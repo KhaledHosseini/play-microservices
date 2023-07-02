@@ -2,8 +2,6 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-
-
 class Config:
     def __init__(self) -> None:
         

@@ -2,6 +2,7 @@ from kafka import KafkaConsumer, KafkaProducer
 import sys
 import signal
 import json
+import logging
 
 from config import Config
 from app.models.email_job import EmailJob
@@ -21,14 +22,15 @@ class JobConsumer:
 
         for msg in consumer:
             if isinstance(msg.value, EmailJob):
+                logging.info("An email job json recieved. doing the job.")
                 self.handleJob(msg.value)
             else:
-                print(f"error handling: {msg}")
+                logging.error(f"error handling: {msg}")
 
     def handleJob(self,job: EmailJob):
         try:
             self.email_sender.send(job.get_email())
-            print(f"email sending Succeeded:")
+            logging.info(f"email sending Succeeded:")
             #  SUCCEEDED = 4;
             #  FAILED = 5;
             job.status = 4
@@ -36,19 +38,19 @@ class JobConsumer:
             self.producer.send(self.cfg.TopicJobRunResult, value=message)
             self.producer.flush()
         except:
-            print(f"email sending failed:")
+            logging.warning(f"email sending failed:")
             job.status = 5
             message = job.toJsonData()
             self.producer.send(self.cfg.TopicJobRunResult, value=message)
             self.producer.flush()
 
     def loadJson(self,value):
-        print(f"decoding message: {value}")
+        logging.info(f"decoding message: {value}")
         try:
             js = json.loads(value.decode('utf-8'))
             return EmailJob(js)
-        except json.decoder.JSONDecodeError: 
-            print(f"invalid email job json: {value}")
+        except json.decoder.JSONDecodeError as e: 
+            logging.error("invalid email job json:", e)
             return "invalid json"
 
     def run(self):
@@ -57,6 +59,6 @@ class JobConsumer:
         self.run_kafka_consumer()
 
     def handle_shutdown(self, signal, frame):
-        print("Shutting down Kafka consumer and producer...")
+        logging.info("Shutting down Kafka consumer and producer...")
         # Clean up Kafka consumer and producer here if necessary
         sys.exit(0)

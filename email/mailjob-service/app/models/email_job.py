@@ -1,4 +1,5 @@
 import json
+import logging
 
 class JsonObject:
     def toJsonData(self):
@@ -7,11 +8,12 @@ class JsonObject:
         try:
             return json[key]
         except Exception as e:
-            print(f"no value for json key : {key}")
+            logging.error(f"no value found for json key : {key}")
             raise e
 
 class EmailJob(JsonObject):
     def __init__(self, json):
+        logging.info("Initilizing EmailJob from json object: ", json)
         self.jobId = self.valueForKey("jobId",json)
         self.status = int(self.valueForKey("status",json))
         self.JobData = self.valueForKey("jobData",json)
