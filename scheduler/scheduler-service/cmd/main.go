@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	log.Println("Starting jobs microservice")
+	log.Info("Starting jobs microservice...")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -24,7 +24,6 @@ func main() {
 
 	appLogger := logger.NewApiLogger(cfg)
 	appLogger.InitLogger()
-	appLogger.Info("Starting user server")
 	appLogger.Infof(
 		"AppVersion: %s, LogLevel: %s, Environment: %s",
 		cfg.AppVersion,
@@ -33,6 +32,7 @@ func main() {
 	)
 	appLogger.Infof("Success parsed config: %#v", cfg.AppVersion)
 
+	appLogger.Info("Connecting to mongodb server")
 	mongoDBConn, err := mongodb.NewMongoDBConn(ctx, cfg.DatabaseURI, cfg.DatabaseUser, cfg.DatabasePass)
 	if err != nil {
 		log.Fatalf("cannot connect mongodb. uri is %s and error is %s", cfg.DatabaseURI, err)
@@ -42,7 +42,9 @@ func main() {
 			log.Fatalf("mongoDBConn.Disconnect")
 		}
 	}()
+	appLogger.Info("Connected to mongodb server")
 
+	appLogger.Info("Connecting to kafka server")
 	conn, err := kafka.NewKafkaConn(cfg.KafkaBrokers[0])
 	if err != nil {
 		log.Fatalf("NewKafkaConn with error %s:", err)
@@ -53,8 +55,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("conn.Brokers with error %s", err)
 	}
-	log.Printf("Kafka connected: %v", brokers)
+	appLogger.Infof("Kafka connected: %v", brokers)
 
+	appLogger.Info("Starting the server")
 	s := server.NewServer(appLogger, cfg, mongoDBConn, conn)
 	s.Run()
 }

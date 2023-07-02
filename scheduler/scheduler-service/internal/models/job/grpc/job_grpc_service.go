@@ -37,11 +37,13 @@ func (js *JobService) LoadScheduledJobs() {
 
 func (j *JobService) CreateJob(ctx context.Context, req *pb.CreateJobRequest) (*pb.CreateJobResponse, error) {
 
+	j.log.Infof("JobService.CreateJob: grpc message arrived : %v", req)
 	job := models.JobFromProto_CreateJobRequest(req)
 	job.Status = int32(pb.JobStatus_SCHEDULED)
 	jobFingerPrint := fmt.Sprintf("%s:%s:%s:%p", job.Name, job.Description, job.JobData, &job.ScheduleTime)
 	job.ScheduledKey = int(fnv1a.HashString64(jobFingerPrint)) //We assume 64 bit systems!
 	//cretae job in the database
+	j.log.Infof("JobService.CreateJob: Creating job in the database")
 	created, err := j.jobDB.Create(ctx, job)
 	if err != nil {
 		j.log.Errorf("JobService.CreateJob: %v", err)
@@ -50,7 +52,7 @@ func (j *JobService) CreateJob(ctx context.Context, req *pb.CreateJobRequest) (*
 
 	jobID := created.JobID
 	functionJob := jobFucntion.NewFunctionJobWithKey(job.ScheduledKey, func(_ context.Context) (int, error) {
-
+		j.log.Info("Job is triggered")
 		jb, err := j.jobDB.GetByID(ctx, jobID)
 		if err != nil {
 			j.log.Errorf("JobService.JobFunction.GetByID: %v", err)

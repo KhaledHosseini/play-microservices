@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log"
 	"net"
 
 	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/config"
@@ -35,18 +34,21 @@ func NewServer(log logger.Logger, cfg *config.Config, mongoDB *mongo.Client, kaf
 func (s *server) Run() error {
 	lis, err := net.Listen("tcp", ":"+s.cfg.ServerPort)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		s.log.Fatalf("failed to listen: %v", err)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	s.log.Info("Starting quartz scheduler...")
 	sched := quartz.NewStdScheduler()
 	sched.Start(ctx)
 	defer func() {
+		s.log.Info("Stoping quartz scheduler...")
 		sched.Stop()
 		sched.Wait(ctx)
 	}()
+
 
 	grpc_server := grpc.NewServer()
 	job_db := JobDB.NewJobDBMongo(s.mongoDB)
@@ -60,12 +62,13 @@ func (s *server) Run() error {
 	JobGRPCServiceProto.RegisterJobServiceServer(grpc_server, job_service)
 	reflection.Register(grpc_server)
 
+	s.log.Info("Starting kafka consumer...")
 	jobsConsumer := kafka.NewJobsConsumerGroup(s.log, job_db)
 	jobsConsumer.Run(ctx, cancel, s.kafkaConn, s.cfg)
 
-	log.Printf("server listening at %v", lis.Addr())
+	s.log.Infof("gRPC server listening at %v", lis.Addr())
 	if err := grpc_server.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		s.log.Fatalf("failed to serve: %v", err)
 		return err
 	}
 
