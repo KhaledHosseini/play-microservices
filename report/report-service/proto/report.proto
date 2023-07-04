@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package reportService;
+option go_package = ".;reportService";
+// option java_package = "productsService";
+// option java_outer_classname = "productsService";
+
+import "google/protobuf/timestamp.proto";
+
+service ReportService {
+  rpc ListReports(ListReportsRequest) returns (ListReportResponse) {}
+}
+
+
+message ListReportsRequest {
+  ReportType filter = 1;
+  int64 page = 2;
+  int64 size = 3;
+}
+
+message ListReportResponse {
+  int64 totalCount = 1;
+  int64 totalPages = 2;
+  int64 page = 3;
+  int64 size = 4;
+  bool hasMore = 5;
+  repeated Report reports = 6;
+}
+
+message Report {
+  string id = 1;
+  ReportType type = 2;
+  string topic = 3;
+  google.protobuf.Timestamp created_time = 4;
+  string report_data = 5;
+}
+
+enum ReportType {
+  Job = 0;
+  Unknown = 1;
+}
