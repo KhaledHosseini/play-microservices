@@ -1,0 +1,164 @@
+version: '3'
+services:
+  r-zk1:
+    build:
+      context: ./zookeeper-service
+      dockerfile: Dockerfile
+    container_name: r-zk1-service
+    secrets:
+      - zoo-server-pass
+    env_file:
+      - ./zookeeper-service/.env
+    environment:
+      ZOO_SERVER_ID: 1
+      ZOO_SERVERS:  r-zk1-service:${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
+      ZOO_SERVER_PASSWORDS_FILE: /run/secrets/zoo-server-pass
+      ZOO_ENABLE_ADMIN_SERVER: yes
+      ZOO_ADMIN_SERVER_PORT_NUMBER: ${ZOOKEEPER_ADMIN_CONTAINER_PORT}
+    ports:
+      - '${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}'
+      - '${ZOOKEEPER_ADMIN_PORT}:${ZOOKEEPER_ADMIN_CONTAINER_PORT}'
+    volumes:
+      - "r-zk_data:/bitnami"
+
+  r-zoo-navigator:
+    build: 
+      context: ./zoonavigator-service
+      dockerfile: Dockerfile
+    container_name: r-zoo-navigator-service
+    ports:
+      - '${ZOO_NAVIGATOR_PORT}:${ZOO_NAVIGATOR_PORT}'
+    environment:
+      - CONNECTION_LOCALZK_NAME = Local-zookeeper
+      - CONNECTION_LOCALZK_CONN = localhost:${ZOOKEEPER_PORT}
+      - AUTO_CONNECT_CONNECTION_ID = LOCALZK
+    depends_on:
+      - r-zk1
+
+  r-kafka1:
+    build: 
+      context: ./kafka-service
+      dockerfile: Dockerfile
+    container_name: r-kafka1-service
+    ports:
+      - '${KAFKA1_PORT}:${KAFKA1_PORT}'
+    volumes:
+      - "r-kfk_data:/bitnami"
+    env_file:
+      - ./kafka-service/.env
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_CFG_ZOOKEEPER_CONNECT: r-zk1-service:${ZOOKEEPER_PORT}
+      KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT #if auth is enabled in zookeeper use one of: SASL, SASL_SSL see https://hub.docker.com/r/bitnami/kafka
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:${KAFKA1_PORT}
+    depends_on:
+      - r-zk1
+
+  r-kafka-ui:
+    build: 
+      context: ./kafkaui-service
+      dockerfile: Dockerfile
+    container_name: r-kafka-ui-service
+    restart: always
+    ports:
+      - ${KAFKAUI_PORT}:${KAFKAUI_PORT}
+    environment:
+     KAFKA_CLUSTERS_0_NAME: local
+     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: r-kafka1-service:${KAFKA1_PORT}
+     DYNAMIC_CONFIG_ENABLED: 'true'
+    depends_on:
+      - r-kafka1
+
+  report-db-service:
+    build: 
+      context: ./report-db-service
+      dockerfile: Dockerfile
+    container_name: report-db-service
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/report-db-user
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/report-db-pass
+    env_file:
+      - ./report-db-service/.env
+    ports:
+      - ${MONGODB_PORT}:${MONGODB_PORT}
+    secrets:
+      - report-db-user
+      - report-db-pass
+      - report-db-dbname 
+    volumes:
+      -  report-db-service-VL:/data/db
+
+# https://hub.docker.com/_/mongo-express
+  r-mongo-express:
+    build:
+      context: ./mongo-express-service
+      dockerfile: Dockerfile
+    container_name: r-mongo-express-service
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_PORT=${MONGODB_PORT}
+      - ME_CONFIG_MONGODB_SERVER=report-db-service
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password123
+    env_file:
+      - ./mongo-express-service/.env
+    ports:
+      - ${MONGO_EXPRESS_PORT}:${MONGO_EXPRESS_PORT}
+    depends_on:
+      - report-db-service
+  
+  report-service:
+    build: 
+      context: ./report-service
+      dockerfile: Dockerfile
+    container_name: report-service
+    command: sleep infinity
+    ports:
+      - ${REPORT_SERVICE_PORT}:${REPORT_SERVICE_PORT}
+    environment:
+      ENVIRONMENT: development
+      SERVER_PORT: ${REPORT_SERVICE_PORT}
+      DATABASE_USER_FILE: /run/secrets/report-db-user
+      DATABASE_PASS_FILE: /run/secrets/report-db-pass
+      DATABASE_DB_NAME_FILE: /run/secrets/report-db-dbname
+      DATABASE_SCHEMA: mongodb
+      DATABASE_HOST_NAME: report-db-service
+      DATABASE_PORT: ${MONGODB_PORT}
+      KAFKA_BROKERS: r-kafka1-service:${KAFKA1_PORT}
+      # TOPICS_FILE: ''
+    volumes:
+      - ./report-service:/usr/src/app
+    depends_on:
+      - r-kafka1
+    secrets:
+      - report-db-user
+      - report-db-pass
+      - report-db-dbname
+
+  r-grpcui-service:
+    build:
+      context: ./grpcui-service
+      dockerfile: Dockerfile
+    container_name: r-grpcui-service
+    command: -port $GRPCUI_PORT -plaintext report-service:${REPORT_SERVICE_PORT}
+    restart: always
+    ports:
+      - ${GRPCUI_PORT}:${GRPCUI_PORT}
+    depends_on:
+      - report-service
+
+volumes:
+  report-db-service-VL:
+  r-zk_data:
+    driver: local
+  r-kfk_data:
+    driver: local
+secrets:
+  zoo-server-pass:
+    file: zookeeper-service/server_passwords.properties
+  report-db-user:
+    file: report-db-service/user.txt
+  report-db-pass:
+    file: report-db-service/pass.txt
+  report-db-dbname:
+    file: report-db-service/db_name.txt
