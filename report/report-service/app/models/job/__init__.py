@@ -1,0 +1,1 @@
+from app.models.job.message_broker import ConsumerService
