@@ -1,17 +1,16 @@
 import logging
 
 from app.database_engines import MongoDB
-from app.database_engines.mongo import MongoPagination
 from app.models import Report
 from app.models import ReportList
-from app.models import ReportDB
+from app.models import ReportDBInterface
 from config import Config
 
 
-class ReportDBMongo(MongoDB, ReportDB):
+class ReportDBMongo(MongoDB, ReportDBInterface):
     def __init__(self, cfg: Config):
         super().__init__(cfg)
-        ReportDB.__init__(self)
+        ReportDBInterface.__init__(self)
         self.dbName = cfg.DatabaseDBName
         self.collection = "ReportsCollection"
         self.db = self.client[self.dbName]
@@ -32,7 +31,7 @@ class ReportDBMongo(MongoDB, ReportDB):
             doc_count = coll.count_documents(find)
             if doc_count == 0:
                 return ReportList()
-            pagination = MongoPagination(size=size, page=page)
+            pagination = MongoDB.MongoPagination(size=size, page=page)
             limit = pagination.getLimit()
             skip = pagination.getOffset()
             documents = coll.find().limit(limit).skip(skip)

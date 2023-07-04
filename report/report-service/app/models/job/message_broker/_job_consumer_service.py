@@ -2,13 +2,13 @@ from threading import Thread
 import logging
 
 from config import Config
-from app.models import ReportDB
+from app.models import ReportDBInterface
 
 from app.models.job.message_broker._job_consumer_worker import JobConsumerWorker
 
 
 class ConsumerService:
-  def __init__(self,cfg: Config, reportDb: ReportDB):
+  def __init__(self,cfg: Config, reportDb: ReportDBInterface):
       self.cfg = cfg
       self.reportDB = reportDb
       self.threads = []

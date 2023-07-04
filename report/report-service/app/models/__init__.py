@@ -13,4 +13,4 @@ class JsonObject(object):
 from app.models._job import Job
 from app.models._report import Report
 from app.models._report import ReportList
-from app.models._report import ReportDB
+from app.models._report import ReportDBInterface

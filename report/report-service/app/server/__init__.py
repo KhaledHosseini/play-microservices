@@ -5,11 +5,12 @@ from grpc_reflection.v1alpha import reflection
 
 from config import Config
 from app.models.report import MyReportService
+from app.models.report import ReportDBMongo
 
-from app.proto import ReportGRPC
-from app.proto import ReportGRPCTypes
+from proto import ReportGRPC
+from proto import ReportGRPCTypes
 
-from app.models.report.db import ReportDBMongo
+
 
 from app.models.job import ConsumerService
 import logging

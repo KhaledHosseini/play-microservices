@@ -1,10 +1,10 @@
-from app.proto import ReportGRPC
+from proto import ReportGRPC
 import logging
 
-from app.models import ReportDB
+from app.models import ReportDBInterface
 
 class MyReportService(ReportGRPC.ReportService):
-    def __init__(self, reportDB: ReportDB):
+    def __init__(self, reportDB: ReportDBInterface):
         self.reportDB = reportDB
         super().__init__()
     

@@ -10,7 +10,7 @@ declare -a services=("proto")
 # grpc_python_out: Directory to generate the gRPC Python code
 
 for SERVICE in "${services[@]}"; do
-    DESTDIR='app/proto'
+    DESTDIR='proto'
     mkdir -p $DESTDIR
     python -m grpc_tools.protoc \
         --proto_path=$SERVICE/ \

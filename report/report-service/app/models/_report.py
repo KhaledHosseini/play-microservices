@@ -1,4 +1,4 @@
-from app.proto import ReportGRPCTypes
+from proto import ReportGRPCTypes
 from typing import Any
 from dataclasses import dataclass
 from google.protobuf.timestamp_pb2 import Timestamp
@@ -27,7 +27,7 @@ class Report(JsonObject):
         _report_data = str(obj.get("report_data"))
         return Report(_type, _topic, _created_time, _report_data)
 
-    def saveToDB(self, db: "ReportDB"):
+    def saveToDB(self, db: "ReportDBInterface"):
         db.create(self)
 
     def toProto(self):
@@ -63,7 +63,7 @@ class ReportList:
         )
 
 
-class ReportDB:
+class ReportDBInterface:
     def create(self, report: Report) -> Report:
         raise Exception("create is not implemented")
 

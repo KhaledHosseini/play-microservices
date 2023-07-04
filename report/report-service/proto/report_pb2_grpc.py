@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import app.proto.report_pb2 as report__pb2
+import proto.report_pb2 as report__pb2
 
 
 class ReportServiceStub(object):
