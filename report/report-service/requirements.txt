@@ -1,0 +1,5 @@
+kafka-python==2.0.2
+python-dotenv==1.0.0
+pymongo==4.4.0
+grpcio-tools==1.56.0
+grpcio-reflection==1.56.0
