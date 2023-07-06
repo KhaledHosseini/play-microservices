@@ -36,14 +36,17 @@ message GetJobResponse {
 }
 
 message ListJobsRequest {
-  string filter = 1;
-  int32 page_size = 2;
-  int32 page_token = 3;
+  int32 page = 2;
+  int32 size = 3;
 }
 
 message ListJobsResponse {
-  repeated Job jobs = 1;
-  string next_page_token = 2;
+  int64 totalCount = 1;
+  int64 totalPages = 2;
+  int64 page = 3;
+  int64 size = 4;
+  bool hasMore = 5;
+  repeated Job jobs = 6;
 }
 
 message UpdateJobRequest {
