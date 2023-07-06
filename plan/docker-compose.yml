@@ -1,0 +1,10 @@
+version: '3'
+services:
+  diagrams:
+    build: 
+      context: ./diagrams
+      dockerfile: Dockerfile
+    container_name: diagrams
+    command: sleep infinity
+    volumes:
+      - './diagrams:/usr/src/app'
