@@ -41,11 +41,11 @@ message ListJobsRequest {
 }
 
 message ListJobsResponse {
-  int64 TotalCount = 1;
-  int64 TotalPages = 2;
-  int64 Page = 3;
-  int64 Size = 4;
-  bool HasMore = 5;
+  int64 totalCount = 1;
+  int64 totalPages = 2;
+  int64 page = 3;
+  int64 size = 4;
+  bool hasMore = 5;
   repeated Job jobs = 6;
 }
 
