@@ -1,9 +1,7 @@
 syntax = "proto3";
 
-package reportService;
-option go_package = ".;reportService";
-// option java_package = "productsService";
-// option java_outer_classname = "productsService";
+package proto;
+option go_package = ".;proto";
 
 import "google/protobuf/timestamp.proto";
 
@@ -36,6 +34,6 @@ message Report {
 }
 
 enum ReportType {
-  Job = 0;
-  Unknown = 1;
+  REPORT_TYPE_JOB = 0;
+  REPORT_TYPE_UNKNOWN = 1;
 }
