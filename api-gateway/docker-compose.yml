@@ -1,0 +1,44 @@
+version: '3'
+services:
+  gripmock:
+    build:
+      context: ./gripmock
+      dockerfile: Dockerfile
+    container_name: gripmock
+    ports:
+      - ${GRIPMOCK_GRPC_PORT}:${GRIPMOCK_GRPC_PORT}
+      - ${GRIPMOCK_ADMIN_PORT}:${GRIPMOCK_ADMIN_PORT}
+    volumes:
+      - ./gripmock:/mock
+    # we use admin to manage grpc servers. we connect to grpc servers using our clinets(from code).
+    command: > 
+      --admin-listen=0.0.0.0 
+      --admin-port=${GRIPMOCK_ADMIN_PORT} 
+      --grpc-listen=0.0.0.0 
+      --grpc-port=${GRIPMOCK_GRPC_PORT} 
+      --stub=/mock/stub /mock/job.proto /mock/report.proto /mock/user.proto
+  api-gateway:
+    build: 
+      context: ./api-gateway-service
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      - SERVER_PORT=${API_GATEWAY_PORT}
+      - AUTH_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
+      - SCHEDULER_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
+      - REPORT_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
+    ports:
+      - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
+    command: sleep infinity
+    volumes:
+      - ./api-gateway-service:/usr/src/app
+  
+  postman:
+    build: 
+      context: ./postman
+      dockerfile: Dockerfile
+    container_name: postman-collection
+    volumes:
+      - ./your_collection.json:/etc/newman/your_collection.json
+    command: run /etc/newman/your_collection.json
+    

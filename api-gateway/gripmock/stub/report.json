@@ -1,0 +1,52 @@
+[
+    {
+      "service": "ReportService",
+      "method": "ListReports",
+      "input": {
+        "equals": {
+          "filter": 1,
+          "page": 1,
+          "size": 10
+        }
+      },
+      "output": {
+        "data": {
+          "totalCount": 5,
+          "totalPages":1,
+          "page":1,
+          "size":10,
+          "hasMore": false,
+          "reports":[
+            {
+                "id": "0",
+                "type":0,
+                "topic": "topic-job-run",
+                "created_time": "2023-06-30T16:50:46.3042086Z",
+                "report_data": "{\"id\":\"job1_id\",\"name\":\"job1\",\"description\":\"sendemailtoexample.com\",\"schedule_time\":\"2023-06-30T16:50:46.3042086Z\",\"created_time\":\"2023-06-30T16:50:46.3042086Z\",\"updated_time\":\"2023-06-30T16:50:46.3042086Z\",\"JobStatus\":1,\"job_type\":0,\"job_data\":{\"SourceAddress\":\"example@example.com\",\"DestinationAddress\":\"example@example.com\",\"Subject\":\"MessageFromexample@example.comcontactform\",\"Message\":\"Thisisaproductiontest!!!!\"}}"
+            },
+            {
+                "id": "1",
+                "type":0,
+                "topic": "topic-job-run",
+                "created_time": "2023-06-30T16:50:46.3042086Z",
+                "report_data": "{\"id\":\"job1_id\",\"name\":\"job1\",\"description\":\"sendemailtoexample.com\",\"schedule_time\":\"2023-06-30T16:50:46.3042086Z\",\"created_time\":\"2023-06-30T16:50:46.3042086Z\",\"updated_time\":\"2023-06-30T16:50:46.3042086Z\",\"JobStatus\":1,\"job_type\":0,\"job_data\":{\"SourceAddress\":\"example@example.com\",\"DestinationAddress\":\"example@example.com\",\"Subject\":\"MessageFromexample@example.comcontactform\",\"Message\":\"Thisisaproductiontest!!!!\"}}"
+            },
+            {
+                "id": "2",
+                "type":0,
+                "topic": "topic-job-run",
+                "created_time": "2023-06-30T16:50:46.3042086Z",
+                "report_data": "{\"id\":\"job1_id\",\"name\":\"job1\",\"description\":\"sendemailtoexample.com\",\"schedule_time\":\"2023-06-30T16:50:46.3042086Z\",\"created_time\":\"2023-06-30T16:50:46.3042086Z\",\"updated_time\":\"2023-06-30T16:50:46.3042086Z\",\"JobStatus\":1,\"job_type\":0,\"job_data\":{\"SourceAddress\":\"example@example.com\",\"DestinationAddress\":\"example@example.com\",\"Subject\":\"MessageFromexample@example.comcontactform\",\"Message\":\"Thisisaproductiontest!!!!\"}}"
+            },
+            {
+                "id": "3",
+                "type":0,
+                "topic": "topic-job-run",
+                "created_time": "2023-06-30T16:50:46.3042086Z",
+                "report_data": "{\"id\":\"job1_id\",\"name\":\"job1\",\"description\":\"sendemailtoexample.com\",\"schedule_time\":\"2023-06-30T16:50:46.3042086Z\",\"created_time\":\"2023-06-30T16:50:46.3042086Z\",\"updated_time\":\"2023-06-30T16:50:46.3042086Z\",\"JobStatus\":1,\"job_type\":0,\"job_data\":{\"SourceAddress\":\"example@example.com\",\"DestinationAddress\":\"example@example.com\",\"Subject\":\"MessageFromexample@example.comcontactform\",\"Message\":\"Thisisaproductiontest!!!!\"}}"
+            }
+          ]
+        }
+      }
+    }
+  ]

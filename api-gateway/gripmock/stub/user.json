@@ -1,0 +1,103 @@
+[
+    {
+      "service": "UserService",
+      "method": "CreateUser",
+      "input": {
+        "equals": {
+          "name": "userAdmin",
+          "email":"userAdmin@admin.com",
+          "password":"passwordAdmin"
+        }
+      },
+      "output": {
+        "data": {
+          "message": "userAdmin created"
+        }
+      }
+    },
+    {
+      "service": "UserService",
+      "method": "CreateUser",
+      "input": {
+        "equals": {
+          "name": "user",
+          "email":"usern@user.com",
+          "password":"password"
+        }
+      },
+      "output": {
+        "data": {
+          "message": "user created"
+        }
+      }
+    },
+
+    {
+      "service": "UserService",
+      "method": "LoginUser",
+      "input": {
+        "equals": {
+          "email":"userAdmin@admin.com",
+          "password":"passwordAdmin"
+        }
+      },
+      "output": {
+        "data": {
+          "access_token": "admin_access_token",
+          "access_token_age": 60,
+          "refresh_token": "admin_refresh_token",
+          "refresh_token_age": 3600
+        }
+      }
+    },
+    {
+      "service": "UserService",
+      "method": "LoginUser",
+      "input": {
+        "equals": {
+          "email":"user@user.com",
+          "password":"password"
+        }
+      },
+      "output": {
+        "data": {
+          "access_token": "user_access_token",
+          "access_token_age": 60,
+          "refresh_token": "user_refresh_token",
+          "refresh_token_age": 3600
+        }
+      }
+    },
+
+    {
+      "service": "UserService",
+      "method": "RefreshAccessToken",
+      "input": {
+        "equals": {
+          "refresh_token":"admin_refresh_token"
+        }
+      },
+      "output": {
+        "data": {
+          "access_token": "admin_access_token",
+          "access_token_age": 60
+        }
+      }
+    },
+    {
+      "service": "UserService",
+      "method": "RefreshAccessToken",
+      "input": {
+        "equals": {
+          "refresh_token":"user_refresh_token"
+        }
+      },
+      "output": {
+        "data": {
+          "access_token": "user_access_token",
+          "access_token_age": 60
+        }
+      }
+    }
+    
+  ]

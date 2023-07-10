@@ -1,0 +1,34 @@
+info:
+  contact: {}
+paths:
+  /Create:
+    get:
+      consumes:
+      - application/json
+      description: Creates and schedule a job
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Creates and schedule a job
+      tags:
+      - job
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: do ping
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: ping example
+      tags:
+      - ping
+swagger: "2.0"

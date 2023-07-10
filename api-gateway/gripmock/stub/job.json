@@ -1,0 +1,153 @@
+[
+    {
+        "service": "Scheduler-service",
+        "method": "CreateJob",
+        "input": {
+          "equals": {
+            "name": "job1",
+            "description":"send email to example.com",
+            "schedule_time":"2023-06-30T16:50:46.3042086Z",
+            "job_data":  {
+                  "SourceAddress": "example@example.com",
+                  "DestinationAddress": "example@example.com",
+                  "Subject": "Message From example@example.com contact form",
+                  "Message": "This is a production test!!!!"
+              }
+          }
+        },
+        "output": {
+          "data": {
+            "id": "job1_id"
+          }
+        }
+      },
+
+      {
+        "service": "Scheduler-service",
+        "method": "GetJob",
+        "input": {
+          "equals": {
+            "id": "job1_id"
+          }
+        },
+        "output": {
+          "data": {
+            "id": "job1_id",
+            "name": "job1",
+            "description":"send email to example.com",
+            "schedule_time":"2023-06-30T16:50:46.3042086Z",
+            "created_time":"2023-06-30T16:50:46.3042086Z",
+            "updated_time":"2023-06-30T16:50:46.3042086Z",
+            "JobStatus": 1,
+            "job_type": 0,
+            "job_data":  {
+                  "SourceAddress": "example@example.com",
+                  "DestinationAddress": "example@example.com",
+                  "Subject": "Message From example@example.com contact form",
+                  "Message": "This is a production test!!!!"
+              }
+          }
+        }
+      },
+
+      {
+        "service": "Scheduler-service",
+        "method": "ListJobs",
+        "input": {
+          "equals": {
+            "size": 10
+          }
+        },
+        "output": {
+          "data": [
+            {
+              "id": "job1_id",
+              "name": "job1",
+              "description":"send email to example.com",
+              "schedule_time":"2023-06-30T16:50:46.3042086Z",
+              "created_time":"2023-06-30T16:50:46.3042086Z",
+              "updated_time":"2023-06-30T16:50:46.3042086Z",
+              "JobStatus": 1,
+              "job_type": 0,
+              "job_data":  {
+                    "SourceAddress": "example@example.com",
+                    "DestinationAddress": "example@example.com",
+                    "Subject": "Message From example@example.com contact form",
+                    "Message": "This is a production test!!!!"
+                }
+            },
+            {
+              "id": "job1_id",
+              "name": "job1",
+              "description":"send email to example.com",
+              "schedule_time":"2023-06-30T16:50:46.3042086Z",
+              "created_time":"2023-06-30T16:50:46.3042086Z",
+              "updated_time":"2023-06-30T16:50:46.3042086Z",
+              "JobStatus": 1,
+              "job_type": 0,
+              "job_data":  {
+                    "SourceAddress": "example@example.com",
+                    "DestinationAddress": "example@example.com",
+                    "Subject": "Message From example@example.com contact form",
+                    "Message": "This is a production test!!!!"
+                }
+            },
+            {
+              "id": "job1_id",
+              "name": "job1",
+              "description":"send email to example.com",
+              "schedule_time":"2023-06-30T16:50:46.3042086Z",
+              "created_time":"2023-06-30T16:50:46.3042086Z",
+              "updated_time":"2023-06-30T16:50:46.3042086Z",
+              "JobStatus": 1,
+              "job_type": 0,
+              "job_data":  {
+                    "SourceAddress": "example@example.com",
+                    "DestinationAddress": "example@example.com",
+                    "Subject": "Message From example@example.com contact form",
+                    "Message": "This is a production test!!!!"
+                }
+            }
+          ]
+        }
+      },
+
+      {
+        "service": "Scheduler-service",
+        "method": "UpdateJob",
+        "input": {
+          "equals": {
+            "id": "job1_id",
+            "name": "job1",
+            "description":"send email to example.com",
+            "schedule_time":"2023-06-30T16:50:46.3042086Z",
+            "job_data":  {
+                  "SourceAddress": "example@example.com",
+                  "DestinationAddress": "example@example.com",
+                  "Subject": "Message From example@example.com contact form",
+                  "Message": "This is a production test!!!!"
+              }
+          }
+        },
+        "output": {
+          "data": {
+            "message": "job1_id updated"
+          }
+        }
+      },
+    
+      {
+        "service": "Scheduler-service",
+        "method": "DeleteJob",
+        "input": {
+          "equals": {
+            "id": "job1_id"
+          }
+        },
+        "output": {
+          "data": {
+            "message": "job1_id deleted"
+          }
+        }
+      }
+  ]
