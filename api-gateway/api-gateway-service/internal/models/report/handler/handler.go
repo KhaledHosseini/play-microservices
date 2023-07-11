@@ -25,7 +25,6 @@ func NewReportHandler(log logger.Logger, cfg *config.Config) *ReportHandler {
 // @Summary Get the list of reports
 // @Description retrieve the reports
 // @Tags report
-// @Accept json
 // @Produce json
 // @Param   filter    query    int   true        "Report Type"
 // @Param   page      query    int     true        "Page"

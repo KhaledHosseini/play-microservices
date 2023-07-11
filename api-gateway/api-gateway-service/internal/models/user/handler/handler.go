@@ -29,7 +29,7 @@ func NewUserHandler(log logger.Logger, cfg *config.Config) *UserHandler {
 // @Accept json
 // @Produce json
 // @Param   input      body    models.CreateUserRequest     true        "input"
-// @Success 200 {object} models.CreateJobResponse
+// @Success 200 {object} models.CreateUserResponse
 // @Router /user/create [post]
 func (uh *UserHandler) CreateUser(c *gin.Context) {
 	uh.log.Info("UserHandler.CreateUser: Entered")
@@ -56,9 +56,9 @@ func (uh *UserHandler) CreateUser(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Param   input      body    models.LoginUserRequest     true        "input"
-// @Success      200      {string}  string    "success"
-// @Header       200      {string}  Access-Token     "Access-Token"
-// @Header       200      {string}  Refresh-Token    "Refresh-Token"
+// @Success      200      {object}  models.LoginUserResponse
+// @Header       200      {string}  Authorization     "Access-Token"
+// @Header       200      {string}  X-Refresh-Token    "Refresh-Token"
 // @Router /user/login [post]
 func (uh *UserHandler) LoginUser(c *gin.Context) {
 	uh.log.Info("UserHandler.LoginUser: Entered")
@@ -81,18 +81,16 @@ func (uh *UserHandler) LoginUser(c *gin.Context) {
 	c.Header("Authorization", res.AccessToken)
 	c.Header("X-Refresh-Token", res.RefreshToken)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "login Success",
-	})
+	c.JSON(http.StatusOK, &models.LoginUserResponse{Message: "Login success"})
 }
 
 // @Summary refresh access token
 // @Description refresh access token
 // @Tags user
 // @Param   X-Refresh-Token      header    string     true        "X-Refresh-Token"
-// @Success      200      {string}  string    "success"
-// @Header       200      {string}  Access-Token     "Access-Token"
-// @Header       200      {string}  Refresh-Token    "Refresh-Token"
+// @Success      200      {object}  models.RefreshTokenResponse
+// @Header       200      {string}  Authorization     "Access-Token"
+// @Header       200      {string}  X-Refresh-Token    "Refresh-Token"
 // @Router /user/refresh_token [post]
 func (uh *UserHandler) RefreshAccessToken(c *gin.Context) {
 
@@ -115,9 +113,7 @@ func (uh *UserHandler) RefreshAccessToken(c *gin.Context) {
 	c.Header("Authorization", res.AccessToken)
 	c.Header("X-Refresh-Token", refreshToken)
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Success",
-	})
+	c.JSON(http.StatusOK, &models.RefreshTokenResponse{Message: "access-token refresh success."})
 }
 
 // @Summary logout user
@@ -168,4 +164,37 @@ func (uh *UserHandler) GetUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, models.GetUserResponseFromProto(res))
+}
+
+// @Summary Get the list of users
+// @Description retrieve the list of users
+// @Tags user
+// @Produce json
+// @Param   page      query    int     true        "Page"
+// @Param   size      query    int     true        "Size"
+// @Success 200 {array} models.ListUsersResponse
+// @Router /user/list [get]
+func (uh *UserHandler) ListUsers(c *gin.Context) {
+	page, err := strconv.ParseInt(c.Query("page"), 10, 32)
+	if err != nil {
+		// Handle missing or invalid page parameter
+		c.JSON(400, gin.H{"error": "Invalid page parameter"})
+		return
+	}
+
+	size, err := strconv.ParseInt(c.Query("size"), 10, 32)
+	if err != nil {
+		// Handle missing or invalid page parameter
+		c.JSON(400, gin.H{"error": "Invalid size parameter"})
+		return
+	}
+
+	res, err := uh.GRPC_ListUsers(c, &proto.ListUsersRequest{Page: page, Size: size})
+
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": false, "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, models.ListUsersResponseFromProto(res))
 }

@@ -92,3 +92,14 @@ func (uc *UserGRPCClient) GRPC_GetUser(c *gin.Context, getUserRequest *proto.Get
 
 	return client.GetUser(c, getUserRequest)
 }
+
+func (uc *UserGRPCClient) GRPC_ListUsers(c *gin.Context, listUsersRequest *proto.ListUsersRequest) (*proto.ListUsersResponse, error) {
+
+	client, conn, err := uc.getClient2()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	return client.ListUsers(c, listUsersRequest)
+}

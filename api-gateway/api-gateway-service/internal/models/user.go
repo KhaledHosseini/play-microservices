@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/proto"
+	"github.com/thoas/go-funk"
 )
 
 type CreateUserRequest struct {
@@ -35,7 +36,7 @@ type LoginUserRequest struct {
 	Password string
 }
 
-type LogOutResponse struct {
+type LoginUserResponse struct {
 	Message string
 }
 
@@ -56,6 +57,10 @@ func (rtr *RefreshTokenRequest) ToProto() *proto.RefreshTokenRequest {
 	}
 }
 
+type RefreshTokenResponse struct {
+	Message string
+}
+
 type LogOutRequest struct {
 	RefreshToken string
 	AccessToken  string
@@ -66,6 +71,10 @@ func (lor *LogOutRequest) ToProto() *proto.LogOutRequest {
 		RefreshToken: lor.RefreshToken,
 		AccessToken:  lor.RefreshToken,
 	}
+}
+
+type LogOutResponse struct {
+	Message string
 }
 
 type GetUserResponse struct {
@@ -79,5 +88,29 @@ func GetUserResponseFromProto(p *proto.GetUserResponse) *GetUserResponse {
 		Id:    p.Id,
 		Name:  p.Name,
 		Email: p.Email,
+	}
+}
+
+type ListUsersResponse struct {
+	TotalCount int64
+	TotalPages int64
+	Page       int64
+	Size       int64
+	HasMore    bool
+	Users      []GetUserResponse
+}
+
+func ListUsersResponseFromProto(p *proto.ListUsersResponse) *ListUsersResponse {
+	users := funk.Map(p.Users, func(x *proto.GetUserResponse) GetUserResponse {
+		return *GetUserResponseFromProto(x)
+	}).([]GetUserResponse)
+
+	return &ListUsersResponse{
+		TotalCount: p.TotalCount,
+		TotalPages: p.TotalPages,
+		Page:       p.Page,
+		Size:       p.Size,
+		HasMore:    p.HasMore,
+		Users:      users,
 	}
 }

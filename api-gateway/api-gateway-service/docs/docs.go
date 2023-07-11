@@ -202,9 +202,6 @@ const docTemplate = `{
         "/report/list": {
             "get": {
                 "description": "retrieve the reports",
-                "consumes": [
-                    "application/json"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -276,7 +273,46 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse"
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/list": {
+            "get": {
+                "description": "retrieve the list of users",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get the list of users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size",
+                        "name": "size",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListUsersResponse"
+                            }
                         }
                     }
                 }
@@ -305,16 +341,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserResponse"
                         },
                         "headers": {
-                            "Access-Token": {
+                            "Authorization": {
                                 "type": "string",
                                 "description": "Access-Token"
                             },
-                            "Refresh-Token": {
+                            "X-Refresh-Token": {
                                 "type": "string",
                                 "description": "Refresh-Token"
                             }
@@ -374,16 +410,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "success",
+                        "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.RefreshTokenResponse"
                         },
                         "headers": {
-                            "Access-Token": {
+                            "Authorization": {
                                 "type": "string",
                                 "description": "Access-Token"
                             },
-                            "Refresh-Token": {
+                            "X-Refresh-Token": {
                                 "type": "string",
                                 "description": "Refresh-Token"
                             }
@@ -465,6 +501,14 @@ const docTemplate = `{
                 },
                 "role": {
                     "type": "integer"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         },
@@ -574,6 +618,32 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListUsersResponse": {
+            "type": "object",
+            "properties": {
+                "hasMore": {
+                    "type": "boolean"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse"
+                    }
+                }
+            }
+        },
         "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LogOutResponse": {
             "type": "object",
             "properties": {
@@ -589,6 +659,22 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.RefreshTokenResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
                     "type": "string"
                 }
             }

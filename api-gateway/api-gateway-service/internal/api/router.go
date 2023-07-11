@@ -43,6 +43,7 @@ func (r *Router) Setup(router *gin.Engine) {
 		router.POST("/api/v1/user/refresh_token", userHandler.RefreshAccessToken)
 		router.POST("/api/v1/user/logout", userHandler.LogOutUser)
 		router.GET("/api/v1/user/:id", userHandler.GetUser)
+		router.GET("/api/v1/user/list", userHandler.ListUsers)
 
 		router.POST("/api/v1/job/create", jobHandler.CreateJob)
 		router.GET("/api/v1/job/:id", jobHandler.GetJob)

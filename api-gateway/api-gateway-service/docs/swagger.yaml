@@ -28,6 +28,11 @@ definitions:
       role:
         type: integer
     type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserResponse:
+    properties:
+      message:
+        type: string
+    type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse:
     properties:
       message:
@@ -97,6 +102,23 @@ definitions:
       totalPages:
         type: integer
     type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListUsersResponse:
+    properties:
+      hasMore:
+        type: boolean
+      page:
+        type: integer
+      size:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse'
+        type: array
+    type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LogOutResponse:
     properties:
       message:
@@ -107,6 +129,16 @@ definitions:
       email:
         type: string
       password:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.RefreshTokenResponse:
+    properties:
+      message:
         type: string
     type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report:
@@ -267,8 +299,6 @@ paths:
       - ping
   /report/list:
     get:
-      consumes:
-      - application/json
       description: retrieve the reports
       parameters:
       - description: Report Type
@@ -335,8 +365,34 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse'
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserResponse'
       summary: Register a user
+      tags:
+      - user
+  /user/list:
+    get:
+      description: retrieve the list of users
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListUsersResponse'
+            type: array
+      summary: Get the list of users
       tags:
       - user
   /user/login:
@@ -353,16 +409,16 @@ paths:
           $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserRequest'
       responses:
         "200":
-          description: success
+          description: OK
           headers:
-            Access-Token:
+            Authorization:
               description: Access-Token
               type: string
-            Refresh-Token:
+            X-Refresh-Token:
               description: Refresh-Token
               type: string
           schema:
-            type: string
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserResponse'
       summary: login a user
       tags:
       - user
@@ -399,16 +455,16 @@ paths:
         type: string
       responses:
         "200":
-          description: success
+          description: OK
           headers:
-            Access-Token:
+            Authorization:
               description: Access-Token
               type: string
-            Refresh-Token:
+            X-Refresh-Token:
               description: Refresh-Token
               type: string
           schema:
-            type: string
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.RefreshTokenResponse'
       summary: refresh access token
       tags:
       - user
