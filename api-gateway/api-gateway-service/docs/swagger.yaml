@@ -1,19 +1,253 @@
+definitions:
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobRequest:
+    properties:
+      description:
+        type: string
+      jobData:
+        type: string
+      jobType:
+        type: integer
+      name:
+        type: string
+      scheduleTime:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: integer
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job:
+    properties:
+      created_time:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      job_data:
+        type: string
+      job_type:
+        type: integer
+      name:
+        type: string
+      schedule_time:
+        type: string
+      status:
+        type: integer
+      updated_time:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListJobsResponse:
+    properties:
+      hasMore:
+        type: boolean
+      jobs:
+        items:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListReportResponse:
+    properties:
+      hasMore:
+        type: boolean
+      page:
+        type: integer
+      reports:
+        items:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report'
+        type: array
+      size:
+        type: integer
+      totalCount:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LogOutResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report:
+    properties:
+      created_time:
+        type: string
+      id:
+        type: string
+      report_data:
+        type: string
+      topic:
+        type: string
+      type:
+        type: integer
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobRequest:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      jobData:
+        type: string
+      jobType:
+        type: integer
+      name:
+        type: string
+      scheduleTime:
+        type: string
+    type: object
+  github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobResponse:
+    properties:
+      message:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /Create:
-    get:
-      consumes:
-      - application/json
-      description: Creates and schedule a job
+  /job/{id}:
+    delete:
+      description: Delete a job by id
+      parameters:
+      - description: some id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse'
+      summary: Delete a job by id
+      tags:
+      - job
+    get:
+      description: Get a job by id
+      parameters:
+      - description: some id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job'
+      summary: Get a job by id
+      tags:
+      - job
+  /job/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates and schedule a job
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse'
       summary: Creates and schedule a job
+      tags:
+      - job
+  /job/list:
+    get:
+      description: list jobs by type
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListJobsResponse'
+      summary: list jobs by type
+      tags:
+      - job
+  /job/update:
+    post:
+      consumes:
+      - application/json
+      description: Updates and reschedule a job
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobResponse'
+      summary: Updates and reschedule a job
       tags:
       - job
   /ping:
@@ -31,4 +265,151 @@ paths:
       summary: ping example
       tags:
       - ping
+  /report/list:
+    get:
+      consumes:
+      - application/json
+      description: retrieve the reports
+      parameters:
+      - description: Report Type
+        in: query
+        name: filter
+        required: true
+        type: integer
+      - description: Page
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListReportResponse'
+            type: array
+      summary: Get the list of reports
+      tags:
+      - report
+  /user/{id}:
+    get:
+      description: Get user by id
+      parameters:
+      - description: some id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse'
+      summary: Get user by id
+      tags:
+      - user
+  /user/create:
+    post:
+      consumes:
+      - application/json
+      description: Register a user
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse'
+      summary: Register a user
+      tags:
+      - user
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: login a user
+      parameters:
+      - description: input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserRequest'
+      responses:
+        "200":
+          description: success
+          headers:
+            Access-Token:
+              description: Access-Token
+              type: string
+            Refresh-Token:
+              description: Refresh-Token
+              type: string
+          schema:
+            type: string
+      summary: login a user
+      tags:
+      - user
+  /user/logout:
+    post:
+      description: logout user
+      parameters:
+      - description: 'Authorization: Access token'
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: X-Refresh-Token
+        in: header
+        name: X-Refresh-Token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LogOutResponse'
+      summary: logout user
+      tags:
+      - user
+  /user/refresh_token:
+    post:
+      description: refresh access token
+      parameters:
+      - description: X-Refresh-Token
+        in: header
+        name: X-Refresh-Token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: success
+          headers:
+            Access-Token:
+              description: Access-Token
+              type: string
+            Refresh-Token:
+              description: Refresh-Token
+              type: string
+          schema:
+            type: string
+      summary: refresh access token
+      tags:
+      - user
 swagger: "2.0"

@@ -20,9 +20,23 @@ func (cur *CreateUserRequest) ToProto() *proto.CreateUserRequest {
 	}
 }
 
+type CreateUserResponse struct {
+	Message string
+}
+
+func CreateUserResponseFromProto(p *proto.CreateUserResponse) *CreateUserResponse {
+	return &CreateUserResponse{
+		Message: p.Message,
+	}
+}
+
 type LoginUserRequest struct {
 	Email    string
 	Password string
+}
+
+type LogOutResponse struct {
+	Message string
 }
 
 func (cur *LoginUserRequest) ToProto() *proto.LoginUserRequest {
@@ -51,5 +65,19 @@ func (lor *LogOutRequest) ToProto() *proto.LogOutRequest {
 	return &proto.LogOutRequest{
 		RefreshToken: lor.RefreshToken,
 		AccessToken:  lor.RefreshToken,
+	}
+}
+
+type GetUserResponse struct {
+	Id    int32
+	Name  string
+	Email string
+}
+
+func GetUserResponseFromProto(p *proto.GetUserResponse) *GetUserResponse {
+	return &GetUserResponse{
+		Id:    p.Id,
+		Name:  p.Name,
+		Email: p.Email,
 	}
 }

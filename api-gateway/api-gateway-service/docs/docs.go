@@ -16,8 +16,8 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/Create": {
-            "get": {
+        "/job/create": {
+            "post": {
                 "description": "Creates and schedule a job",
                 "consumes": [
                     "application/json"
@@ -29,11 +29,148 @@ const docTemplate = `{
                     "job"
                 ],
                 "summary": "Creates and schedule a job",
+                "parameters": [
+                    {
+                        "description": "input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/job/list": {
+            "get": {
+                "description": "list jobs by type",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "list jobs by type",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size",
+                        "name": "size",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListJobsResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/job/update": {
+            "post": {
+                "description": "Updates and reschedule a job",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Updates and reschedule a job",
+                "parameters": [
+                    {
+                        "description": "input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/job/{id}": {
+            "get": {
+                "description": "Get a job by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Get a job by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "some id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a job by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Delete a job by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "some id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse"
                         }
                     }
                 }
@@ -59,6 +196,451 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        },
+        "/report/list": {
+            "get": {
+                "description": "retrieve the reports",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "report"
+                ],
+                "summary": "Get the list of reports",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Report Type",
+                        "name": "filter",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size",
+                        "name": "size",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListReportResponse"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/create": {
+            "post": {
+                "description": "Register a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Register a user",
+                "parameters": [
+                    {
+                        "description": "input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/login": {
+            "post": {
+                "description": "login a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "login a user",
+                "parameters": [
+                    {
+                        "description": "input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "headers": {
+                            "Access-Token": {
+                                "type": "string",
+                                "description": "Access-Token"
+                            },
+                            "Refresh-Token": {
+                                "type": "string",
+                                "description": "Refresh-Token"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/logout": {
+            "post": {
+                "description": "logout user",
+                "tags": [
+                    "user"
+                ],
+                "summary": "logout user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Authorization: Access token",
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "X-Refresh-Token",
+                        "name": "X-Refresh-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LogOutResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/refresh_token": {
+            "post": {
+                "description": "refresh access token",
+                "tags": [
+                    "user"
+                ],
+                "summary": "refresh access token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "X-Refresh-Token",
+                        "name": "X-Refresh-Token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "headers": {
+                            "Access-Token": {
+                                "type": "string",
+                                "description": "Access-Token"
+                            },
+                            "Refresh-Token": {
+                                "type": "string",
+                                "description": "Refresh-Token"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "get": {
+                "description": "Get user by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "some id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "jobData": {
+                    "type": "string"
+                },
+                "jobType": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scheduleTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job": {
+            "type": "object",
+            "properties": {
+                "created_time": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "job_data": {
+                    "type": "string"
+                },
+                "job_type": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule_time": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updated_time": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListJobsResponse": {
+            "type": "object",
+            "properties": {
+                "hasMore": {
+                    "type": "boolean"
+                },
+                "jobs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListReportResponse": {
+            "type": "object",
+            "properties": {
+                "hasMore": {
+                    "type": "boolean"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "reports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report"
+                    }
+                },
+                "size": {
+                    "type": "integer"
+                },
+                "totalCount": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LogOutResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.LoginUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report": {
+            "type": "object",
+            "properties": {
+                "created_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "report_data": {
+                    "type": "string"
+                },
+                "topic": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "jobData": {
+                    "type": "string"
+                },
+                "jobType": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scheduleTime": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
                 }
             }
         }

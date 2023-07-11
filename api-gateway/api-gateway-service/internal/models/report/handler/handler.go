@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/config"
+	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/internal/models"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/internal/models/report/grpc"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/logger"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/proto"
@@ -21,15 +22,16 @@ func NewReportHandler(log logger.Logger, cfg *config.Config) *ReportHandler {
 	return &ReportHandler{log: log, ReportGRPCClient: grpcClient}
 }
 
-// @BasePath /api/v1/job
-//
-// @Summary Creates and schedule a job
-// @Description Creates and schedule a job
-// @Tags job
+// @Summary Get the list of reports
+// @Description retrieve the reports
+// @Tags report
 // @Accept json
 // @Produce json
-// @Success 200 {string} Job
-// @Router /Create [get]
+// @Param   filter    query    int   true        "Report Type"
+// @Param   page      query    int     true        "Page"
+// @Param   size      query    int     true        "Size"
+// @Success 200 {array} models.ListReportResponse
+// @Router /report/list [get]
 func (rh *ReportHandler) ListReports(c *gin.Context) {
 	rh.log.Infof("Request arrived: list reports: %v", c.Request)
 	filter, err := strconv.ParseInt(c.Query("filter"), 10, 32)
@@ -60,5 +62,5 @@ func (rh *ReportHandler) ListReports(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, models.ListReportResponseFromProto(res))
 }

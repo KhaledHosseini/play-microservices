@@ -37,7 +37,7 @@ func (jc *UserGRPCClient) getClient2() (proto.UserProfileServiceClient, *grpc.Cl
 	return proto.NewUserProfileServiceClient(conn), conn, nil
 }
 
-func (uc *UserGRPCClient) GRPC_CreateUser(c *gin.Context, createUserRequest *proto.CreateUserRequest) (*proto.CreateUserReply, error) {
+func (uc *UserGRPCClient) GRPC_CreateUser(c *gin.Context, createUserRequest *proto.CreateUserRequest) (*proto.CreateUserResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -49,7 +49,7 @@ func (uc *UserGRPCClient) GRPC_CreateUser(c *gin.Context, createUserRequest *pro
 	return client.CreateUser(c, createUserRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_LoginUser(c *gin.Context, loginUserRequest *proto.LoginUserRequest) (*proto.LoginUserReply, error) {
+func (uc *UserGRPCClient) GRPC_LoginUser(c *gin.Context, loginUserRequest *proto.LoginUserRequest) (*proto.LoginUserResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -60,7 +60,7 @@ func (uc *UserGRPCClient) GRPC_LoginUser(c *gin.Context, loginUserRequest *proto
 	return client.LoginUser(c, loginUserRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_RefreshAccessToken(c *gin.Context, refreshTokenRequest *proto.RefreshTokenRequest) (*proto.RefreshTokenReply, error) {
+func (uc *UserGRPCClient) GRPC_RefreshAccessToken(c *gin.Context, refreshTokenRequest *proto.RefreshTokenRequest) (*proto.RefreshTokenResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -71,7 +71,7 @@ func (uc *UserGRPCClient) GRPC_RefreshAccessToken(c *gin.Context, refreshTokenRe
 	return client.RefreshAccessToken(c, refreshTokenRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_LogOutUser(c *gin.Context, logOutRequest *proto.LogOutRequest) (*proto.LogOutReply, error) {
+func (uc *UserGRPCClient) GRPC_LogOutUser(c *gin.Context, logOutRequest *proto.LogOutRequest) (*proto.LogOutResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -82,7 +82,7 @@ func (uc *UserGRPCClient) GRPC_LogOutUser(c *gin.Context, logOutRequest *proto.L
 	return client.LogOutUser(c, logOutRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_GetUser(c *gin.Context, getUserRequest *proto.GetUserRequest) (*proto.GetUserReply, error) {
+func (uc *UserGRPCClient) GRPC_GetUser(c *gin.Context, getUserRequest *proto.GetUserRequest) (*proto.GetUserResponse, error) {
 
 	client, conn, err := uc.getClient2()
 	if err != nil {

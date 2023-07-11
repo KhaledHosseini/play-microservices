@@ -11,4 +11,6 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 RUN export PATH="$PATH:$(go env GOPATH)/bin"
 
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 WORKDIR /usr/src/app

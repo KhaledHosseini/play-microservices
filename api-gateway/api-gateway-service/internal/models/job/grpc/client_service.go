@@ -37,7 +37,7 @@ func (jc *JobGRPCClient) GRPC_CreateJob(c *gin.Context, createJobRequest *proto.
 	return client.CreateJob(c, createJobRequest)
 }
 
-func (jc *JobGRPCClient) GRPC_GetJob(c *gin.Context, getJobRequest *proto.GetJobRequest) (*proto.GetJobResponse, error) {
+func (jc *JobGRPCClient) GRPC_GetJob(c *gin.Context, getJobRequest *proto.GetJobRequest) (*proto.Job, error) {
 
 	client, conn, err := jc.getClient()
 	if err != nil {

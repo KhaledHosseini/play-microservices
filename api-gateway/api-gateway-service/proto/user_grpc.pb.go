@@ -31,10 +31,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserReply, error)
-	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserReply, error)
-	RefreshAccessToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenReply, error)
-	LogOutUser(ctx context.Context, in *LogOutRequest, opts ...grpc.CallOption) (*LogOutReply, error)
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error)
+	RefreshAccessToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error)
+	LogOutUser(ctx context.Context, in *LogOutRequest, opts ...grpc.CallOption) (*LogOutResponse, error)
 }
 
 type userServiceClient struct {
@@ -45,8 +45,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserReply, error) {
-	out := new(CreateUserReply)
+func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	out := new(CreateUserResponse)
 	err := c.cc.Invoke(ctx, UserService_CreateUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -54,8 +54,8 @@ func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserReques
 	return out, nil
 }
 
-func (c *userServiceClient) LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserReply, error) {
-	out := new(LoginUserReply)
+func (c *userServiceClient) LoginUser(ctx context.Context, in *LoginUserRequest, opts ...grpc.CallOption) (*LoginUserResponse, error) {
+	out := new(LoginUserResponse)
 	err := c.cc.Invoke(ctx, UserService_LoginUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -63,8 +63,8 @@ func (c *userServiceClient) LoginUser(ctx context.Context, in *LoginUserRequest,
 	return out, nil
 }
 
-func (c *userServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenReply, error) {
-	out := new(RefreshTokenReply)
+func (c *userServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*RefreshTokenResponse, error) {
+	out := new(RefreshTokenResponse)
 	err := c.cc.Invoke(ctx, UserService_RefreshAccessToken_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -72,8 +72,8 @@ func (c *userServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshT
 	return out, nil
 }
 
-func (c *userServiceClient) LogOutUser(ctx context.Context, in *LogOutRequest, opts ...grpc.CallOption) (*LogOutReply, error) {
-	out := new(LogOutReply)
+func (c *userServiceClient) LogOutUser(ctx context.Context, in *LogOutRequest, opts ...grpc.CallOption) (*LogOutResponse, error) {
+	out := new(LogOutResponse)
 	err := c.cc.Invoke(ctx, UserService_LogOutUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -85,10 +85,10 @@ func (c *userServiceClient) LogOutUser(ctx context.Context, in *LogOutRequest, o
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	CreateUser(context.Context, *CreateUserRequest) (*CreateUserReply, error)
-	LoginUser(context.Context, *LoginUserRequest) (*LoginUserReply, error)
-	RefreshAccessToken(context.Context, *RefreshTokenRequest) (*RefreshTokenReply, error)
-	LogOutUser(context.Context, *LogOutRequest) (*LogOutReply, error)
+	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error)
+	RefreshAccessToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error)
+	LogOutUser(context.Context, *LogOutRequest) (*LogOutResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -96,16 +96,16 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserReply, error) {
+func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
-func (UnimplementedUserServiceServer) LoginUser(context.Context, *LoginUserRequest) (*LoginUserReply, error) {
+func (UnimplementedUserServiceServer) LoginUser(context.Context, *LoginUserRequest) (*LoginUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoginUser not implemented")
 }
-func (UnimplementedUserServiceServer) RefreshAccessToken(context.Context, *RefreshTokenRequest) (*RefreshTokenReply, error) {
+func (UnimplementedUserServiceServer) RefreshAccessToken(context.Context, *RefreshTokenRequest) (*RefreshTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshAccessToken not implemented")
 }
-func (UnimplementedUserServiceServer) LogOutUser(context.Context, *LogOutRequest) (*LogOutReply, error) {
+func (UnimplementedUserServiceServer) LogOutUser(context.Context, *LogOutRequest) (*LogOutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LogOutUser not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
@@ -229,7 +229,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserProfileServiceClient interface {
-	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error)
+	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 }
 
 type userProfileServiceClient struct {
@@ -240,8 +240,8 @@ func NewUserProfileServiceClient(cc grpc.ClientConnInterface) UserProfileService
 	return &userProfileServiceClient{cc}
 }
 
-func (c *userProfileServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserReply, error) {
-	out := new(GetUserReply)
+func (c *userProfileServiceClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, UserProfileService_GetUser_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -253,7 +253,7 @@ func (c *userProfileServiceClient) GetUser(ctx context.Context, in *GetUserReque
 // All implementations must embed UnimplementedUserProfileServiceServer
 // for forward compatibility
 type UserProfileServiceServer interface {
-	GetUser(context.Context, *GetUserRequest) (*GetUserReply, error)
+	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
 	mustEmbedUnimplementedUserProfileServiceServer()
 }
 
@@ -261,7 +261,7 @@ type UserProfileServiceServer interface {
 type UnimplementedUserProfileServiceServer struct {
 }
 
-func (UnimplementedUserProfileServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserReply, error) {
+func (UnimplementedUserProfileServiceServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (UnimplementedUserProfileServiceServer) mustEmbedUnimplementedUserProfileServiceServer() {}
