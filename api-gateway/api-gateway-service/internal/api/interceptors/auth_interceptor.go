@@ -6,9 +6,11 @@ import (
 )
 
 // We do authentication and authorization in the end services. We just attach the auth headers to grpc requests.
-func AttachAccessTokenToGRPC() gin.HandlerFunc {
+func AuthenticateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken := c.GetHeader("Authorization") // Retrieve the access token from the request header
+
+		// do authentication.
 
 		// Create a gRPC context and add the access token to the metadata
 		md := metadata.Pairs("authorization", accessToken)
