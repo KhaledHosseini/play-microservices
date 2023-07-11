@@ -57,7 +57,7 @@ func (r *Router) Setup(router *gin.Engine) {
 
 // @BasePath /api/v1
 // PingExample godoc
-// @Summary ping example
+// @Summary ping
 // @Schemes
 // @Description do ping
 // @Tags ping

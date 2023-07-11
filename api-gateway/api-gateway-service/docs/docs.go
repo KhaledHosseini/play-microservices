@@ -188,7 +188,7 @@ const docTemplate = `{
                 "tags": [
                     "ping"
                 ],
-                "summary": "ping example",
+                "summary": "ping",
                 "responses": {
                     "200": {
                         "description": "OK",

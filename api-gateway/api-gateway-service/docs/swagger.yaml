@@ -294,7 +294,7 @@ paths:
           description: OK
           schema:
             type: string
-      summary: ping example
+      summary: ping
       tags:
       - ping
   /report/list:
