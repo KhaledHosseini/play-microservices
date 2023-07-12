@@ -5,24 +5,39 @@ package proto;
 option go_package = ".;proto";
 
 service UserService {
-  rpc CreateUser (CreateUserRequest) returns (CreateUserReply) {}
-  rpc LoginUser (LoginUserRequest) returns (LoginUserReply) {}
-  rpc RefreshAccessToken (RefreshTokenRequest) returns (RefreshTokenReply) {}
-  rpc LogOutUser (LogOutRequest) returns (LogOutReply) {}
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+  rpc LoginUser (LoginUserRequest) returns (LoginUserResponse) {}
+  rpc RefreshAccessToken (RefreshTokenRequest) returns (RefreshTokenResponse) {}
+  rpc LogOutUser (LogOutRequest) returns (LogOutResponse) {}
 }
 
 service UserProfileService {
-  rpc GetUser (GetUserRequest) returns (GetUserReply) {}
+    rpc GetUser (GetUserRequest) returns (GetUserResponse) {}
+    rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {}
 }
 
 message GetUserRequest {
     int32 id = 1 ;
 }
 
-message GetUserReply {
+message GetUserResponse {
     int32 id = 1 ;
     string name = 2;
     string email = 3;
+}
+
+message ListUsersRequest {
+    int64 page = 2;
+    int64 size = 3;
+}
+
+message ListUsersResponse {
+    int64 totalCount = 1;
+    int64 totalPages = 2;
+    int64 page = 3;
+    int64 size = 4;
+    bool hasMore = 5;
+    repeated GetUserResponse users = 6;
 }
 
 message Empty {}
@@ -39,7 +54,7 @@ message CreateUserRequest {
     RoleType role = 4;
 }
 
-message CreateUserReply {
+message CreateUserResponse {
     string message = 1;
 }
 
@@ -48,7 +63,7 @@ message LoginUserRequest {
     string password = 2;
 }
 
-message LoginUserReply {
+message LoginUserResponse {
     string access_token = 1;
     int64 access_token_age = 2;
     string refresh_token = 3;
@@ -59,7 +74,7 @@ message RefreshTokenRequest {
     string refresh_token = 1;
 }
 
-message RefreshTokenReply {
+message RefreshTokenResponse {
     string access_token = 1;
     int64 access_token_age = 2;
 }
@@ -69,6 +84,6 @@ message LogOutRequest {
     string access_token = 2;
 }
 
-message LogOutReply {
+message LogOutResponse {
     string message = 1;
 }

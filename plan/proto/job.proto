@@ -7,7 +7,7 @@ import "google/protobuf/timestamp.proto";
 
 service JobsService {
   rpc CreateJob(CreateJobRequest) returns (CreateJobResponse) {}
-  rpc GetJob(GetJobRequest) returns (GetJobResponse) {}
+  rpc GetJob(GetJobRequest) returns (Job) {}
   rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {}
   rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse) {}
   rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse) {}
@@ -27,10 +27,6 @@ message CreateJobResponse {
 
 message GetJobRequest {
   string id = 1;
-}
-
-message GetJobResponse {
-  Job job = 1;
 }
 
 message ListJobsRequest {
