@@ -1,0 +1,24 @@
+version: '3'
+services:
+  wiremock:
+    build: 
+      context: ./wiremock
+      dockerfile: Dockerfile
+    container_name: wriremock
+    ports:
+      - ${WIREMOCK_PORT}:${WIREMOCK_CONTAINER_PORT}
+    volumes:
+      - ./wiremock/mappings:/home/wiremock/mappings
+  
+  client:
+    build: 
+      context: ./client-service
+      dockerfile: Dockerfile
+    container_name: client
+    command: sleep infinity
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    environment:
+      - APIGATEWAY_URL=http://wriremock:${WIREMOCK_CONTAINER_PORT}
+    volumes:
+      - ./client-service:/usr/src/app

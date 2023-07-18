@@ -1,0 +1,235 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/create",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"email\":\"admin@admin.com\",\"name\":\"admin\",\"password\":\"password\",\"role\":0}",
+            "ignoreArrayOrder" : true,
+            "ignoreExtraElements" : true
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"Message\": \"Admin registered successfully\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/create",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"email\":\"user@user.com\",\"name\":\"user\",\"password\":\"password\",\"role\":1}",
+            "ignoreArrayOrder" : true,
+            "ignoreExtraElements" : true
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"Message\": \"User registered successfully\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/login",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"email\":\"admin@admin.com\",\"password\":\"password\"}",
+            "ignoreArrayOrder" : true,
+            "ignoreExtraElements" : true
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": ["Authorization=Admin-access-token; path=/; Secure; HttpOnly","X-Refresh-token=Admin-refresh-token; path=/; Secure; HttpOnly"]
+        },
+        "body": "{\"Message\": \"Admin login successfull\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/login",
+        "bodyPatterns": [
+          {
+            "equalToJson": "{\"email\":\"user@user.com\",\"password\":\"password\"}",
+            "ignoreArrayOrder" : true,
+            "ignoreExtraElements" : true
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": ["Authorization=User-access-token; path=/; Secure; HttpOnly","X-Refresh-token=User-refresh-token; path=/; Secure; HttpOnly"]
+        },
+        "body": "{\"Message\": \"User login successfull\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": "/api/v1/user/list\\?page=([^&]+)&size=([^&]+)",
+        "queryParameters": {
+          "page": {
+            "matches": "^[1-9][0-9]*$"
+          },
+          "size": {
+            "matches": "^[1-9][0-9]*$"
+          }
+        },
+        "headers":{
+          "Cookie": {
+            "contains": "Authorization=Admin-access-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "[{\"id\":\"0\",\"name\":\"admin\",\"email\":\"admin@admin.com\"},{\"id\":\"1\",\"name\":\"user\",\"email\":\"user@user.com\"}]"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": "/api/v1/user/get",
+        "headers":{
+          "Cookie": {
+            "contains": "Authorization=Admin-access-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"id\":\"0\",\"name\":\"admin\",\"email\":\"admin@admin.com\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "urlPattern": "/api/v1/user/get",
+        "headers":{
+          "Cookie": {
+            "contains": "Authorization=User-access-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"id\":\"0\",\"name\":\"user\",\"email\":\"user@user.com\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/refresh_token",
+        "headers":{
+          "Cookie": {
+            "contains": "Admin-refresh-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": ["Authorization=Admin-access-token; path=/; Secure; HttpOnly","X-Refresh-token=Admin-refresh-token; path=/; Secure; HttpOnly"]
+        },
+        "body": "{\"Message\": \"Admin token refreshed\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/refresh_token"
+      },
+      "response": {
+        "status": 401,
+        "body": "Unauthorized"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/refresh_token",
+        "headers":{
+          "Cookie": {
+            "contains": "User-refresh-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": ["Authorization=User-access-token; path=/; Secure; HttpOnly","X-Refresh-token=User-refresh-token; path=/; Secure; HttpOnly"]
+
+        },
+        "body": "{\"Message\": \"User token refreshed\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/logout",
+        "headers":{
+          "Cookie": {
+            "contains": "Admin-access-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": ["Authorization=; path=/; Secure; HttpOnly","X-Refresh-token=; path=/; Secure; HttpOnly"]
+        },
+        "body": "{\"Message\": \"Admin logout success\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPattern": "/api/v1/user/logout",
+        "headers":{
+          "Cookie": {
+            "contains": "User-access-token"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json",
+          "Set-Cookie": ["Authorization=; path=/; Secure; HttpOnly","X-Refresh-token=; path=/; Secure; HttpOnly"]
+        },
+        "body": "{\"Message\": \"User logout success\"}"
+      }
+    }
+  ]
+}
