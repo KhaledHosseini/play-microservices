@@ -1,0 +1,10 @@
+{
+    "request": {
+      "method": "GET",
+      "urlPattern": "/api/v1/ping"
+    },
+    "response": {
+      "status": 200,
+      "body": "{\"Message\": \"Pong\"}"
+    }
+}
