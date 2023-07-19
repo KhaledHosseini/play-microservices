@@ -1,3 +1,5 @@
+#!/bin/bash
+
 db_name_file="${POSTGRES_DB_FILE}"
 db_name=$(cat "$db_name_file")
 db_user_file="${POSTGRES_USER_FILE}"

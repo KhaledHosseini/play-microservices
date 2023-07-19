@@ -1,58 +1,42 @@
+extern crate log;
 // in the main file, declare all modules of sibling files.
 mod config;
-mod services;
-mod convert;
 mod models;
 mod schema;
-mod token;
+mod utils;
 mod interceptors;
 
-use crate::interceptors::authenticate::{AuthenticatedService};
+//interceptor
+use crate::interceptors::auth::AuthenticatedService;
 //proto
-use services::user::{UserService};
-use services::user_profile::{UserProfileService};
-use tonic::{transport::Server};
-use proto::user_server::{UserServer};
-use proto::user_profile_server::{UserProfileServer};
+use models::user::grpc::MyUserService;
+use models::user::grpc::MyUserProfileService;
+use tonic::transport::Server;
+use proto::user_service_server::UserServiceServer;
+use proto::user_profile_service_server::UserProfileServiceServer;
 mod proto {
     tonic::include_proto!("proto");
     pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
         tonic::include_file_descriptor_set!("user_descriptor");
 }
-
+pub use crate::models::user::db::{PostgressDB,PgPool,PgPooledConnection};
+pub use crate::models::user::db::RedisCache;
 //diesel
 use diesel::{pg::PgConnection, prelude::*};
-use diesel::r2d2::{ Pool, PooledConnection, ConnectionManager, PoolError };
+use diesel::r2d2::{ Pool, ConnectionManager };
 use diesel_migrations::EmbeddedMigrations;
 use diesel_migrations::{embed_migrations, MigrationHarness};
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
-use redis::{Client};
 use config::Config;
 use std::net::SocketAddr;
 
-
-
-type PgPool = Pool<ConnectionManager<PgConnection>>;
-type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
-pub struct Context {
-    db_pool: PgPool,
-    redis_client: Client,
-    env: Config,
-}
-
-impl Context {
-    // helper function to get a connection from the pool
-    pub fn get_conn(&self) -> Result<PgPooledConnection, PoolError> {
-       let _pool = self.db_pool.get().unwrap();
-       Ok(_pool)
-   }
-}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // env::set_var("RUST_BACKTRACE", "full");
+    env_logger::init();
 
     let config = Config::init();
     let redis_url = config.redis_url.clone();
@@ -88,23 +72,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     _ = connection.run_pending_migrations(MIGRATIONS);
 
     //user service
-    
-    let my_user_service = UserService { context: Context {
-            db_pool: db_pool.clone(),
-            redis_client: redis_client.clone(),
-            env: config.clone(),
-        }
+    let my_user_service = MyUserService { 
+        db: Box::new(PostgressDB { db_pool: db_pool.clone() }),
+        cache: Box::new(RedisCache{redis_client: redis_client.clone()}),
+        env: config.clone()
     };
 
-    let user_service = UserServer::new(my_user_service);
+    let user_service = UserServiceServer::new(my_user_service);
 
-    let my_user_profile_service = UserProfileService { context: Context {
-            db_pool: db_pool,
-            redis_client: redis_client,
-            env: config.clone(),
-        }
+    let my_user_profile_service = MyUserProfileService {
+        db: Box::new(PostgressDB { db_pool: db_pool })
     };
-    let profile_service = UserProfileServer::new(my_user_profile_service);
+    let profile_service = UserProfileServiceServer::new(my_user_profile_service);
     let profile_service_intercepted = AuthenticatedService {
         inner: profile_service,
         env: config,

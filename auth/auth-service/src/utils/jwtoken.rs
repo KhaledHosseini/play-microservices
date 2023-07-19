@@ -7,12 +7,14 @@ pub struct TokenDetails {
     pub token: Option<String>,
     pub token_uuid: uuid::Uuid,
     pub user_id: i32,
+    pub role: String,
     pub expires_in: Option<i64>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TokenClaims {
     pub sub: String,
+    pub role: String,
     pub token_uuid: String,
     pub exp: i64,
     pub iat: i64,
@@ -21,6 +23,7 @@ pub struct TokenClaims {
 
 pub fn generate_jwt_token(
     user_id: i32,
+    role: String,
     ttl: i64,
     private_key: String,
 ) -> Result<TokenDetails, jsonwebtoken::errors::Error> {
@@ -30,6 +33,7 @@ pub fn generate_jwt_token(
     let now = chrono::Utc::now();
     let mut token_details = TokenDetails {
         user_id,
+        role,
         token_uuid: Uuid::new_v4(),
         expires_in: Some((now + chrono::Duration::minutes(ttl)).timestamp()),
         token: None,
@@ -37,12 +41,14 @@ pub fn generate_jwt_token(
 
     let claims = TokenClaims {
         sub: token_details.user_id.to_string(),
+        role: token_details.role.to_string(),
         token_uuid: token_details.token_uuid.to_string(),
         exp: token_details.expires_in.unwrap(),
         iat: now.timestamp(),
         nbf: now.timestamp(),
     };
 
+    // see https://jwt.io/introduction
     let header = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::RS256);
     let token = jsonwebtoken::encode(
         &header,
@@ -71,10 +77,12 @@ pub fn verify_jwt_token(
     let user_id = decoded.claims.sub.as_str().parse::<i32>().unwrap();
     let token_uuid = Uuid::parse_str(decoded.claims.token_uuid.as_str()).unwrap();
     let expr = decoded.claims.exp.clone();
+    let role = decoded.claims.role.clone();
     Ok(TokenDetails {
         token: None,
         token_uuid,
         user_id,
+        role,
         expires_in: Some(expr),
     })
 }

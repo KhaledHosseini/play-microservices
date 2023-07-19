@@ -1,16 +1,18 @@
 use chrono::{DateTime, NaiveDateTime, Utc};
 
 use hyper::{ Request, Response};
+use hyper::header::{HeaderName, HeaderValue};
 use std::task::{Context, Poll};
 use tonic::{
     body::BoxBody,
     transport::{Body, NamedService},
     Status,
 };
-use tower::{ Service};
+use tower::Service;
 
-use crate::token;
+use crate::utils::jwtoken;
 use crate::config::Config;
+use log::info;
 
 #[derive(Debug, Clone)]
 pub(crate) struct AuthenticatedService<S> {
@@ -58,22 +60,25 @@ fn authenticate(
     request: Request<Body>,
     public_key: String,
 ) -> Result<Request<Body>, Status> {
-    
-    let access_token = match request.headers().get("authorization") {
+    info!("authenticate:start {:#?}", &request);
+    let headers = request.headers();
+    let access_token = match headers.get("authorization") {
         Some(token) => match token.to_str() {
             Ok(token) => token,
             Err(_) => return Err(Status::unauthenticated("Token malformed (string)")),
         },
         None => return Err(Status::unauthenticated("Token not found")),
     };
+    info!("authenticate:  found access token{:#?}", &access_token);
     let access_token_details =
-    match token::verify_jwt_token(public_key, access_token)
+    match jwtoken::verify_jwt_token(public_key, access_token)
     {
         Ok(token_details) => token_details,
         Err(e) => {
-            return Err(Status::internal(format!("Token validation failed with error: {}", e)));
+            return Err(Status::unauthenticated(format!("Token validation failed with error: {}", e)));
         }
     };
+    info!("authenticate:  access token verified. {:#?}", &access_token_details);
     //check expiration 
     match access_token_details.expires_in {
         Some(exp)=> {
@@ -83,13 +88,24 @@ fn authenticate(
                     return Err(Status::unauthenticated("Token has expired"));
                 }
             }else {
-                return Err(Status::internal("Error checking token expiry"));
+                return Err(Status::unauthenticated("Error checking token expiry"));
             }
         },
         None => {
-            return Err(Status::internal("Error checking token expiry"));
+            return Err(Status::unauthenticated("Error checking token expiry"));
         }
     }
-    
-    Ok(request)
+    info!("authenticate:  set auth headers. ");
+    //add authorization values to request
+    let mut modified_request = request;
+    modified_request.headers_mut().insert(
+        HeaderName::from_static("user_role"),
+        HeaderValue::from_str(&access_token_details.role).map_err(|_| Status::internal("Error setting role"))?,
+    );
+    modified_request.headers_mut().insert(
+        HeaderName::from_static("user_id"),
+        HeaderValue::from_str(&access_token_details.user_id.to_string()).map_err(|_| Status::internal("Error setting user id"))?,
+    );
+
+    Ok(modified_request)
 }
