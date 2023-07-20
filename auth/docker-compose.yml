@@ -90,12 +90,14 @@ services:
     container_name: auth-service
     command: sleep infinity
     environment:
-      POSTGRES_HOST: auth-db-service
-      POSTGRES_PORT: ${AUTH_POSTGRES_PORT}
-      POSTGRES_USER_FILE: /run/secrets/auth-db-user
-      POSTGRES_PASSWORD_FILE: /run/secrets/auth-db-pass
-      POSTGRES_DB_FILE: /run/secrets/auth-db-db
-      REDIS_HOST: auth-cache-service
+      DATABSE_SCHEME: postgresql
+      DATABSE_DOMAIN: auth-db-service
+      DATABSE_PORT: ${AUTH_POSTGRES_PORT}
+      DATABSE_USER_FILE: /run/secrets/auth-db-user
+      DATABSE_PASSWORD_FILE: /run/secrets/auth-db-pass
+      DATABSE_DB_FILE: /run/secrets/auth-db-db
+      REDIS_SCHEME: redis # rediss
+      REDIS_DOMAIN: auth-cache-service
       REDIS_PORT: ${AUTH_REDIS_PORT}
       REDIS_PASS_FILE: /run/secrets/auth-redis-pass
       SERVER_PORT: ${AUTH_SERVICE_PORT}

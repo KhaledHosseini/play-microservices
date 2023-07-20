@@ -12,17 +12,21 @@ fn get_file_contents(file_path: &str)-> String {
 
 #[derive(Debug, Clone)]
 pub struct Config {
-    pub database_host: String,
+    //database url for postgres-> postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+    pub database_scheme: String,
+    pub database_domain: String,
     pub database_port: String,
     pub database_name: String,
     pub database_user: String,
     pub database_pass: String,
     pub database_url: String,
 
-    pub redis_host_name: String,
-    pub redis_password: String,
-    pub redis_url_scheme: String,
+    // rediss://:password=@redis-server-url:6380/0?ssl_cert_reqs=CERT_REQUIRED'
+    // redis://arbitrary_usrname:password@ipaddress:6379/0 -> 0: database index
+    pub redis_scheme: String,
+    pub redis_domain: String,
     pub redis_port: String,
+    pub redis_password: String,
     pub redis_url: String,
 
     pub server_port: String,
@@ -42,33 +46,36 @@ impl Config {
     pub fn init() -> Config {
         dotenv().ok();
 
-        let database_host = get_env_var("POSTGRES_HOST");
-        let database_port = get_env_var("POSTGRES_PORT");
-
-        let database_name_file = get_env_var("POSTGRES_DB_FILE");
+        let database_scheme = get_env_var("DATABSE_SCHEME");
+        let database_domain = get_env_var("DATABSE_DOMAIN");
+        let database_port = get_env_var("DATABSE_PORT");
+        let database_name_file = get_env_var("DATABSE_DB_FILE");
         let database_name = get_file_contents(&database_name_file);
-        let database_user_file = get_env_var("POSTGRES_USER_FILE");
+        let database_user_file = get_env_var("DATABSE_USER_FILE");
         let database_user = get_file_contents(&database_user_file);
-        let database_pass_file = get_env_var("POSTGRES_PASSWORD_FILE");
+        let database_pass_file = get_env_var("DATABSE_PASSWORD_FILE");
         let database_pass = get_file_contents(&database_pass_file);
-
-        let database_url = format!("postgresql://{}:{}@{}:{}/{}",
+        //database url for postgres-> postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
+        let database_url = format!("{}://{}:{}@{}:{}/{}",
+        database_scheme,
         database_user,
         database_pass,
-        database_host,
+        database_domain,
         database_port,
         database_name);
 
-        let redis_url_scheme = get_env_var("REDIS_URI_SCHEME");
-        let redis_host_name = get_env_var("REDIS_HOST");
+        
+        let redis_scheme = get_env_var("REDIS_SCHEME");
+        let redis_domain = get_env_var("REDIS_DOMAIN");
         let redis_port = get_env_var("REDIS_PORT");
         let redis_password_file = get_env_var("REDIS_PASS_FILE");
         let redis_password = get_file_contents(&redis_password_file);
-        
+        // rediss://:password=@redis-server-url:6380/0?ssl_cert_reqs=CERT_REQUIRED'
+        // redis://arbitrary_usrname:password@ipaddress:6379/0 -> 0: database index
         let redis_url = format!("{}://:{}@{}:{}", 
-        redis_url_scheme, 
+        redis_scheme, 
         redis_password, 
-        redis_host_name,
+        redis_domain,
         redis_port);
 
         let server_port = get_env_var("SERVER_PORT");
@@ -84,17 +91,18 @@ impl Config {
         let refresh_token_max_age = get_env_var("REFRESH_TOKEN_MAXAGE");
 
         Config {
-            database_host,
+            database_scheme,
+            database_domain,
             database_port,
             database_name,
             database_user,
             database_pass,
             database_url,
             
-            redis_host_name,
-            redis_password,
-            redis_url_scheme,
+            redis_scheme,
+            redis_domain,
             redis_port,
+            redis_password,
             redis_url,
 
             server_port,

@@ -8,10 +8,7 @@ use crate::proto::{
     RefreshTokenRequest,RefreshTokenResponse, LogOutRequest, LogOutResponse
 };
 
-use crate::models::user::db::{UserDBInterface, UserCacheInterface};
-
-//orm models
-use crate::models::user::db::{User , NewUser};
+use crate::models::user::db::{UserDBInterface, UserCacheInterface, User , NewUser, Validate};
 
 //others
 use crate::utils::jwtoken;
@@ -40,6 +37,13 @@ impl UserService for MyUserService {
        
     //    let CreateUserRequest { name, email, password, role } = &request.into_inner();
        let create_user_request: CreateUserRequest = request.into_inner();
+       match create_user_request.validate() {
+            Ok(_)=>{}
+            Err(err)=> {
+                return Err(Status::internal(format!("{}",err)));
+            }
+       }
+
        match self.db.is_user_exists_with_email(&create_user_request.email).await {
             Ok(exists) => {
                 if exists {
@@ -66,7 +70,7 @@ impl UserService for MyUserService {
 
         match self.db.insert_new_user(&new_user).await {
             Ok(_)=> {
-                let reply = CreateUserResponse { message: format!("Successfull user registration")};
+                let reply: CreateUserResponse = "Successfull user registration".into();
                 return Ok(Response::new(reply))
             },
             Err(err)=> {
@@ -82,9 +86,14 @@ impl UserService for MyUserService {
 
         info!("MyUserService:login_user a request: {:#?}", &request);
 
-        let LoginUserRequest { email, password } = request.into_inner();
-
-        let user: User = match self.db.get_user_by_email(&email).await {
+        let login_user_request: LoginUserRequest = request.into_inner();
+        match login_user_request.validate() {
+            Ok(_)=>{}
+            Err(err)=> {
+                return Err(Status::internal(format!("{}",err)));
+            }
+       }
+        let user: User = match self.db.get_user_by_email(&login_user_request.email).await {
             Ok(user)=> {
                 info!("Optional user: {:#?}", &user);
                 if let Some(user) = user {
@@ -99,12 +108,12 @@ impl UserService for MyUserService {
 
         let is_password_correct = PasswordHash::new(&user.password)
         .and_then(|parsed_hash| {
-            Argon2::default().verify_password(password.as_bytes(), &parsed_hash)
+            Argon2::default().verify_password(login_user_request.password.as_bytes(), &parsed_hash)
         })
         .map_or(false, |_| true);
 
         if !is_password_correct {
-            return Err(Status::internal(format!("Invalid password for: {}", email)))
+            return Err(Status::internal("Invalid password"))
         }
 
         let access_token_details = match jwtoken::generate_jwt_token(
@@ -162,10 +171,16 @@ impl UserService for MyUserService {
     ) -> Result<Response<RefreshTokenResponse>, Status> {
         info!("MyUserService:refresh_access_token Got a request: {:#?}", &request);
         
-        let RefreshTokenRequest { refresh_token } = request.into_inner();
+        let refresh_token_request: RefreshTokenRequest = request.into_inner();
+        match refresh_token_request.validate() {
+            Ok(_)=>{}
+            Err(err)=> {
+                return Err(Status::internal(format!("{}",err)));
+            }
+       }
 
         let refresh_token_details =
-        match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &refresh_token)
+        match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &refresh_token_request.refresh_token)
         {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -222,10 +237,24 @@ impl UserService for MyUserService {
     ) -> Result<Response<LogOutResponse>, Status> {
         info!("MyUserService:log_out_user Got a request: {:#?}", &request);
         
-        let LogOutRequest { refresh_token, access_token } = request.into_inner();
+        let log_out_request: LogOutRequest  = request.into_inner();
+        match log_out_request.validate() {
+            Ok(_)=>{}
+            Err(err)=> {
+                return Err(Status::internal(format!("{}",err)));
+            }
+       }
+       let refresh_token_details =
+       match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &log_out_request.refresh_token)
+       {
+           Ok(token_details) => token_details,
+           Err(e) => {
+               return Err(Status::internal(format!("Token validation failed with error: {}", e)));
+           }
+       };
 
-        let refresh_token_details =
-        match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &refresh_token)
+       let access_token_details =
+        match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &log_out_request.access_token)
         {
             Ok(token_details) => token_details,
             Err(e) => {
@@ -235,7 +264,7 @@ impl UserService for MyUserService {
 
         match self.cache.delete_value_for_key(vec![
             refresh_token_details.token_uuid.to_string(),
-            access_token.to_string(),
+            access_token_details.token_uuid.to_string(),
         ]).await {
             Ok(_)=> {},
             Err(err)=> {
@@ -243,9 +272,7 @@ impl UserService for MyUserService {
             }
         }
 
-        let reply = LogOutResponse {
-            message : "Logout successfull".to_string()
-        };
+        let reply: LogOutResponse = "Logout successfull".into();
 
         Ok(Response::new(reply))
     }

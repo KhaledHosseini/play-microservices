@@ -1,6 +1,6 @@
 use std::error::Error;
 //Proto models (gRPC)
-use crate::proto::{ CreateUserRequest, GetUserResponse, RoleType as RoleTypeEnumProto};
+use crate::proto::{ CreateUserRequest, CreateUserResponse, GetUserResponse,LogOutResponse, RoleType as RoleTypeEnumProto};
 
 //Our ORM models.
 use diesel::prelude::*;
@@ -79,6 +79,20 @@ impl From<CreateUserRequest> for NewUser {
     }
 }
 
+impl From<&str> for LogOutResponse {
+    fn from(str: &str)-> Self {
+        LogOutResponse{
+            message: str.to_string()
+        }
+    }
+}
+impl From<&str> for CreateUserResponse {
+    fn from(str: &str)-> Self {
+        CreateUserResponse{
+            message: str.to_string()
+        }
+    }
+}
 
 
 #[tonic::async_trait]
