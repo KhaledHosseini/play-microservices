@@ -15,11 +15,11 @@ class Job(JsonObject):
 
     @staticmethod
     def from_dict(obj: Any) -> 'Job':
-        _jobId = str(obj.get("jobId"))
+        _jobId = str(obj.get("job_id"))
         _name = str(obj.get("name"))
-        _scheduleTime = str(obj.get("scheduleTime"))
-        _createdAt = str(obj.get("createdAt"))
-        _updatedAt = str(obj.get("updatedAt"))
+        _scheduleTime = str(obj.get("schedule_time"))
+        _createdAt = str(obj.get("created_at"))
+        _updatedAt = str(obj.get("updated_at"))
         _status = int(obj.get("status"))
-        _jobData = str(obj.get("jobData"))
+        _jobData = str(obj.get("job_data"))
         return Job(_jobId, _name, _scheduleTime, _createdAt, _updatedAt, _status, _jobData)

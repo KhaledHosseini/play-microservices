@@ -125,6 +125,7 @@ services:
       DATABASE_HOST_NAME: report-db-service
       DATABASE_PORT: ${MONGODB_PORT}
       KAFKA_BROKERS: r-kafka1-service:${KAFKA1_PORT}
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public-key
       # TOPICS_FILE: ''
     volumes:
       - ./report-service:/usr/src/app
@@ -134,6 +135,7 @@ services:
       - report-db-user
       - report-db-pass
       - report-db-dbname
+      - auth-public-key
 
   r-grpcui-service:
     build:
@@ -162,3 +164,5 @@ secrets:
     file: report-db-service/pass.txt
   report-db-dbname:
     file: report-db-service/db_name.txt
+  auth-public-key:
+    file: report-service/keys/access_token.public.pem

@@ -3,3 +3,4 @@ python-dotenv==1.0.0
 pymongo==4.4.0
 grpcio-tools==1.56.0
 grpcio-reflection==1.56.0
+python_jwt==4.0.0

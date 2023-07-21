@@ -1,6 +1,4 @@
-from kafka import KafkaConsumer, KafkaProducer
-import sys
-import signal
+from kafka import KafkaConsumer
 import json
 import logging
 from typing import List
