@@ -58,7 +58,7 @@ where
 
 fn authenticate(
     request: Request<Body>,
-    public_key: String,
+    public_key: Vec<u8>,
 ) -> Result<Request<Body>, Status> {
     info!("authenticate:start {:#?}", &request);
     let headers = request.headers();

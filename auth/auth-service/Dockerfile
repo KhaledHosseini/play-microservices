@@ -8,3 +8,5 @@ RUN curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v${PR
     && rm -f $PROTOC_ZIP
 RUN apt install -y netcat
 RUN cargo install diesel_cli --no-default-features --features postgres
+
+WORKDIR /usr/src/app

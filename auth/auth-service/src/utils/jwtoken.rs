@@ -1,4 +1,3 @@
-use base64::{engine::general_purpose, Engine as _};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -25,11 +24,9 @@ pub fn generate_jwt_token(
     user_id: i32,
     role: String,
     ttl: i64,
-    private_key: String,
+    private_key: Vec<u8>,
 ) -> Result<TokenDetails, jsonwebtoken::errors::Error> {
-    let bytes_private_key = general_purpose::STANDARD.decode(private_key).unwrap();
-    let decoded_private_key = String::from_utf8(bytes_private_key).unwrap();
-
+   
     let now = chrono::Utc::now();
     let mut token_details = TokenDetails {
         user_id,
@@ -53,24 +50,22 @@ pub fn generate_jwt_token(
     let token = jsonwebtoken::encode(
         &header,
         &claims,
-        &jsonwebtoken::EncodingKey::from_rsa_pem(decoded_private_key.as_bytes())?,
+        &jsonwebtoken::EncodingKey::from_rsa_pem(&private_key)?,
     )?;
     token_details.token = Some(token);
     Ok(token_details)
 }
 
 pub fn verify_jwt_token(
-    public_key: String,
+    public_key: Vec<u8>,
     token: &str,
 ) -> Result<TokenDetails, jsonwebtoken::errors::Error> {
-    let bytes_public_key = general_purpose::STANDARD.decode(public_key).unwrap();
-    let decoded_public_key = String::from_utf8(bytes_public_key).unwrap();
-
+    
     let validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::RS256);
 
     let decoded = jsonwebtoken::decode::<TokenClaims>(
         token,
-        &jsonwebtoken::DecodingKey::from_rsa_pem(decoded_public_key.as_bytes())?,
+        &jsonwebtoken::DecodingKey::from_rsa_pem(&public_key)?,
         &validation,
     )?;
 

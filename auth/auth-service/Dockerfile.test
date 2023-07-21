@@ -1,0 +1,16 @@
+FROM rust:1.70.0 AS base
+
+WORKDIR /usr/src/app
+# Copy all files from the current directory of host to WORKDIR on container
+COPY . .
+# Build the Rust code inside the container
+RUN cargo build --release
+
+# Create a new image without the build tools
+FROM debian:buster-slim
+
+WORKDIR /usr/src/app
+# copy only the compiled executable to the folder
+COPY --from=base /usr/src/app/target/release/app .
+
+CMD ["./app"]

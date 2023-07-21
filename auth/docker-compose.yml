@@ -80,14 +80,14 @@ services:
     depends_on:
       - auth-cache-service
 
-  auth-service:
+  authentication-service:
     build:
       context: ./auth-service
       dockerfile: Dockerfile
       # target: developement
     # restart: always
     # command: bash -c 'while ! nc -z auth-db-service $AUTH_POSTGRES_PORT; do echo ..; sleep 1; done; echo backend is up;cargo sqlx database create; cargo run --bin migrate; cargo run --bin server;'
-    container_name: auth-service
+    container_name: authentication-service
     command: sleep infinity
     environment:
       DATABSE_SCHEME: postgresql
@@ -101,12 +101,19 @@ services:
       REDIS_PORT: ${AUTH_REDIS_PORT}
       REDIS_PASS_FILE: /run/secrets/auth-redis-pass
       SERVER_PORT: ${AUTH_SERVICE_PORT}
+      REFRESH_TOKEN_PRIVATE_KEY_FILE: /run/secrets/auth-refresh-private-key
+      REFRESH_TOKEN_PUBLIC_KEY_FILE: /run/secrets/auth-refresh-public-key
+      ACCESS_TOKEN_PRIVATE_KEY_FILE: /run/secrets/auth-access-private-key
+      ACCESS_TOKEN_PUBLIC_KEY_FILE: /run/secrets/auth-access-public-key
     secrets:
       - auth-db-user
       - auth-db-pass
       - auth-db-db
       - auth-redis-pass
       - auth-access-public-key
+      - auth-access-private-key
+      - auth-refresh-public-key
+      - auth-refresh-private-key
     env_file:
       - ./auth-service/.env
       - ./auth-cache-service/.env
@@ -126,11 +133,11 @@ services:
       context: ./auth-grpcui-service
       dockerfile: Dockerfile
     container_name: auth-grpcui-service
-    command: -port $AUTH_GRPCUI_PORT -plaintext auth-service:${AUTH_SERVICE_PORT}
+    command: -port $AUTH_GRPCUI_PORT -plaintext authentication-service:${AUTH_SERVICE_PORT}
     ports:
       - ${AUTH_GRPCUI_PORT}:${AUTH_GRPCUI_PORT}
     depends_on:
-      - auth-service
+      - authentication-service
 
 volumes:
   auth-db-service-VL:
@@ -152,4 +159,10 @@ secrets:
   auth-redis-acl:
     file: auth-cache-service/users.acl
   auth-access-public-key:
-    file: auth-service/access.public
+    file: auth-service/keys/access_token.public.pem
+  auth-access-private-key:
+    file: auth-service/keys/access_token.private.pem
+  auth-refresh-public-key:
+    file: auth-service/keys/refresh_token.public.pem
+  auth-refresh-private-key:
+    file: auth-service/keys/refresh_token.private.pem

@@ -10,6 +10,11 @@ fn get_file_contents(file_path: &str)-> String {
         .unwrap_or_else(|_| panic!("Cannot read the file {}",file_path))
 }
 
+fn get_file_contents_bytes(file_path: &str)-> Vec<u8> {
+    fs::read(file_path)
+        .unwrap_or_else(|_| panic!("Cannot read the file {}",file_path))
+}
+
 #[derive(Debug, Clone)]
 pub struct Config {
     //database url for postgres-> postgresql://[user[:password]@][netloc][:port][/dbname][?param1=value1&...]
@@ -31,13 +36,13 @@ pub struct Config {
 
     pub server_port: String,
     
-    pub access_token_private_key: String,
-    pub access_token_public_key: String,
+    pub access_token_private_key: Vec<u8>,
+    pub access_token_public_key: Vec<u8>,
     pub access_token_expires_in: String,
     pub access_token_max_age: i64,
 
-    pub refresh_token_private_key: String,
-    pub refresh_token_public_key: String,
+    pub refresh_token_private_key: Vec<u8>,
+    pub refresh_token_public_key: Vec<u8>,
     pub refresh_token_expires_in: String,
     pub refresh_token_max_age: i64,
 }
@@ -80,13 +85,17 @@ impl Config {
 
         let server_port = get_env_var("SERVER_PORT");
 
-        let access_token_private_key = get_env_var("ACCESS_TOKEN_PRIVATE_KEY");
-        let access_token_public_key = get_env_var("ACCESS_TOKEN_PUBLIC_KEY");
+        let at_pub_file = get_env_var("ACCESS_TOKEN_PRIVATE_KEY_FILE");
+        let access_token_private_key = get_file_contents_bytes(&at_pub_file);
+        let ac_prvt_file = get_env_var("ACCESS_TOKEN_PUBLIC_KEY_FILE");
+        let access_token_public_key = get_file_contents_bytes(&ac_prvt_file);
         let access_token_expires_in = get_env_var("ACCESS_TOKEN_EXPIRED_IN");
         let access_token_max_age = get_env_var("ACCESS_TOKEN_MAXAGE");
 
-        let refresh_token_private_key = get_env_var("REFRESH_TOKEN_PRIVATE_KEY");
-        let refresh_token_public_key = get_env_var("REFRESH_TOKEN_PUBLIC_KEY");
+        let rt_pub_file = get_env_var("REFRESH_TOKEN_PRIVATE_KEY_FILE");
+        let refresh_token_private_key = get_file_contents_bytes(&rt_pub_file);
+        let rt_prvt_file = get_env_var("REFRESH_TOKEN_PUBLIC_KEY_FILE");
+        let refresh_token_public_key = get_file_contents_bytes(&rt_prvt_file);
         let refresh_token_expires_in = get_env_var("REFRESH_TOKEN_EXPIRED_IN");
         let refresh_token_max_age = get_env_var("REFRESH_TOKEN_MAXAGE");
 
