@@ -54,11 +54,11 @@ class ReportList:
 
     def toProto(self):
         return ReportGRPCTypes.ListReportResponse(
-            totalCount=self.TotalCount,
-            totalPages=self.TotalPages,
+            total_count=self.TotalCount,
+            total_pages=self.TotalPages,
             page=self.Page,
             size=self.Size,
-            hasMore=self.HasMore,
+            has_more=self.HasMore,
             reports=[r.toProto() for r in self.Reports],
         )
 

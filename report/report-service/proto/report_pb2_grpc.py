@@ -15,7 +15,7 @@ class ReportServiceStub(object):
             channel: A grpc.Channel.
         """
         self.ListReports = channel.unary_unary(
-                '/reportService.ReportService/ListReports',
+                '/proto.ReportService/ListReports',
                 request_serializer=report__pb2.ListReportsRequest.SerializeToString,
                 response_deserializer=report__pb2.ListReportResponse.FromString,
                 )
@@ -40,7 +40,7 @@ def add_ReportServiceServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'reportService.ReportService', rpc_method_handlers)
+            'proto.ReportService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -59,7 +59,7 @@ class ReportService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/reportService.ReportService/ListReports',
+        return grpc.experimental.unary_unary(request, target, '/proto.ReportService/ListReports',
             report__pb2.ListReportsRequest.SerializeToString,
             report__pb2.ListReportResponse.FromString,
             options, channel_credentials,
