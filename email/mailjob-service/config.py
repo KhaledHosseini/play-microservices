@@ -18,8 +18,8 @@ class Config:
         self.TopicJobRunConsumerGroupID = os.getenv("TOPIC_JOB_RUN_CONSUMER_GROUP_ID")
         self.TopicJobRunWorkerCount = int(os.getenv("TOPIC_JOB_RUN_CONSUMER_WORKER_COUNT"))
         self.TopicJobRunResult = os.getenv("TOPIC_JOB_RUN_RESULT")
-        self.TopicJobRunResultConsumerGroupID = os.getenv("TOPIC_JOB_RUN_RESULT_CONSUMER_GROUP_ID")
-        self.TopicJobRunResultConsumerWorkerCount = os.getenv("TOPIC_JOB_RUN_RESULT_CONSUMER_WORKER_COUNT")
+        self.TopicJobRunResultCreatePartitions = int(os.getenv("TOPIC_JOB_RUN_RESULT_CREATE_PARTITIONS"))
+        self.TopicJobRunResultCreateReplicas = int(os.getenv("TOPIC_JOB_RUN_RESULT_CREATE_REPLICAS"))
 
         self.KafkaBrokers = os.getenv("KAFKA_BROKERS").split(",")
 
