@@ -1,0 +1,13 @@
+FROM golang:1.19
+
+# Set the working directory inside the container
+WORKDIR /usr/src/app
+
+# Copy the necessary files to the container
+COPY . .
+
+# Build the Go application
+RUN go build -o app ./cmd
+
+# Define the command to run your application
+CMD ["./app"]

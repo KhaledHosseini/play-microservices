@@ -60,7 +60,11 @@ func (ai *AuthInterceptor) AuthInterceptor(ctx context.Context, req interface{},
 		// Access the role value
 		role := claims["role"]
 		ai.log.Info(role)
-		// // Add the role information to the metadata of the request
+		//  We can Add the role information to the metadata of the request to be used
+		// by the service method for authorization puroposes. but we do a simple authorization here!
+		if role != "admin" {
+			return nil, status.Errorf(codes.PermissionDenied, "Only admins have access!")
+		}
 		// newMD := metadata.New(map[string]string{"role": role})
 		// ctx = metadata.NewIncomingContext(ctx, newMD)
 		// Call the actual gRPC handler with updated context
