@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.23.3
-// source: proto/job.proto
+// source: job.proto
 
-package jobsService
+package proto
 
 import (
 	context "context"
@@ -19,239 +19,239 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	JobService_CreateJob_FullMethodName = "/jobsService.JobService/CreateJob"
-	JobService_GetJob_FullMethodName    = "/jobsService.JobService/GetJob"
-	JobService_ListJobs_FullMethodName  = "/jobsService.JobService/ListJobs"
-	JobService_UpdateJob_FullMethodName = "/jobsService.JobService/UpdateJob"
-	JobService_DeleteJob_FullMethodName = "/jobsService.JobService/DeleteJob"
+	JobsService_CreateJob_FullMethodName = "/proto.JobsService/CreateJob"
+	JobsService_GetJob_FullMethodName    = "/proto.JobsService/GetJob"
+	JobsService_ListJobs_FullMethodName  = "/proto.JobsService/ListJobs"
+	JobsService_UpdateJob_FullMethodName = "/proto.JobsService/UpdateJob"
+	JobsService_DeleteJob_FullMethodName = "/proto.JobsService/DeleteJob"
 )
 
-// JobServiceClient is the client API for JobService service.
+// JobsServiceClient is the client API for JobsService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type JobServiceClient interface {
+type JobsServiceClient interface {
 	CreateJob(ctx context.Context, in *CreateJobRequest, opts ...grpc.CallOption) (*CreateJobResponse, error)
-	GetJob(ctx context.Context, in *GetJobRequest, opts ...grpc.CallOption) (*GetJobResponse, error)
+	GetJob(ctx context.Context, in *GetJobRequest, opts ...grpc.CallOption) (*Job, error)
 	ListJobs(ctx context.Context, in *ListJobsRequest, opts ...grpc.CallOption) (*ListJobsResponse, error)
 	UpdateJob(ctx context.Context, in *UpdateJobRequest, opts ...grpc.CallOption) (*UpdateJobResponse, error)
 	DeleteJob(ctx context.Context, in *DeleteJobRequest, opts ...grpc.CallOption) (*DeleteJobResponse, error)
 }
 
-type jobServiceClient struct {
+type jobsServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewJobServiceClient(cc grpc.ClientConnInterface) JobServiceClient {
-	return &jobServiceClient{cc}
+func NewJobsServiceClient(cc grpc.ClientConnInterface) JobsServiceClient {
+	return &jobsServiceClient{cc}
 }
 
-func (c *jobServiceClient) CreateJob(ctx context.Context, in *CreateJobRequest, opts ...grpc.CallOption) (*CreateJobResponse, error) {
+func (c *jobsServiceClient) CreateJob(ctx context.Context, in *CreateJobRequest, opts ...grpc.CallOption) (*CreateJobResponse, error) {
 	out := new(CreateJobResponse)
-	err := c.cc.Invoke(ctx, JobService_CreateJob_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, JobsService_CreateJob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *jobServiceClient) GetJob(ctx context.Context, in *GetJobRequest, opts ...grpc.CallOption) (*GetJobResponse, error) {
-	out := new(GetJobResponse)
-	err := c.cc.Invoke(ctx, JobService_GetJob_FullMethodName, in, out, opts...)
+func (c *jobsServiceClient) GetJob(ctx context.Context, in *GetJobRequest, opts ...grpc.CallOption) (*Job, error) {
+	out := new(Job)
+	err := c.cc.Invoke(ctx, JobsService_GetJob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *jobServiceClient) ListJobs(ctx context.Context, in *ListJobsRequest, opts ...grpc.CallOption) (*ListJobsResponse, error) {
+func (c *jobsServiceClient) ListJobs(ctx context.Context, in *ListJobsRequest, opts ...grpc.CallOption) (*ListJobsResponse, error) {
 	out := new(ListJobsResponse)
-	err := c.cc.Invoke(ctx, JobService_ListJobs_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, JobsService_ListJobs_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *jobServiceClient) UpdateJob(ctx context.Context, in *UpdateJobRequest, opts ...grpc.CallOption) (*UpdateJobResponse, error) {
+func (c *jobsServiceClient) UpdateJob(ctx context.Context, in *UpdateJobRequest, opts ...grpc.CallOption) (*UpdateJobResponse, error) {
 	out := new(UpdateJobResponse)
-	err := c.cc.Invoke(ctx, JobService_UpdateJob_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, JobsService_UpdateJob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *jobServiceClient) DeleteJob(ctx context.Context, in *DeleteJobRequest, opts ...grpc.CallOption) (*DeleteJobResponse, error) {
+func (c *jobsServiceClient) DeleteJob(ctx context.Context, in *DeleteJobRequest, opts ...grpc.CallOption) (*DeleteJobResponse, error) {
 	out := new(DeleteJobResponse)
-	err := c.cc.Invoke(ctx, JobService_DeleteJob_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, JobsService_DeleteJob_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// JobServiceServer is the server API for JobService service.
-// All implementations must embed UnimplementedJobServiceServer
+// JobsServiceServer is the server API for JobsService service.
+// All implementations must embed UnimplementedJobsServiceServer
 // for forward compatibility
-type JobServiceServer interface {
+type JobsServiceServer interface {
 	CreateJob(context.Context, *CreateJobRequest) (*CreateJobResponse, error)
-	GetJob(context.Context, *GetJobRequest) (*GetJobResponse, error)
+	GetJob(context.Context, *GetJobRequest) (*Job, error)
 	ListJobs(context.Context, *ListJobsRequest) (*ListJobsResponse, error)
 	UpdateJob(context.Context, *UpdateJobRequest) (*UpdateJobResponse, error)
 	DeleteJob(context.Context, *DeleteJobRequest) (*DeleteJobResponse, error)
-	mustEmbedUnimplementedJobServiceServer()
+	mustEmbedUnimplementedJobsServiceServer()
 }
 
-// UnimplementedJobServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedJobServiceServer struct {
+// UnimplementedJobsServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedJobsServiceServer struct {
 }
 
-func (UnimplementedJobServiceServer) CreateJob(context.Context, *CreateJobRequest) (*CreateJobResponse, error) {
+func (UnimplementedJobsServiceServer) CreateJob(context.Context, *CreateJobRequest) (*CreateJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateJob not implemented")
 }
-func (UnimplementedJobServiceServer) GetJob(context.Context, *GetJobRequest) (*GetJobResponse, error) {
+func (UnimplementedJobsServiceServer) GetJob(context.Context, *GetJobRequest) (*Job, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetJob not implemented")
 }
-func (UnimplementedJobServiceServer) ListJobs(context.Context, *ListJobsRequest) (*ListJobsResponse, error) {
+func (UnimplementedJobsServiceServer) ListJobs(context.Context, *ListJobsRequest) (*ListJobsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListJobs not implemented")
 }
-func (UnimplementedJobServiceServer) UpdateJob(context.Context, *UpdateJobRequest) (*UpdateJobResponse, error) {
+func (UnimplementedJobsServiceServer) UpdateJob(context.Context, *UpdateJobRequest) (*UpdateJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateJob not implemented")
 }
-func (UnimplementedJobServiceServer) DeleteJob(context.Context, *DeleteJobRequest) (*DeleteJobResponse, error) {
+func (UnimplementedJobsServiceServer) DeleteJob(context.Context, *DeleteJobRequest) (*DeleteJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteJob not implemented")
 }
-func (UnimplementedJobServiceServer) mustEmbedUnimplementedJobServiceServer() {}
+func (UnimplementedJobsServiceServer) mustEmbedUnimplementedJobsServiceServer() {}
 
-// UnsafeJobServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to JobServiceServer will
+// UnsafeJobsServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to JobsServiceServer will
 // result in compilation errors.
-type UnsafeJobServiceServer interface {
-	mustEmbedUnimplementedJobServiceServer()
+type UnsafeJobsServiceServer interface {
+	mustEmbedUnimplementedJobsServiceServer()
 }
 
-func RegisterJobServiceServer(s grpc.ServiceRegistrar, srv JobServiceServer) {
-	s.RegisterService(&JobService_ServiceDesc, srv)
+func RegisterJobsServiceServer(s grpc.ServiceRegistrar, srv JobsServiceServer) {
+	s.RegisterService(&JobsService_ServiceDesc, srv)
 }
 
-func _JobService_CreateJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JobsService_CreateJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CreateJobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(JobServiceServer).CreateJob(ctx, in)
+		return srv.(JobsServiceServer).CreateJob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: JobService_CreateJob_FullMethodName,
+		FullMethod: JobsService_CreateJob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JobServiceServer).CreateJob(ctx, req.(*CreateJobRequest))
+		return srv.(JobsServiceServer).CreateJob(ctx, req.(*CreateJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _JobService_GetJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JobsService_GetJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetJobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(JobServiceServer).GetJob(ctx, in)
+		return srv.(JobsServiceServer).GetJob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: JobService_GetJob_FullMethodName,
+		FullMethod: JobsService_GetJob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JobServiceServer).GetJob(ctx, req.(*GetJobRequest))
+		return srv.(JobsServiceServer).GetJob(ctx, req.(*GetJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _JobService_ListJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JobsService_ListJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ListJobsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(JobServiceServer).ListJobs(ctx, in)
+		return srv.(JobsServiceServer).ListJobs(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: JobService_ListJobs_FullMethodName,
+		FullMethod: JobsService_ListJobs_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JobServiceServer).ListJobs(ctx, req.(*ListJobsRequest))
+		return srv.(JobsServiceServer).ListJobs(ctx, req.(*ListJobsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _JobService_UpdateJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JobsService_UpdateJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateJobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(JobServiceServer).UpdateJob(ctx, in)
+		return srv.(JobsServiceServer).UpdateJob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: JobService_UpdateJob_FullMethodName,
+		FullMethod: JobsService_UpdateJob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JobServiceServer).UpdateJob(ctx, req.(*UpdateJobRequest))
+		return srv.(JobsServiceServer).UpdateJob(ctx, req.(*UpdateJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _JobService_DeleteJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _JobsService_DeleteJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteJobRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(JobServiceServer).DeleteJob(ctx, in)
+		return srv.(JobsServiceServer).DeleteJob(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: JobService_DeleteJob_FullMethodName,
+		FullMethod: JobsService_DeleteJob_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(JobServiceServer).DeleteJob(ctx, req.(*DeleteJobRequest))
+		return srv.(JobsServiceServer).DeleteJob(ctx, req.(*DeleteJobRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// JobService_ServiceDesc is the grpc.ServiceDesc for JobService service.
+// JobsService_ServiceDesc is the grpc.ServiceDesc for JobsService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var JobService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "jobsService.JobService",
-	HandlerType: (*JobServiceServer)(nil),
+var JobsService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.JobsService",
+	HandlerType: (*JobsServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "CreateJob",
-			Handler:    _JobService_CreateJob_Handler,
+			Handler:    _JobsService_CreateJob_Handler,
 		},
 		{
 			MethodName: "GetJob",
-			Handler:    _JobService_GetJob_Handler,
+			Handler:    _JobsService_GetJob_Handler,
 		},
 		{
 			MethodName: "ListJobs",
-			Handler:    _JobService_ListJobs_Handler,
+			Handler:    _JobsService_ListJobs_Handler,
 		},
 		{
 			MethodName: "UpdateJob",
-			Handler:    _JobService_UpdateJob_Handler,
+			Handler:    _JobsService_UpdateJob_Handler,
 		},
 		{
 			MethodName: "DeleteJob",
-			Handler:    _JobService_DeleteJob_Handler,
+			Handler:    _JobsService_DeleteJob_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/job.proto",
+	Metadata: "job.proto",
 }

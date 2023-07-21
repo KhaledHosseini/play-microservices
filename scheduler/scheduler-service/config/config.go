@@ -1,6 +1,7 @@
 package config
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -17,11 +18,13 @@ const (
 
 	SERVER_PORT = "SERVER_PORT"
 
+	AUTH_PUBLIC_KEY_FILE = "AUTH_PUBLIC_KEY_FILE"
+
 	DATABASE_USER_FILE    = "DATABASE_USER_FILE"
 	DATABASE_PASS_FILE    = "DATABASE_PASS_FILE"
 	DATABASE_DB_NAME_FILE = "DATABASE_DB_NAME_FILE"
-	DATABASE_SCHEMA       = "DATABASE_SCHEMA"
-	DATABASE_HOST_NAME    = "DATABASE_HOST_NAME"
+	DATABASE_SCHEME       = "DATABASE_SCHEME"
+	DATABASE_DOMAIN       = "DATABASE_DOMAIN"
 	DATABASE_PORT         = "DATABASE_PORT"
 
 	KAFKA_BROKERS                              = "KAFKA_BROKERS"
@@ -45,13 +48,15 @@ type Config struct {
 
 	ServerPort string
 
-	DatabaseUser     string
-	DatabasePass     string
-	DatabaseDBName   string
-	DatabaseSchema   string
-	DatabaseHostName string
-	DatabasePort     string
-	DatabaseURI      string
+	AuthPublicKey []byte
+
+	DatabaseUser   string
+	DatabasePass   string
+	DatabaseDBName string
+	DatabaseScheme string
+	DatabaseDomain string
+	DatabasePort   string
+	DatabaseURI    string
 
 	KafkaBrokers                         []string
 	TopicJobCreate                       string
@@ -129,16 +134,24 @@ func InitConfig() (*Config, error) {
 	c.Environment = goDotEnvVariable(ENVIRONMENT)
 	c.ServerPort = goDotEnvVariable(SERVER_PORT)
 
+	pemFilePath := goDotEnvVariable(AUTH_PUBLIC_KEY_FILE)
+	pemBytes, err := ioutil.ReadFile(pemFilePath)
+	if err != nil {
+		log.Fatalf("Failed to read PEM file: %v", err)
+	}
+	c.AuthPublicKey = pemBytes
+
 	db_user_file := goDotEnvVariable(DATABASE_USER_FILE)
 	c.DatabaseUser = fileContent(db_user_file)
 	db_pass_file := goDotEnvVariable(DATABASE_PASS_FILE)
 	c.DatabasePass = fileContent(db_pass_file)
 	db_name_file := goDotEnvVariable(DATABASE_DB_NAME_FILE)
 	c.DatabaseDBName = fileContent(db_name_file)
-	c.DatabaseSchema = goDotEnvVariable(DATABASE_SCHEMA)
-	c.DatabaseHostName = goDotEnvVariable(DATABASE_HOST_NAME)
+	c.DatabaseScheme = goDotEnvVariable(DATABASE_SCHEME)
+	c.DatabaseDomain = goDotEnvVariable(DATABASE_DOMAIN)
 	c.DatabasePort = goDotEnvVariable(DATABASE_PORT)
-	c.DatabaseURI = c.DatabaseSchema + "://" + c.DatabaseHostName + ":" + c.DatabasePort
+	//mongodb database url: mongodb://[username:password@]host1[:port1][,...hostN[:portN]][/[defaultauthdb][?options]]
+	c.DatabaseURI = c.DatabaseScheme + "://" + c.DatabaseDomain + ":" + c.DatabasePort
 
 	c.KafkaBrokers = strings.Split(goDotEnvVariable(KAFKA_BROKERS), ",")
 	c.TopicJobCreate = goDotEnvVariable(TOPIC_JOB_CREATE)

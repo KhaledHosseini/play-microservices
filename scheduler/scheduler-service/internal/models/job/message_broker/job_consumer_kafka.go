@@ -114,7 +114,7 @@ func (jcg *JobsConsumerGroup) createJobWorker(
 			continue
 		}
 
-		jobID := job.JobID
+		jobID := job.JobID.Hex()
 		job2, err2 := jcg.jobDB.GetByID(ctx, jobID)
 		if err2 != nil {
 			jcg.log.Errorf("JobsConsumerGroup.CreateJobWorker.GetByID: %v", err)

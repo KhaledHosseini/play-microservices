@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/config"
+	Interceptors "github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/internal/interceptors"
 	MyJobGRPCService "github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/internal/models/job/grpc"
 	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/logger"
 	JobGRPCServiceProto "github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/proto"
@@ -49,17 +50,19 @@ func (s *server) Run() error {
 		sched.Wait(ctx)
 	}()
 
-
-	grpc_server := grpc.NewServer()
-	job_db := JobDB.NewJobDBMongo(s.mongoDB)
-
 	job_producer := kafka.NewJobsProducer(s.log)
 	job_producer.Run(s.kafkaConn, s.cfg)
 	defer job_producer.Close()
+	
+	auth_interceptor := Interceptors.NewAuthInterceptor(s.log,s.cfg)
+	grpc_server := grpc.NewServer(
+		grpc.UnaryInterceptor(auth_interceptor.AuthInterceptor),
+	)
+	job_db := JobDB.NewJobDBMongo(s.mongoDB)
 
-	job_service := MyJobGRPCService.NewJobService(s.log, job_db, job_producer, sched)
-	job_service.LoadScheduledJobs()
-	JobGRPCServiceProto.RegisterJobServiceServer(grpc_server, job_service)
+	JobService := MyJobGRPCService.NewJobService(s.log, job_db, job_producer, sched)
+	JobService.LoadScheduledJobs()
+	JobGRPCServiceProto.RegisterJobsServiceServer(grpc_server, JobService)
 	reflection.Register(grpc_server)
 
 	s.log.Info("Starting kafka consumer...")

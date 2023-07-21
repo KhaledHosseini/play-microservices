@@ -36,12 +36,11 @@ func NewJobsProducer(log logger.Logger) *jobsProducer {
 // Run init producers writers
 func (p *jobsProducer) Run(conn *kafka.Conn, cfg *config.Config) {
 
-	if cfg.IsDevelopmentEnvironment() {
-		topic1 := kafka.TopicConfig{Topic: cfg.TopicJobCreate, NumPartitions: cfg.TopicJobCreatePartitions, ReplicationFactor: cfg.TopicJobCreateReplicas}
-		topic2 := kafka.TopicConfig{Topic: cfg.TopicJobUpdate, NumPartitions: cfg.TopicJobUpdatePartitions, ReplicationFactor: cfg.TopicJobUpdateReplicas}
-		topic3 := kafka.TopicConfig{Topic: cfg.TopicJobRun, NumPartitions: cfg.TopicJobRunPartitions, ReplicationFactor: cfg.TopicJobRunReplicas}
-		conn.CreateTopics(topic1, topic2, topic3)
-	}
+	// producers are responsible for creation of topics
+	topic1 := kafka.TopicConfig{Topic: cfg.TopicJobCreate, NumPartitions: cfg.TopicJobCreatePartitions, ReplicationFactor: cfg.TopicJobCreateReplicas}
+	topic2 := kafka.TopicConfig{Topic: cfg.TopicJobUpdate, NumPartitions: cfg.TopicJobUpdatePartitions, ReplicationFactor: cfg.TopicJobUpdateReplicas}
+	topic3 := kafka.TopicConfig{Topic: cfg.TopicJobRun, NumPartitions: cfg.TopicJobRunPartitions, ReplicationFactor: cfg.TopicJobRunReplicas}
+	conn.CreateTopics(topic1, topic2, topic3)
 
 	p.createWriter = p.getNewKafkaWriter(cfg.TopicJobCreate, cfg.KafkaBrokers)
 	p.updateWriter = p.getNewKafkaWriter(cfg.TopicJobUpdate, cfg.KafkaBrokers)

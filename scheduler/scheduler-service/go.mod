@@ -3,11 +3,13 @@ module github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service
 go 1.19
 
 require (
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1
 	github.com/reugn/go-quartz v0.7.0
 	github.com/segmentio/fasthash v1.0.3
 	github.com/segmentio/kafka-go v0.4.40
+	github.com/thoas/go-funk v0.9.3
 	go.mongodb.org/mongo-driver v1.12.0
 	go.uber.org/zap v1.24.0
 	google.golang.org/grpc v1.56.1

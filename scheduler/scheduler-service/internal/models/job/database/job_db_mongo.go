@@ -71,7 +71,12 @@ func (db jobDBMongo) Update(ctx context.Context, job *models.Job) (*models.Job, 
 	return &_job, nil
 }
 
-func (db jobDBMongo) GetByID(ctx context.Context, jobID primitive.ObjectID) (*models.Job, error) {
+func (db jobDBMongo) GetByID(ctx context.Context, id string) (*models.Job, error) {
+
+	jobID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
 
 	collection := db.mongoDB.Database(jobsDB).Collection(jobsCollection)
 
@@ -82,13 +87,19 @@ func (db jobDBMongo) GetByID(ctx context.Context, jobID primitive.ObjectID) (*mo
 
 	return &_job, nil
 }
-func (db jobDBMongo) DeleteByID(ctx context.Context, jobID primitive.ObjectID) (error) {
+func (db jobDBMongo) DeleteByID(ctx context.Context, id string) (error) {
 	
+	jobID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
 	collection := db.mongoDB.Database(jobsDB).Collection(jobsCollection)
-	_, err:= collection.DeleteOne(ctx, bson.M{"_id": jobID}) 
-	if err != nil{
+	_ , err2 := collection.DeleteOne(ctx, bson.M{"_id": jobID}) 
+	if err2 != nil{
 		return errors.Wrap(err, "Decode")
 	}
+	
 	return nil
 }
 
@@ -112,7 +123,59 @@ func (db jobDBMongo) DeleteByScheduledKey(ctx context.Context, jobScheduledKey i
 	return nil
 }
 
-func (db jobDBMongo) ListALL(ctx context.Context, pagination *utils.Pagination) (*models.JobsList, error) {
+func (db jobDBMongo) ListALL(ctx context.Context, size int64, page int64) (*models.JobsList, error) {
+	
+	pagination := utils.NewPaginationQuery(int(size),int(page))
+	
+	collection := db.mongoDB.Database(jobsDB).Collection(jobsCollection)
+	
+	count, err := collection.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return nil, err
+	}
 
-	return nil,nil
+	if count == 0 {
+		return &models.JobsList{
+			TotalCount: 0,
+			TotalPages: 0,
+			Page:       0,
+			Size:       0,
+			HasMore:    false,
+			Jobs:   	make([]*models.Job, 0),
+		}, nil
+	}
+
+	limit := int64(pagination.GetLimit())
+	skip := int64(pagination.GetOffset())
+
+	cursor, err := collection.Find(ctx, bson.D{}, &options.FindOptions{
+        Limit: &limit,
+		Skip:  &skip,
+    })
+    if err != nil {
+        return nil, err
+    }
+    defer cursor.Close(ctx)
+
+    // Iterate over the cursor and retrieve all jobs
+    var jobs = make([]*models.Job, 0, pagination.GetSize())
+    for cursor.Next(ctx) {
+        var job models.Job
+        if err := cursor.Decode(&job); err != nil {
+            return nil, err
+        }
+        jobs = append(jobs, &job)
+    }
+    if err := cursor.Err(); err != nil {
+        return nil, err
+    }
+
+    return &models.JobsList{
+		TotalCount: count,
+		TotalPages: int64(pagination.GetTotalPages(int(count))),
+		Page:       int64(pagination.GetPage()),
+		Size:       int64(pagination.GetSize()),
+		HasMore:    pagination.GetHasMore(int(count)),
+		Jobs:   	jobs,
+	}, nil
 }

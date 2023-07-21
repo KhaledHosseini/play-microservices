@@ -6,9 +6,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
-	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/utils"
-	jobsService "github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/proto"
-
+	proto "github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/proto"
+	"github.com/thoas/go-funk"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -25,21 +24,21 @@ type Job struct {
 	ScheduledKey int                `json:"scheduledKey,omitempty" bson:"scheduledKey,omitempty"`
 }
 
-func (j *Job) ToProto() *jobsService.Job {
-	return &jobsService.Job{
+func (j *Job) ToProto() *proto.Job {
+	return &proto.Job{
 		Id:           j.JobID.String(),
 		Name:         j.Name,
 		Description:  j.Description,
 		ScheduleTime: timestamppb.New(j.ScheduleTime),
 		CreatedTime:  timestamppb.New(j.CreatedAt),
 		UpdatedTime:  timestamppb.New(j.UpdatedAt),
-		Status:       jobsService.JobStatus(j.Status),
-		JobType:      jobsService.JobType(j.JobType),
+		Status:       proto.JobStatus(j.Status),
+		JobType:      proto.JobType(j.JobType),
 		JobData:      j.JobData,
 	}
 }
 
-func JobFromProto_Job(jb *jobsService.Job) (*Job, error) {
+func JobFromProto_Job(jb *proto.Job) (*Job, error) {
 	jobID, err := primitive.ObjectIDFromHex(jb.GetId())
 	if err != nil {
 		return nil, err
@@ -58,14 +57,29 @@ func JobFromProto_Job(jb *jobsService.Job) (*Job, error) {
 	}, nil
 }
 
-func JobFromProto_CreateJobRequest(jbr *jobsService.CreateJobRequest) *Job {
+func JobFromProto_CreateJobRequest(jbr *proto.CreateJobRequest)  (*Job, error) {
 	return &Job{
 		Name:         jbr.GetName(),
 		Description:  jbr.GetDescription(),
 		ScheduleTime: jbr.GetScheduleTime().AsTime(),
 		JobType:      int32(jbr.GetJobType()),
 		JobData:      jbr.GetJobData(),
+	},nil
+}
+
+func JobFromProto_UpdateJobRequest(jbr *proto.UpdateJobRequest)  (*Job, error) {
+	jobID, err := primitive.ObjectIDFromHex(jbr.GetId())
+	if err != nil {
+		return nil, err
 	}
+	return &Job{
+		JobID:		  jobID,
+		Name:         jbr.GetName(),
+		Description:  jbr.GetDescription(),
+		ScheduleTime: jbr.GetScheduleTime().AsTime(),
+		JobType:      int32(jbr.GetJobType()),
+		JobData:      jbr.GetJobData(),
+	},nil
 }
 
 type JobsList struct {
@@ -77,15 +91,30 @@ type JobsList struct {
 	Jobs       []*Job `json:"jobs"`
 }
 
+
+func (j *JobsList) ToProto() *proto.ListJobsResponse {
+	jobs := funk.Map(j.Jobs, func(x *Job) *proto.Job {
+		return x.ToProto()
+	}).([]*proto.Job)
+	return &proto.ListJobsResponse{
+		TotalCount:           j.TotalCount,
+		TotalPages:         j.TotalPages,
+		Page:  j.Page,
+		Size: j.Size,
+		HasMore:  j.HasMore,
+		Jobs:  jobs,
+	}
+}
+
 // databas interface for Job model
 type JobDB interface {
 	Create(ctx context.Context, job *Job) (*Job, error)
 	Update(ctx context.Context, job *Job) (*Job, error)
-	GetByID(ctx context.Context, jobID primitive.ObjectID) (*Job, error)
-	DeleteByID(ctx context.Context, jobID primitive.ObjectID) error
+	GetByID(ctx context.Context, jobID string) (*Job, error)
+	DeleteByID(ctx context.Context, jobID string) error
 	GetByScheduledKey(ctx context.Context, jobScheduledKey int) (*Job, error)
 	DeleteByScheduledKey(ctx context.Context, jobScheduledKey int) error
-	ListALL(ctx context.Context, pagination *utils.Pagination) (*JobsList, error)
+	ListALL(ctx context.Context, page int64, size int64) (*JobsList, error)
 }
 
 // Message broker interface for Job model

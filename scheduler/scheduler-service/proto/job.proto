@@ -1,15 +1,13 @@
 syntax = "proto3";
 
-package jobsService;
-option go_package = ".;jobsService";
-// option java_package = "productsService";
-// option java_outer_classname = "productsService";
+package proto;
+option go_package = ".;proto";
 
 import "google/protobuf/timestamp.proto";
 
-service JobService {
+service JobsService {
   rpc CreateJob(CreateJobRequest) returns (CreateJobResponse) {}
-  rpc GetJob(GetJobRequest) returns (GetJobResponse) {}
+  rpc GetJob(GetJobRequest) returns (Job) {}
   rpc ListJobs(ListJobsRequest) returns (ListJobsResponse) {}
   rpc UpdateJob(UpdateJobRequest) returns (UpdateJobResponse) {}
   rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse) {}
@@ -31,36 +29,40 @@ message GetJobRequest {
   string id = 1;
 }
 
-message GetJobResponse {
-  Job job = 1;
-}
-
 message ListJobsRequest {
-  int32 page = 2;
-  int32 size = 3;
+  int64 page = 2;
+  int64 size = 3;
 }
 
 message ListJobsResponse {
-  int64 totalCount = 1;
-  int64 totalPages = 2;
+  int64 total_count = 1;
+  int64 total_pages = 2;
   int64 page = 3;
   int64 size = 4;
-  bool hasMore = 5;
+  bool has_more = 5;
   repeated Job jobs = 6;
 }
 
 message UpdateJobRequest {
   string id = 1;
-  Job job = 2;
+  string name = 2;
+  string description = 3;
+  google.protobuf.Timestamp schedule_time = 4;
+  JobType job_type = 5;
+  string job_data = 6;
 }
 
-message UpdateJobResponse {}
+message UpdateJobResponse {
+  string message = 1;
+}
 
 message DeleteJobRequest {
   string id = 1;
 }
 
-message DeleteJobResponse {}
+message DeleteJobResponse {
+  string message = 1;
+}
 
 message Job {
   string id = 1;
@@ -75,15 +77,15 @@ message Job {
 }
 
 enum JobStatus {
-  UNKNOWN = 0;
-  PENDING = 1;
-  SCHEDULED = 2;
-  RUNNING = 3;
-  SUCCEEDED = 4;
-  FAILED = 5;
+  JOB_STATUS_UNKNOWN = 0;
+  JOB_STATUS_PENDING = 1;
+  JOB_STATUS_SCHEDULED = 2;
+  JOB_STATUS_RUNNING = 3;
+  JOB_STATUS_SUCCEEDED = 4;
+  JOB_STATUS_FAILED = 5;
 }
 
 enum JobType {
-  EMAIL = 0;
-  SMS = 1;
+  JOB_TYPE_EMAIL = 0;
+  JOB_TYPE_SMS = 1;
 }

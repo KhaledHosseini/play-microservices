@@ -118,16 +118,17 @@ services:
     container_name: scheduler-service
     command: sleep infinity
     environment:
-      ENVIRONMENT: development
-      SERVER_PORT: ${SCHEDULER_PORT}
+      DATABASE_SCHEME: mongodb
+      DATABASE_DOMAIN: scheduler-db-service
+      DATABASE_PORT: ${MONGODB_PORT}
       DATABASE_USER_FILE: /run/secrets/scheduler-db-user
       DATABASE_PASS_FILE: /run/secrets/scheduler-db-pass
       DATABASE_DB_NAME_FILE: /run/secrets/scheduler-db-dbname
-      DATABASE_SCHEMA: mongodb
-      DATABASE_HOST_NAME: scheduler-db-service
-      DATABASE_PORT: ${MONGODB_PORT}
       KAFKA_BROKERS: kafka1-service:${KAFKA1_PORT}
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public-key
       # TOPICS_FILE: ''
+      ENVIRONMENT: development
+      SERVER_PORT: ${SCHEDULER_PORT}
     ports:
       - ${SCHEDULER_PORT}:${SCHEDULER_PORT}
     volumes:
@@ -136,6 +137,7 @@ services:
       - scheduler-db-user
       - scheduler-db-pass
       - scheduler-db-dbname
+      - auth-public-key
 
   grpcui-service:
     build:
@@ -165,3 +167,6 @@ secrets:
     file: scheduler-db-service/pass.txt
   scheduler-db-dbname:
     file: scheduler-db-service/db_name.txt
+  # this is temorary for development environment. 
+  auth-public-key:
+    file: scheduler-service/keys/access_token.public.pem
