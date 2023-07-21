@@ -37,21 +37,23 @@ func (r *Router) Setup(router *gin.Engine) {
 
 	router.POST("/api/v1/user/create", userHandler.CreateUser)
 	router.POST("/api/v1/user/login", userHandler.LoginUser)
+	router.POST("/api/v1/user/refresh_token", userHandler.RefreshAccessToken)
+	router.POST("/api/v1/user/logout", userHandler.LogOutUser)
 
-	router.Group("/api", interceptors.AuthenticateUser())
+	// Apply the middleware to the routes inside the router.Group function
+	api := router.Group("/api")
+	api.Use(interceptors.AuthenticateUser()) // Apply the middleware here
 	{
-		router.POST("/api/v1/user/refresh_token", userHandler.RefreshAccessToken)
-		router.POST("/api/v1/user/logout", userHandler.LogOutUser)
-		router.GET("/api/v1/user/:id", userHandler.GetUser)
-		router.GET("/api/v1/user/list", userHandler.ListUsers)
+		api.GET("/v1/user/get", userHandler.GetUser)
+		api.GET("/v1/user/list", userHandler.ListUsers)
 
-		router.POST("/api/v1/job/create", jobHandler.CreateJob)
-		router.GET("/api/v1/job/:id", jobHandler.GetJob)
-		router.GET("/api/v1/job/list", jobHandler.ListJobs)
-		router.POST("/api/v1/job/update", jobHandler.UpdateJob)
-		router.DELETE("/api/v1/job/:id", jobHandler.DeleteJob)
+		api.POST("/v1/job/create", jobHandler.CreateJob)
+		api.GET("/v1/job/:id", jobHandler.GetJob)
+		api.GET("/v1/job/list", jobHandler.ListJobs)
+		api.POST("/v1/job/update", jobHandler.UpdateJob)
+		api.DELETE("/v1/job/:id", jobHandler.DeleteJob)
 
-		router.GET("/api/v1/report/list", reportHandler.ListReports)
+		api.GET("/v1/report/list", reportHandler.ListReports)
 	}
 }
 

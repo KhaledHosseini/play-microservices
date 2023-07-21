@@ -32,8 +32,8 @@ message ListUsersRequest {
 }
 
 message ListUsersResponse {
-    int64 totalCount = 1;
-    int64 totalPages = 2;
+    int64 total_count = 1;
+    int64 total_pages = 2;
     int64 page = 3;
     int64 size = 4;
     bool hasMore = 5;

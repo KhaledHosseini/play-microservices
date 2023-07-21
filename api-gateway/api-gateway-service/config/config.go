@@ -11,8 +11,9 @@ import (
 const (
 	APP_VERSION = "APP_VERSION"
 
-	ENVIRONMENT = "ENVIRONMENT"
-	SERVER_PORT = "SERVER_PORT"
+	ENVIRONMENT   = "ENVIRONMENT"
+	SERVER_PORT   = "SERVER_PORT"
+	SERVER_DOMAIN = "SERVER_DOMAIN"
 
 	AUTH_SERVICE_URL      = "AUTH_SERVICE_URL"
 	SCHEDULER_SERVICE_URL = "SCHEDULER_SERVICE_URL"
@@ -25,7 +26,8 @@ type Config struct {
 	AppVersion  string
 	Environment string
 
-	ServerPort string
+	ServerPort   string
+	ServerDomain string
 
 	AuthServiceURL      string
 	SchedulerServiceURL string
@@ -83,6 +85,8 @@ func InitConfig() (*Config, error) {
 	c.AppVersion = goDotEnvVariable(APP_VERSION)
 	c.Environment = goDotEnvVariable(ENVIRONMENT)
 	c.ServerPort = goDotEnvVariable(SERVER_PORT)
+	c.ServerDomain = goDotEnvVariable(SERVER_DOMAIN)
+
 	c.AuthServiceURL = goDotEnvVariable(AUTH_SERVICE_URL)
 	c.SchedulerServiceURL = goDotEnvVariable(SCHEDULER_SERVICE_URL)
 	c.ReportServiceURL = goDotEnvVariable(REPORT_SERVICE_URL)

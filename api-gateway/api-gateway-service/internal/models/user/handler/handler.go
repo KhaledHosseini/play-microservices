@@ -8,6 +8,7 @@ import (
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/config"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/internal/models"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/internal/models/user/grpc"
+	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/cookie"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/logger"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/proto"
 	"github.com/gin-gonic/gin"
@@ -16,11 +17,13 @@ import (
 type UserHandler struct {
 	log logger.Logger
 	*grpc.UserGRPCClient
+	cookieManager *cookie.CookieManager
 }
 
 func NewUserHandler(log logger.Logger, cfg *config.Config) *UserHandler {
 	grpcClient := grpc.NewUserGRPCClient(log, cfg) // Initialize the embedded type
-	return &UserHandler{log: log, UserGRPCClient: grpcClient}
+	cookieManager := cookie.NewCookie(cfg)
+	return &UserHandler{log: log, UserGRPCClient: grpcClient, cookieManager: cookieManager}
 }
 
 // @Summary Register a user
@@ -78,8 +81,8 @@ func (uh *UserHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	c.Header("Authorization", res.AccessToken)
-	c.Header("X-Refresh-Token", res.RefreshToken)
+	uh.cookieManager.SetAccessToken(c, res.AccessToken, res.AccessTokenAge)
+	uh.cookieManager.SetRefreshToken(c, res.RefreshToken, res.RefreshTokenAge)
 
 	c.JSON(http.StatusOK, &models.LoginUserResponse{Message: "Login success"})
 }
@@ -95,10 +98,10 @@ func (uh *UserHandler) LoginUser(c *gin.Context) {
 func (uh *UserHandler) RefreshAccessToken(c *gin.Context) {
 
 	uh.log.Info("UserHandler.RefreshAccessToken started")
-	refreshToken := c.GetHeader("X-Refresh-Token")
-	if refreshToken == "" {
+	refreshToken, err := cookie.GetRefreshToken(c)
+	if err != nil {
 		uh.log.Info("UserHandler.RefreshAccessToken error getting refresh token")
-		c.AbortWithStatusJSON(http.StatusNoContent, gin.H{"status": false, "error": "Error getting refresh token."})
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": false, "error": "Error getting refresh token."})
 		return
 	}
 
@@ -110,8 +113,8 @@ func (uh *UserHandler) RefreshAccessToken(c *gin.Context) {
 		return
 	}
 	uh.log.Info("UserHandler.RefreshAccessToken refresh token success.")
-	c.Header("Authorization", res.AccessToken)
-	c.Header("X-Refresh-Token", refreshToken)
+
+	uh.cookieManager.SetAccessToken(c, res.AccessToken, res.AccessTokenAge)
 
 	c.JSON(http.StatusOK, &models.RefreshTokenResponse{Message: "access-token refresh success."})
 }
@@ -124,11 +127,17 @@ func (uh *UserHandler) RefreshAccessToken(c *gin.Context) {
 // @Success      200      {object}  models.LogOutResponse
 // @Router /user/logout [post]
 func (uh *UserHandler) LogOutUser(c *gin.Context) {
-	accessToken := c.GetHeader("Authorization")
-	refreshToken := c.GetHeader("X-Refresh-Token")
+	accessToken, err := cookie.GetAccessToken(c)
+	if err != nil {
+		uh.log.Info("UserHandler.LogOutUser error getting access token")
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": false, "error": "Error getting access token."})
+		return
+	}
 
-	if refreshToken == "" || accessToken == "" {
-		c.AbortWithStatusJSON(http.StatusNoContent, gin.H{"status": false, "error": "Error getting tokens."})
+	refreshToken, err2 := cookie.GetRefreshToken(c)
+	if err2 != nil {
+		uh.log.Info("UserHandler.LogOutUser error getting refresh token")
+		c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": false, "error": "Error getting refresh token."})
 		return
 	}
 
@@ -138,6 +147,8 @@ func (uh *UserHandler) LogOutUser(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"status": false, "error": err.Error()})
 		return
 	}
+	uh.cookieManager.SetAccessToken(c, "", 0)
+	uh.cookieManager.SetRefreshToken(c, "", 0)
 
 	c.JSON(http.StatusOK, &models.LogOutResponse{Message: res.Message})
 }
@@ -150,6 +161,9 @@ func (uh *UserHandler) LogOutUser(c *gin.Context) {
 // @Success 200 {object} models.GetUserResponse
 // @Router /user/{id} [get]
 func (uh *UserHandler) GetUser(c *gin.Context) {
+
+	// get user id from cookie?
+
 	userId, err := strconv.ParseInt(c.Param("id"), 10, 32)
 	if err != nil {
 		c.AbortWithStatusJSON(400, gin.H{"error": "Invalid or no id parameter"})
@@ -184,7 +198,7 @@ func (uh *UserHandler) ListUsers(c *gin.Context) {
 
 	size, err := strconv.ParseInt(c.Query("size"), 10, 32)
 	if err != nil {
-		// Handle missing or invalid page parameter
+		// Handle missing or invalid size parameter
 		c.JSON(400, gin.H{"error": "Invalid size parameter"})
 		return
 	}

@@ -24,21 +24,17 @@ services:
     container_name: api-gateway
     environment:
       - SERVER_PORT=${API_GATEWAY_PORT}
+      - SERVER_DOMAIN=api-gateway
       - AUTH_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
       - SCHEDULER_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
       - REPORT_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
+      - AUTH_PUBLIC_KEY_FILE=/run/secrets/auth-public-key
     ports:
       - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
     command: sleep infinity
     volumes:
       - ./api-gateway-service:/usr/src/app
-  
-  postman:
-    build: 
-      context: ./postman
-      dockerfile: Dockerfile
-    container_name: postman-collection
-    volumes:
-      - ./your_collection.json:/etc/newman/your_collection.json
-    command: run /etc/newman/your_collection.json
-    
+
+secrets:
+  auth-public-key:
+    file: api-gateway-service/keys/access_token.public.pem
