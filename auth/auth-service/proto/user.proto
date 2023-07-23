@@ -17,9 +17,7 @@ service UserProfileService {
     rpc ListUsers (ListUsersRequest) returns (ListUsersResponse) {}
 }
 
-message GetUserRequest {
-    int32 id = 1 ;
-}
+message GetUserRequest {}
 
 message GetUserResponse {
     int32 id = 1 ;
@@ -82,7 +80,6 @@ message RefreshTokenResponse {
 
 message LogOutRequest {
     string refresh_token = 1;
-    string access_token = 2;
 }
 
 message LogOutResponse {

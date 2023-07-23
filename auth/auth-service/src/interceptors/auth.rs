@@ -1,5 +1,3 @@
-use chrono::{DateTime, NaiveDateTime, Utc};
-
 use hyper::{ Request, Response};
 use hyper::header::{HeaderName, HeaderValue};
 use std::task::{Context, Poll};
@@ -80,21 +78,6 @@ fn authenticate(
     };
     info!("authenticate:  access token verified. {:#?}", &access_token_details);
     //check expiration 
-    match access_token_details.expires_in {
-        Some(exp)=> {
-            if let Some(exp) = NaiveDateTime::from_timestamp_opt(exp, 0) {
-                let expires = DateTime::<Utc>::from_utc(exp, Utc);
-                if Utc::now() > expires {
-                    return Err(Status::unauthenticated("Token has expired"));
-                }
-            }else {
-                return Err(Status::unauthenticated("Error checking token expiry"));
-            }
-        },
-        None => {
-            return Err(Status::unauthenticated("Error checking token expiry"));
-        }
-    }
     info!("authenticate:  set auth headers. ");
     //add authorization values to request
     let mut modified_request = request;

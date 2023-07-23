@@ -56,7 +56,7 @@ impl Validate for RefreshTokenRequest {
 
 impl Validate for LogOutRequest {
     fn validate(&self)-> Result<(),  ValidationError> {
-        if self.access_token.is_empty() || self.refresh_token.is_empty() {
+        if self.refresh_token.is_empty() {
             return Err(ValidationError::new("Empty token is not allowed."))
         }
         Ok(())

@@ -5,6 +5,12 @@ mod models;
 mod schema;
 mod utils;
 mod interceptors;
+// We have set the our directory for building the .proto inside build script to ./src/proto
+// we define a module called proto and include the generated proto.rs file.
+mod proto {
+    include!("./proto/proto.rs");
+    pub(crate) const FILE_DESCRIPTOR_SET: &[u8] = include_bytes!("./proto/user_descriptor.bin");
+}
 
 //interceptor
 use crate::interceptors::auth::AuthenticatedService;
@@ -14,11 +20,6 @@ use models::user::grpc::MyUserProfileService;
 use tonic::transport::Server;
 use proto::user_service_server::UserServiceServer;
 use proto::user_profile_service_server::UserProfileServiceServer;
-mod proto {
-    tonic::include_proto!("proto");
-    pub(crate) const FILE_DESCRIPTOR_SET: &[u8] =
-        tonic::include_file_descriptor_set!("user_descriptor");
-}
 pub use crate::models::user::db::{PostgressDB,PgPool,PgPooledConnection};
 pub use crate::models::user::db::RedisCache;
 //diesel

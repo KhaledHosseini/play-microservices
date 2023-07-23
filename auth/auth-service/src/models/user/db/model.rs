@@ -107,6 +107,6 @@ pub trait UserDBInterface {
 #[tonic::async_trait]
 pub trait UserCacheInterface {
     async fn set_expiration(&self,key: &String,value: &String, seconds: usize)-> Result<(), Box<dyn Error>>;
-    async fn get_value(&self,key: &String)-> Result<String, Box<dyn Error>>;
-    async fn delete_value_for_key(&self,keys: Vec<String>)-> Result<String, Box<dyn Error>>;
+    async fn get_value(&self,key: &String)-> Result<Option<String>, Box<dyn Error>>;
+    async fn delete_value_for_key(&self,keys: &String)-> Result<u64, Box<dyn Error>>;
 }

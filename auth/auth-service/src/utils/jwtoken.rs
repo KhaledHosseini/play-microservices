@@ -1,5 +1,16 @@
+use std::time::SystemTime;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TokenClaims {
+    pub sub: String,
+    pub role: String,
+    pub token_uuid: String,
+    pub exp: u64,
+    pub iat: i64,
+    pub nbf: i64,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TokenDetails {
@@ -7,17 +18,15 @@ pub struct TokenDetails {
     pub token_uuid: uuid::Uuid,
     pub user_id: i32,
     pub role: String,
-    pub expires_in: Option<i64>,
+    pub expires_in: Option<u64>,
 }
 
+
 #[derive(Debug, Serialize, Deserialize)]
-pub struct TokenClaims {
-    pub sub: String,
-    pub role: String,
-    pub token_uuid: String,
-    pub exp: i64,
-    pub iat: i64,
-    pub nbf: i64,
+pub struct RefreshTokenDetails {
+    pub token: Option<String>,
+    pub token_uuid: uuid::Uuid,
+    pub expires_in: Option<i64>,
 }
 
 pub fn generate_jwt_token(
@@ -32,7 +41,7 @@ pub fn generate_jwt_token(
         user_id,
         role,
         token_uuid: Uuid::new_v4(),
-        expires_in: Some((now + chrono::Duration::minutes(ttl)).timestamp()),
+        expires_in: Some((now + chrono::Duration::minutes(ttl)).timestamp().abs() as u64),
         token: None,
     };
 
@@ -71,13 +80,24 @@ pub fn verify_jwt_token(
 
     let user_id = decoded.claims.sub.as_str().parse::<i32>().unwrap();
     let token_uuid = Uuid::parse_str(decoded.claims.token_uuid.as_str()).unwrap();
-    let expr = decoded.claims.exp.clone();
+    let exp = decoded.claims.exp.clone();
     let role = decoded.claims.role.clone();
+    match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH){
+        Ok(some)=> {
+            let current_time = some.as_secs();
+            if exp <= current_time {
+                return Err(jsonwebtoken::errors::Error::from(jsonwebtoken::errors::ErrorKind::ExpiredSignature))
+            }
+        }
+        Err(_) => {
+            return Err(jsonwebtoken::errors::Error::from(jsonwebtoken::errors::ErrorKind::ExpiredSignature))
+        }
+    }
     Ok(TokenDetails {
         token: None,
         token_uuid,
         user_id,
         role,
-        expires_in: Some(expr),
+        expires_in: Some(exp),
     })
 }

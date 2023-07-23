@@ -18,37 +18,23 @@ impl UserProfileService for MyUserProfileService {
     async fn get_user(&self, request: Request<GetUserRequest>) -> Result<Response<GetUserResponse>, Status> {
         info!("MyUserProfileService:get_user Got a request: {:#?}", &request);
         let metadata = request.metadata();
-        let GetUserRequest { id } = request.get_ref();
-        let mut authorized = false;
         if let Some(user_id) = metadata.get("user_id") {
             if let Ok(user_id) = user_id.to_str() {
                 let user_id = user_id.parse::<i32>().unwrap();
-                if user_id == *id{
-                    authorized = true;
-                }
+                match self.db.get_user_by_id(&user_id).await {
+                    Ok(user) => {
+                        //convert from orm model to grpc model
+                        let u: GetUserResponse = user.into();
+                        return Ok(Response::new(u))
+                    }
+                    Err(err) => {
+                        error!("Error finding user: {}", err);
+                        return Err(Status::not_found("User not found."))
+                    }
+                };
             }
         }
-        if let Some(user_role) = metadata.get("user_role") {
-            if let Ok(user_role) = user_role.to_str() {
-                if user_role.to_lowercase() == "admin".to_lowercase(){
-                    authorized = true;
-                }
-            }
-        }
-        if !authorized {
-            return Err(Status::permission_denied("Unauthorized."))
-        }
-        match self.db.get_user_by_id(&id).await {
-            Ok(user) => {
-                //convert from orm model to grpc model
-                let u: GetUserResponse = user.into();
-                return Ok(Response::new(u))
-            }
-            Err(err) => {
-                error!("Error finding user: {}", err);
-                return Err(Status::not_found("User not found."))
-            }
-        };
+        return Err(Status::permission_denied("Unauthorized."))
     }
 
     async fn list_users(&self, request: Request<ListUsersRequest>) -> Result<Response<ListUsersResponse>, Status> {
@@ -73,8 +59,8 @@ impl UserProfileService for MyUserProfileService {
                 let result = ListUsersResponse {
                     total_count:0,
                     total_pages: 1,
-                    page:1,
-                    size:1,
+                    page:*page,
+                    size:*size,
                     has_more: true,
                     users: users
                 };

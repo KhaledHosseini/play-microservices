@@ -129,8 +129,8 @@ impl UserService for MyUserService {
         };
     
         let refresh_token_details = match jwtoken::generate_jwt_token(
-            user.id,
-            format!("{:?}", user.role),
+            0,
+            "".into(),
             self.env.refresh_token_max_age,
             self.env.refresh_token_private_key.to_owned(),
         ) {
@@ -140,13 +140,6 @@ impl UserService for MyUserService {
             }
         };
 
-        
-        match self.cache.set_expiration(&access_token_details.token_uuid.to_string(), &user.id.to_string(), (self.env.access_token_max_age * 60) as usize).await {
-            Ok(_)=> {},
-            Err(err)=> {
-                return Err(Status::internal(format!("Cache saving failed with error: {}", err)));
-            }
-        }
 
         match self.cache.set_expiration(&refresh_token_details.token_uuid.to_string(), &user.id.to_string(), (self.env.refresh_token_max_age * 60) as usize).await {
             Ok(_)=> {},
@@ -156,7 +149,7 @@ impl UserService for MyUserService {
         }
 
         let reply = LoginUserResponse {
-            access_token : access_token_details.token.clone().unwrap(),
+            access_token : access_token_details.token.unwrap(),
             access_token_age : self.env.access_token_max_age * 60,
             refresh_token : refresh_token_details.token.unwrap(),
             refresh_token_age : self.env.access_token_max_age * 60,
@@ -175,7 +168,7 @@ impl UserService for MyUserService {
         match refresh_token_request.validate() {
             Ok(_)=>{}
             Err(err)=> {
-                return Err(Status::internal(format!("{}",err)));
+                return Err(Status::unauthenticated(format!("{}",err)));
             }
        }
 
@@ -184,14 +177,21 @@ impl UserService for MyUserService {
         {
             Ok(token_details) => token_details,
             Err(e) => {
-                return Err(Status::internal(format!("Token validation failed with error: {}", e)));
+                return Err(Status::unauthenticated(format!("Token validation failed with error: {}", e)));
             }
         };
 
         let user_id_str = match self.cache.get_value(&refresh_token_details.token_uuid.to_string()).await {
-            Ok(user_id)=> user_id,
+            Ok(user_id)=> match user_id {
+                Some(value) => {
+                    value
+                },
+                None => {
+                    return Err(Status::unauthenticated(format!("UserId for this token is not exists in cache: {}",&refresh_token_details.token_uuid.to_string())));
+                }
+            },
             Err(err)=> {
-                return Err(Status::internal(format!("User id retrival failed: {}", err)));
+                return Err(Status::unauthenticated(format!("User id retrival failed: {}", err)));
             }
         };
 
@@ -200,7 +200,7 @@ impl UserService for MyUserService {
             Ok(user) => user,
             Err(err) => {
                 info!("Error finding user: {}", err);
-                return Err(Status::internal(format!("the user belonging to this token no logger exists.")));
+                return Err(Status::unauthenticated(format!("the user belonging to this token no logger exists.")));
             }
         };
 
@@ -212,16 +212,9 @@ impl UserService for MyUserService {
         ) {
             Ok(token_details) => token_details,
             Err(e) => {
-                return Err(Status::internal(format!("Token generation failed with error: {}", e)))
+                return Err(Status::unauthenticated(format!("Token generation failed with error: {}", e)))
             }
         };
-
-        match self.cache.set_expiration(&access_token_details.token_uuid.to_string(), &user.id.to_string(),(self.env.access_token_max_age * 60) as usize).await {
-            Ok(_)=> {},
-            Err(err)=> {
-                return Err(Status::internal(format!("Catch saving failed with error: {}",err)));
-            }
-        }
 
         let reply = RefreshTokenResponse {
             access_token : access_token_details.token.clone().unwrap(),
@@ -241,7 +234,7 @@ impl UserService for MyUserService {
         match log_out_request.validate() {
             Ok(_)=>{}
             Err(err)=> {
-                return Err(Status::internal(format!("{}",err)));
+                return Err(Status::unauthenticated(format!("{}",err)));
             }
        }
        let refresh_token_details =
@@ -249,23 +242,11 @@ impl UserService for MyUserService {
        {
            Ok(token_details) => token_details,
            Err(e) => {
-               return Err(Status::internal(format!("Token validation failed with error: {}", e)));
+               return Err(Status::unauthenticated(format!("Token validation failed with error: {}", e)));
            }
        };
 
-       let access_token_details =
-        match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &log_out_request.access_token)
-        {
-            Ok(token_details) => token_details,
-            Err(e) => {
-                return Err(Status::internal(format!("Token validation failed with error: {}", e)));
-            }
-        };
-
-        match self.cache.delete_value_for_key(vec![
-            refresh_token_details.token_uuid.to_string(),
-            access_token_details.token_uuid.to_string(),
-        ]).await {
+        match self.cache.delete_value_for_key(&refresh_token_details.token_uuid.to_string()).await {
             Ok(_)=> {},
             Err(err)=> {
                 return Err(Status::internal(format!("Logout failed with error: {}",err)));

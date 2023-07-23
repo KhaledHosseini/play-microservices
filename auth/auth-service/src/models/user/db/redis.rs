@@ -17,23 +17,27 @@ impl RedisCache {
 #[tonic::async_trait]
 impl UserCacheInterface for RedisCache {
     async fn set_expiration(&self,key: &String,value: &String, seconds: usize)-> Result<(), Box<dyn Error>>{
+        info!("RedisCache: set_expiration");
         // Get a Redis connection
         let mut connection = self.get_conn()?;
         let _: () = connection.set_ex(key, value, seconds)?;
         Ok(())
     }
 
-    async fn get_value(&self,key: &String)-> Result<String, Box<dyn Error>> {
+    async fn get_value(&self,key: &String)-> Result<Option<String>, Box<dyn Error>> {
         info!("RedisCache: get_value");
         let mut connection = self.get_conn()?;
         let result = connection.get(key)?;
-        Ok(result)
+        match result {
+            Some(value) => Ok(Some(value)),
+            None => Ok(None),
+        }
     }
 
-    async fn delete_value_for_key(&self,keys: Vec<String>)-> Result<String, Box<dyn Error>> {
+    async fn delete_value_for_key(&self,key: &String)-> Result<u64, Box<dyn Error>> {
         info!("RedisCache: delete_value_for_key");
         let mut connection = self.get_conn()?;
-        let result = connection.del(keys)?;
+        let result = connection.del(key)?;
         Ok(result)
     }
 }

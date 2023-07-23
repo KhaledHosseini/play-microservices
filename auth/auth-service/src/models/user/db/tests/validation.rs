@@ -59,17 +59,12 @@ use crate::proto::{RoleType, CreateUserRequest,LoginUserRequest, RefreshTokenReq
     #[test]
     fn logout_user_request_validation() {
         let mut request = LogOutRequest {
-            refresh_token:"".into(),
-            access_token:"".into()
+            refresh_token:"".into()
         };
         let mut result = request.validate();
         assert!(result.is_err());
 
         request.refresh_token = "token".into();
-        result = request.validate();
-        assert!(result.is_err());
-
-        request.access_token = "token".into();
         result = request.validate();
         assert!(!result.is_err());
 
