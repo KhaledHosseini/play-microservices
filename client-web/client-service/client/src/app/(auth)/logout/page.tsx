@@ -13,7 +13,7 @@ export default function LogOut() {
           const response = await fetch("/api/user/logout", {
             method: 'POST'
           });
-          console.log("LogOut.useEffect.fetchData: logout result: ",response.body)
+          console.log("LogOut.useEffect.fetchData: logout result: ",response)
           if (response.status == 200){
             toast.success('Logout successfull');
           }else {

@@ -1,7 +1,8 @@
 'use client'
-import {ParseReportArray, Report, ReportType} from '../../types'
+import {ParseReportArray, Report} from '../../types'
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
+import {api_fetch_with_access_token} from '../../lib/api_gateway'
 
 const ReportListComponent: React.FC = ()=> {
     const [isBusy,setIsBusy] = useState<boolean>(true)
@@ -10,14 +11,20 @@ const ReportListComponent: React.FC = ()=> {
     useEffect(() => {
         // declare the data fetching function
         const fetchData = async () => {
-          const reportResponse = await fetch("/api/report/list?filter=1&page=1&size=10",{
+          const reportResponse = await api_fetch_with_access_token("/api/report/list?page=1&size=100",{
             method: 'GET'
           });
           setIsBusy(false)
-          const reports: Report[] = await ParseReportArray(reportResponse)
-          console.log("UsersReportComponent.useEffect.fetchData: reports array is: ",reports)
-          toast.success("Numbr of returned reports: "+ reports.length.toString())
-          setReportList(reports)
+          console.log("response is ", reportResponse)
+          if (reportResponse.ok){
+            const reports: Report[] = await ParseReportArray(reportResponse)
+            console.log("UsersReportComponent.useEffect.fetchData: reports array is: ",reports)
+            toast.success("Numbr of returned reports: "+ reports.length.toString())
+            setReportList(reports)
+          }else {
+            toast.error("error" + reportResponse.statusText)
+          }
+          
         }
         setIsBusy(true)
         fetchData()
@@ -38,7 +45,6 @@ const ReportListComponent: React.FC = ()=> {
           <tr>
             <th></th>
             <th className="p-2"> <div className="text-left font-semibold">Id</div> </th>
-            <th className="p-2"> <div className="text-left font-semibold">Type</div> </th>
             <th className="p-2"> <div className="text-left font-semibold">Topic</div> </th>
             <th className="p-2"> <div className="text-left font-semibold">Data</div> </th>
           </tr>
@@ -47,10 +53,9 @@ const ReportListComponent: React.FC = ()=> {
           {reportList.map((report, index) => (
             <tr key={index}>
               <td className="p-2"> <div className="text-left font-medium text-gray-800">{index + 1}</div> </td>
-              <td className="p-2"> <div className="text-left font-medium text-gray-800">{report.id}</div> </td>
-              <td className="p-2"> <div className="text-left font-medium text-green-500">{ReportType[report.type]}</div> </td>
-              <td className="p-2"> <div className="text-left font-medium text-gray-800">{report.topic}</div> </td>
-              <td className="p-2"> <div className="text-left font-medium text-green-500">{JSON.stringify(report.report_data).substring(0, 60) + "..."}</div> </td>
+              <td className="p-2"> <div className="text-left font-medium text-gray-800">{report.Id}</div> </td>
+              <td className="p-2"> <div className="text-left font-medium text-gray-800">{report.Topic}</div> </td>
+              <td className="p-2"> <div className="text-left font-medium text-green-500">{report.ReportData.substring(0, 60) + "..."}</div> </td>
             </tr>
           ))}
         </tbody>

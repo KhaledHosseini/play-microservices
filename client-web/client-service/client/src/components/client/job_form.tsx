@@ -1,28 +1,48 @@
 import React, { useEffect } from 'react'
 import { useForm } from "react-hook-form";
-import {Job} from '../../types'
+import {Job, EmailJob, JobStatus, JobType} from '../../types'
 interface JobFormProps {
   job: Job | null;
   onSubmit: (job: Job) => void;
   onClose:() => void;
 }
 const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
+  //
+  const jobData: any | null = job?.JobData ? JSON.parse(job.JobData) : null
     const {
         handleSubmit,
         register,
         formState: { errors },
-      } = useForm<Job>({
+      } = useForm<EmailJob>({
         defaultValues: {
-          name: job?.name,
-          description: job?.description,
-          schedule_time:job?.schedule_time,
-          job_type: job?.job_type,
-          job_data: job?.job_data
+          Name: job?.Name,
+          Description: job?.Description,
+          ScheduleTime:job?.ScheduleTime,
+          JobType: job?.JobType,
+          JobData: job?.JobData,
+          SourceAddress: jobData?.SourceAddress,
+          DestinationAddress: jobData?.DestinationAddress,
+          Subject: jobData?.Subject,
+          Message: jobData?.Message
         },
       });
   
-    const handleSubmitJob = (job: Job) => {
-        onSubmit(job)
+    const handleSubmitJob = (emailjob: EmailJob) => {
+      const job: Job = {
+        Id: '',
+        Name: emailjob.Name,
+        Description: emailjob.Description,
+        ScheduleTime: emailjob.ScheduleTime,
+        JobStatus: JobStatus.JOB_STATUS_UNKNOWN,
+        JobType: JobType.JOB_TYPE_EMAIL,
+        JobData: JSON.stringify({
+          SourceAddress: emailjob.SourceAddress,
+          DestinationAddress: emailjob.DestinationAddress,
+          Subject: emailjob.Subject,
+          Message: emailjob.Message
+        })
+      }
+      onSubmit(job)
     };
   
     return (
@@ -34,7 +54,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="text" 
                 id="name"
                 placeholder="name"
-                {...register('name', { required: true })}/>
+                {...register('Name', { required: true })}/>
             </div>
 
             <div className="mb-4">
@@ -43,7 +63,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="text" 
                 id="description"
                 placeholder="description"
-                {...register('description', { required: true })}/>
+                {...register('Description', { required: true })}/>
             </div>
 
             <div className="mb-4">
@@ -51,7 +71,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
               <input className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                   id="dateTime"
                   type='text'
-                  {...register('schedule_time') } />
+                  {...register('ScheduleTime') } />
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="job_type">Job type: 0 email, 1 sms</label>
@@ -59,7 +79,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="number" 
                 id="job_type"
                 placeholder="0"
-                {...register('job_type', { required: true })}/>
+                {...register('JobType', { required: true })}/>
             </div>
           </div>
           
@@ -74,7 +94,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="email" 
                 id="job_data.source_address"
                 placeholder="admin@admin.com"
-                {...register('job_data.source_address', { required: true })}/>
+                {...register('SourceAddress', { required: true })}/>
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="job_data.destination_address">Destination address</label>
@@ -82,7 +102,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="email" 
                 id="job_data.destination_address"
                 placeholder="customer@example.com"
-                {...register('job_data.destination_address', { required: true })}/>
+                {...register('DestinationAddress', { required: true })}/>
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="job_data.subject">Subject</label>
@@ -90,7 +110,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="text" 
                 id="job_data.subject"
                 placeholder="subject"
-                {...register('job_data.subject', { required: true })}/>
+                {...register('Subject', { required: true })}/>
             </div>
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="job_data.message">Message</label>
@@ -98,7 +118,7 @@ const JobForm: React.FC<JobFormProps> = ({ job, onSubmit, onClose }) => {
                 type="text" 
                 id="job_data.message"
                 placeholder="message"
-                {...register('job_data.message', { required: true })}/>
+                {...register('Message', { required: true })}/>
             </div>
           </div>
 

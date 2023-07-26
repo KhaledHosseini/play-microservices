@@ -12,13 +12,20 @@ export async function middleware(req: NextRequest) {
   console.log("middleware is called for url: ",req.url)
   const url = URL_APIGATEWAY + "/" + req.url.split("/api/")[1]
   console.log("middleware sends the request to : ", url)
-  const res = await fetch( url, {
-    method:req.method,
-    headers: req.headers,
-    body: req.body
-  });
-
-  return res
+  try {
+    const res = await fetch( url, {
+      method:req.method,
+      headers: req.headers,
+      body: req.body
+    });
+    return res
+  }catch (err) {
+    console.log(err)
+    return new NextResponse('Internal Server Error', {
+      status: 500,
+      statusText: 'Internal Server(proxy) Error'
+    });
+  }
 }
 
 export const config = {

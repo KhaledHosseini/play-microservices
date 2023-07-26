@@ -1,30 +1,47 @@
-import { Job } from "./job";
+import {all_keys} from '../lib/utils'
 export interface Report {
-	id: string;
-    type: ReportType;
-	topic:string;
-    created_time: string;
-    report_data: Job;
+	Id: string;
+	Topic:string;
+    CreatedTime: string;
+    ReportData: string;
 };
 
-export enum ReportType {
-	REPORT_TYPE_JOB = 0,
-	REPORT_TYPE_UNKNOWN = 1
-}
 
 export interface ReportArray {
-    total_count: number;
-    total_pages: number;
-    page: number;
-    size: number;
-    has_more: false;
-    reports: Report[]
+    TotalCount: number;
+    TotalPages: number;
+    Page: number;
+    Size: number;
+    HasMore: false;
+    Reports: Report[]
 };
+
+function isReport(obj: any): obj is Report {
+	const fieldNames: string[] = all_keys(obj)
+	return fieldNames.includes('Id') &&
+	fieldNames.includes('Topic') && 
+	fieldNames.includes('CreatedTime') && 
+	fieldNames.includes('ReportData');
+}
+
+function isReportArray(obj: any): obj is ReportArray {
+	const fieldNames: string[] = all_keys(obj)
+	return fieldNames.includes('TotalCount') && 
+	fieldNames.includes('TotalPages') && 
+	fieldNames.includes('Page') && 
+	fieldNames.includes('Size') && 
+	fieldNames.includes('HasMore') && 
+	fieldNames.includes('Reports');
+}
 
 export async function ParseReport(req: Response): Promise<Report | null> {
 	try {
-		const data: Report = await req.json()
-		return data
+		const data = await req.json()
+		if(isReport(data)){
+			return data as Report;
+		}
+		console.log("ParseReport: data is not report", data)
+		return null
 	}catch (exception) {
 		console.log("ParseReport: report not found with error", exception)
 		return null
@@ -34,13 +51,14 @@ export async function ParseReport(req: Response): Promise<Report | null> {
 export async function ParseReportArray(req: Response): Promise<Report[]> {
 	try {
         console.log("report request:",req)
-		const data = await req.json()
-        console.log("report json body:",data)
-        const reportArray: ReportArray = data as ReportArray
-        console.log("report array is:",reportArray)
-		return reportArray.reports;
+		const data: any = await req.json()
+		if (isReportArray(data)){
+			return data.Reports
+		}
+		console.log("ParseReportArray: data is not report array ", data)
+		return []
 	}catch (exception) {
 		console.log("ParseReportArray: reports not found with error", exception)
 		return []
 	}
-} 
+}

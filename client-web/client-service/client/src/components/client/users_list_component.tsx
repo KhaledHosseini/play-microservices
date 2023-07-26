@@ -2,7 +2,7 @@
 import {ParseUserArray, User} from '../../types'
 import React, { useEffect, useReducer, useState } from "react";
 import { toast } from "react-hot-toast";
-
+import {api_fetch_with_access_token} from '../../lib/api_gateway'
 const UsersListComponent: React.FC = ()=> {
   
     const [isBusy,setIsBusy] = useState<boolean>(true)
@@ -10,14 +10,19 @@ const UsersListComponent: React.FC = ()=> {
     useEffect(() => {
         const fetchData = async () => {
           //TODO: add pagination
-          const userResponse = await fetch("/api/user/list?page=1&size=50",{
+          const userResponse = await api_fetch_with_access_token("/api/user/list?page=1&size=100",{
             method: 'GET'
           });
           setIsBusy(false)
-          const users: User[] = await ParseUserArray(userResponse)
-          console.log("UsersList.useEffect.fetchData: Users array is: ",users)
-          toast.success("Numbr of returned users: "+ users.length.toString())
-          setUserList(users)
+          console.log("response is ", userResponse)
+          if(userResponse.ok){
+            const users: User[] = await ParseUserArray(userResponse)
+            console.log("UsersList.useEffect.fetchData: Users array is: ",users)
+            toast.success("Numbr of returned users: "+ users.length.toString())
+            setUserList(users)
+          }else {
+            toast.error("Error: "+ userResponse.statusText)
+          }
         }
         setIsBusy(true)
         fetchData()
@@ -44,8 +49,8 @@ const UsersListComponent: React.FC = ()=> {
           {userList.map((user, index) => (
             <tr key={index}>
               <td className="p-2"> <div className="text-left font-medium text-gray-800">{index + 1}</div> </td>
-              <td className="p-2"> <div className="text-left font-medium text-gray-800">{user.name}</div> </td>
-              <td className="p-2"> <div className="text-left font-medium text-green-500">{user.email}</div> </td>
+              <td className="p-2"> <div className="text-left font-medium text-gray-800">{user.Name}</div> </td>
+              <td className="p-2"> <div className="text-left font-medium text-green-500">{user.Email}</div> </td>
             </tr>
           ))}
         </tbody>

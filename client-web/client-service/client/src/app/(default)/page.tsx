@@ -8,7 +8,7 @@ import Header from '@/components/client/header'
 import UsersListComponent from '@/components/client/users_list_component'
 import ReportListComponent from '@/components/client/report_list_component'
 import JobListComponent from '@/components/client/job_list_component'
-
+import {api_fetch_with_access_token} from '../../lib/api_gateway'
 export default function Home() {
 
   const [_user,setUser] = useAuth()
@@ -16,7 +16,7 @@ export default function Home() {
   useEffect(() => {
     // declare the data fetching function
     const fetchData = async () => {
-      const userResponse = await fetch("/api/user/get");
+      const userResponse = await api_fetch_with_access_token("/api/user/get");
       const user = await ParseUser(userResponse)
       console.log("Home.useEffect.fetchData: User is: ",user)
       setUser(user)

@@ -10,11 +10,11 @@ services:
     volumes:
       - ./wiremock/mappings:/home/wiremock/mappings
   
-  client:
+  client-service:
     build: 
       context: ./client-service
       dockerfile: Dockerfile
-    container_name: client
+    container_name: client-service
     command: sleep infinity
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}

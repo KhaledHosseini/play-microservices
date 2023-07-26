@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from 'next/navigation';
 import { CreateUserRequest } from "@/types";
+import { toast } from "react-hot-toast";
 
 export default function SignUpForm() {
   const router = useRouter();
@@ -27,17 +28,24 @@ export default function SignUpForm() {
       body: JSON.stringify(params),
     })
   , {
-    onSuccess: async (response) => {
-      const data = await response.json()
-      console.log("response is:",data );
+    onSuccess: async (response) => { 
+      console.log("response is:",response);
       if (response.ok) {
+        toast.success("Signup successfull")
+        const data = await response.json()
+        console.log("response is:",data );
         router.push('/login');
+      } else {
+        toast.error("signup failed:" + response.statusText)
       }
     },
+    onError: async (error)=> {
+      toast.error("signup failed:" + error)
+    }
   });
 
   const handleCreateUser = (createUserRequest: CreateUserRequest) => {
-    createUserRequest.role = Number(createUserRequest.role)
+    createUserRequest.Role = Number(createUserRequest.Role)
     createUserMutation(createUserRequest);
   };
 
@@ -52,7 +60,7 @@ export default function SignUpForm() {
           type="text" 
           id="name"
           placeholder="Name"
-          {...register('name', { required: true })}/>
+          {...register('Name', { required: true })}/>
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">Email</label>
@@ -60,7 +68,7 @@ export default function SignUpForm() {
           type="email" 
           id="email"
           placeholder="example@example.com"
-          {...register('email', { required: true })}/>
+          {...register('Email', { required: true })}/>
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">Password</label>
@@ -68,7 +76,7 @@ export default function SignUpForm() {
           type="password" 
           id="password"
           placeholder="********"
-          {...register('password', { required: true })}/>
+          {...register('Password', { required: true })}/>
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">Role: (0: admin)(1: user)</label>
@@ -76,7 +84,7 @@ export default function SignUpForm() {
           type="number" 
           id="role"
           placeholder="0"
-          {...register('role', { required: true })}/>
+          {...register('Role', { required: true })}/>
       </div>
       <button
         className="w-full bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded-md hover:bg-indigo-600 transition duration-300"

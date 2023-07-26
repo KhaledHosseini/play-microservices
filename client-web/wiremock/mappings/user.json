@@ -6,7 +6,7 @@
         "urlPattern": "/api/v1/user/create",
         "bodyPatterns": [
           {
-            "equalToJson": "{\"email\":\"admin@admin.com\",\"name\":\"admin\",\"password\":\"password\",\"role\":0}",
+            "equalToJson": "{\"Email\":\"admin@admin.com\",\"Name\":\"admin\",\"Password\":\"password\",\"Role\":0}",
             "ignoreArrayOrder" : true,
             "ignoreExtraElements" : true
           }
@@ -26,7 +26,7 @@
         "urlPattern": "/api/v1/user/create",
         "bodyPatterns": [
           {
-            "equalToJson": "{\"email\":\"user@user.com\",\"name\":\"user\",\"password\":\"password\",\"role\":1}",
+            "equalToJson": "{\"Email\":\"user@user.com\",\"Name\":\"user\",\"Password\":\"password\",\"Role\":1}",
             "ignoreArrayOrder" : true,
             "ignoreExtraElements" : true
           }
@@ -46,7 +46,7 @@
         "urlPattern": "/api/v1/user/login",
         "bodyPatterns": [
           {
-            "equalToJson": "{\"email\":\"admin@admin.com\",\"password\":\"password\"}",
+            "equalToJson": "{\"Email\":\"admin@admin.com\",\"Password\":\"password\"}",
             "ignoreArrayOrder" : true,
             "ignoreExtraElements" : true
           }
@@ -67,7 +67,7 @@
         "urlPattern": "/api/v1/user/login",
         "bodyPatterns": [
           {
-            "equalToJson": "{\"email\":\"user@user.com\",\"password\":\"password\"}",
+            "equalToJson": "{\"Email\":\"user@user.com\",\"Password\":\"password\"}",
             "ignoreArrayOrder" : true,
             "ignoreExtraElements" : true
           }
@@ -105,7 +105,25 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "body": "[{\"id\":\"0\",\"name\":\"admin\",\"email\":\"admin@admin.com\"},{\"id\":\"1\",\"name\":\"user\",\"email\":\"user@user.com\"}]"
+        "jsonBody": {
+          "TotalCount": 2,
+          "TotalPages": 1,
+          "Page": 1,
+          "Size": 2,
+          "HasMore": false,
+          "Users": [
+            {
+              "Id": "admin_id",
+              "Name": "admin",
+              "Email": "admin@admin.com"
+			      },
+            {
+              "Id": "user_id",
+              "Name": "user",
+              "Email": "user@user.com"
+			      }
+          ]
+        }
       }
     },
     {
@@ -123,7 +141,12 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "body": "{\"id\":\"0\",\"name\":\"admin\",\"email\":\"admin@admin.com\"}"
+        "jsonBody":
+        {
+          "Id": "admin_id",
+          "Name": "admin",
+          "Email": "admin@admin.com"
+        }
       }
     },
     {
@@ -141,7 +164,11 @@
         "headers": {
           "Content-Type": "application/json"
         },
-        "body": "{\"id\":\"0\",\"name\":\"user\",\"email\":\"user@user.com\"}"
+        "jsonBody":{
+          "Id": "user_id",
+          "Name": "user",
+          "Email": "user@user.com"
+        }
       }
     },
     {
