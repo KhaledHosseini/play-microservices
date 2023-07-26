@@ -4,10 +4,10 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useMutation } from '@tanstack/react-query';
 import JobForm from './job_form';
-import {api_fetch_with_access_token} from '../../lib/api_gateway'
+import {fetch_with_refresh_token} from '../../lib/api_gateway'
 
 async function deleteJob(id: string): Promise<Response> {
-  const response = await api_fetch_with_access_token(`/api/job/delete?id=${id}`, {
+  const response = await fetch_with_refresh_token(`/api/job/delete?id=${id}`, {
     method: 'POST',
     headers:{},
     body:null
@@ -29,7 +29,7 @@ async function createOrUpdateJob(job: Job,action: string): Promise<Response> {
     }
     json = JSON.stringify(createJob)
   }
-  const response = await api_fetch_with_access_token(url, {
+  const response = await fetch_with_refresh_token(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ const JobListComponent: React.FC = ()=> {
     useEffect(() => {
         // declare the data fetching function
         const fetchData = async () => {
-          const jobResponse = await api_fetch_with_access_token("/api/job/list?page=1&size=100",{
+          const jobResponse = await fetch_with_refresh_token("/api/job/list?page=1&size=100",{
             method: 'GET'
           });
           setIsBusy(false)

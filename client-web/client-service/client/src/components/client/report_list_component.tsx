@@ -2,7 +2,7 @@
 import {ParseReportArray, Report} from '../../types'
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import {api_fetch_with_access_token} from '../../lib/api_gateway'
+import {fetch_with_refresh_token} from '../../lib/api_gateway'
 
 const ReportListComponent: React.FC = ()=> {
     const [isBusy,setIsBusy] = useState<boolean>(true)
@@ -11,7 +11,7 @@ const ReportListComponent: React.FC = ()=> {
     useEffect(() => {
         // declare the data fetching function
         const fetchData = async () => {
-          const reportResponse = await api_fetch_with_access_token("/api/report/list?page=1&size=100",{
+          const reportResponse = await fetch_with_refresh_token("/api/report/list?page=1&size=100",{
             method: 'GET'
           });
           setIsBusy(false)

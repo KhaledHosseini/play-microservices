@@ -2,7 +2,7 @@
 import {ParseUserArray, User} from '../../types'
 import React, { useEffect, useReducer, useState } from "react";
 import { toast } from "react-hot-toast";
-import {api_fetch_with_access_token} from '../../lib/api_gateway'
+import {fetch_with_refresh_token} from '../../lib/api_gateway'
 const UsersListComponent: React.FC = ()=> {
   
     const [isBusy,setIsBusy] = useState<boolean>(true)
@@ -10,7 +10,7 @@ const UsersListComponent: React.FC = ()=> {
     useEffect(() => {
         const fetchData = async () => {
           //TODO: add pagination
-          const userResponse = await api_fetch_with_access_token("/api/user/list?page=1&size=100",{
+          const userResponse = await fetch_with_refresh_token("/api/user/list?page=1&size=100",{
             method: 'GET'
           });
           setIsBusy(false)

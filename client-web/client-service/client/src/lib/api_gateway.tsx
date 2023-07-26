@@ -1,6 +1,6 @@
 import { StatusCodes } from 'http-status-codes';
 // we do fetch, If the result is unauthorized, Possibily our access token has exired! we simply refresh it.
-export async function api_fetch_with_access_token(url: string, options?: RequestInit | undefined): Promise<Response> {
+export async function fetch_with_refresh_token(url: string, options?: RequestInit | undefined): Promise<Response> {
     let result = await fetch(url,options)
     console.log("fetch result status code and texts are: ",result.status, result.statusText)
     if (result.status == StatusCodes.UNAUTHORIZED) {
