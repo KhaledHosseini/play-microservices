@@ -1,9 +1,8 @@
 # play-microservices
-
 A simple job scheduler app using microservices architecture. Users can sign up (as admin or normal role).
  - Admins can query the list of all users.
  - Admins can schedule email jobs to be run in the future.
- - admins can query the reports.
+ - Admins can query the reports.
 
 Just run 'docker-compose up' from the root directory. Then go to http://localhost:3000/
 
@@ -25,13 +24,13 @@ Just run 'docker-compose up' from the root directory. Then go to http://localhos
 
 ## Choreography
 
- ![Choreography](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/choreography.png)
+ ![Choreography](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/choreography.svg)
 
 ---
 
 ## CI / CD Flow diagram
 
- ![Choreography](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/developement_environment.png)
+ ![Choreography](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/developement_environment.svg)
  
 ---
 
@@ -77,3 +76,5 @@ Just run 'docker-compose up' from the root directory. Then go to http://localhos
   - [TanStack Query](https://tanstack.com/query/latest): An asynchronous state management.
 
 ---
+
+# How to add my service?
