@@ -27,7 +27,6 @@ func NewReportHandler(log logger.Logger, cfg *config.Config) *ReportHandler {
 // @Description retrieve the reports
 // @Tags report
 // @Produce json
-// @Param   filter    query    int   true        "Report Type"
 // @Param   page      query    int     true        "Page"
 // @Param   size      query    int     true        "Size"
 // @Success 200 {array} models.ListReportResponse

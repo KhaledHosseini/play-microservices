@@ -1,0 +1,381 @@
+version: '3'
+services:
+#--------------------------------------------------------------------------------------------
+#                                          AUTH                                             #
+#--------------------------------------------------------------------------------------------
+  auth-db:
+    build:
+      context: ./auth/auth-db-service
+      dockerfile: Dockerfile
+    # restart: always
+    container_name: auth-db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 1s
+      retries: 5
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/auth-db-user
+      POSTGRES_PASSWORD_FILE: /run/secrets/auth-db-pass
+      POSTGRES_DB_FILE: /run/secrets/auth-db-db
+    ports:
+      - '${AUTH_POSTGRES_PORT}:${AUTH_POSTGRES_PORT}'
+    volumes:
+      -  auth-db-VL:/var/lib/postgresql/data
+    secrets:
+      - auth-db-user
+      - auth-db-pass
+      - auth-db-db
+
+  auth-cache:
+    build:
+      context: ./auth/auth-cache-service
+      dockerfile: Dockerfile
+    container_name: auth-cache
+    #command: redis-server --requirepass yourpassword --loglevel warning
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+    ports:
+      - '${AUTH_REDIS_PORT}:${AUTH_REDIS_PORT}'
+    volumes:
+      - auth-cache-VL:/var/vcap/store/redis 
+      - ./auth/auth-cache-service/redis.conf:/usr/local/etc/redis/redis.conf
+    secrets:
+      - auth-redis-pass
+      - auth-redis-acl
+
+  auth:
+    build:
+      context: ./auth/auth-service
+      dockerfile: Dockerfile.test
+    restart: always
+    container_name: auth
+    environment:
+      DATABSE_SCHEME: postgresql
+      DATABSE_DOMAIN: auth-db
+      DATABSE_PORT: ${AUTH_POSTGRES_PORT}
+      DATABSE_USER_FILE: /run/secrets/auth-db-user
+      DATABSE_PASSWORD_FILE: /run/secrets/auth-db-pass
+      DATABSE_DB_FILE: /run/secrets/auth-db-db
+      REDIS_SCHEME: redis # rediss
+      REDIS_DOMAIN: auth-cache
+      REDIS_PORT: ${AUTH_REDIS_PORT}
+      REDIS_PASS_FILE: /run/secrets/auth-redis-pass
+      SERVER_PORT: ${AUTH_SERVICE_PORT}
+      REFRESH_TOKEN_PRIVATE_KEY_FILE: /run/secrets/auth-refresh-private-key
+      REFRESH_TOKEN_PUBLIC_KEY_FILE: /run/secrets/auth-refresh-public-key
+      ACCESS_TOKEN_PRIVATE_KEY_FILE: /run/secrets/auth-access-private-key
+      ACCESS_TOKEN_PUBLIC_KEY_FILE: /run/secrets/auth-access-public-key
+    secrets:
+      - auth-db-user
+      - auth-db-pass
+      - auth-db-db
+      - auth-redis-pass
+      - auth-access-public-key
+      - auth-access-private-key
+      - auth-refresh-public-key
+      - auth-refresh-private-key
+    env_file:
+      - ./auth/auth-service/.env
+    ports:
+      - ${AUTH_SERVICE_PORT}:${AUTH_SERVICE_PORT}
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      auth-cache:
+        condition: service_healthy
+#--------------------------------------------------------------------------------------------
+#                                          SCHEDULER + MESSAGE BROKER                       #
+#--------------------------------------------------------------------------------------------
+  zk1:
+    build:
+      context: ./scheduler/zookeeper-service
+      dockerfile: Dockerfile
+    container_name: zk1
+    healthcheck:
+      test: ["CMD-SHELL", "echo stat | nc zk1 ${ZOOKEEPER_PORT}"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+    env_file:
+      - ./scheduler/zookeeper-service/.env
+    environment:
+      ZOO_SERVER_ID: 1
+      ZOO_SERVERS: zk1:${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT} #,zk2:{ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}
+      ZOO_SERVER_PASSWORDS_FILE: /run/secrets/zoo-server-pass
+      ZOO_ENABLE_ADMIN_SERVER: no
+    ports:
+      - '${ZOOKEEPER_PORT}:${ZOOKEEPER_PORT}'
+    volumes:
+      - "zookeeper_data:/bitnami"
+    secrets:
+      - zoo-server-pass
+
+  kafka1:
+    build: 
+      context: ./scheduler/kafka-service
+      dockerfile: Dockerfile
+    container_name: kafka1
+    healthcheck:
+      test: ["CMD", "kafka-topics.sh", "--list", "--bootstrap-server", "kafka1:${KAFKA1_PORT}"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    ports:
+      - '${KAFKA1_PORT}:${KAFKA1_PORT}'
+    volumes:
+      - "kafka_data:/bitnami"
+    env_file:
+      - ./scheduler/kafka-service/.env
+    environment:
+      KAFKA_BROKER_ID: 1
+      # KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka1:${KAFKA1_PORT},LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:${KAFKA1_PORT}
+      # KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      # KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zk1:${ZOOKEEPER_PORT}
+      KAFKA_ZOOKEEPER_PROTOCOL: PLAINTEXT #if auth is enabled in zookeeper use one of: SASL, SASL_SSL see https://hub.docker.com/r/bitnami/kafka
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:${KAFKA1_PORT}
+    depends_on:
+      zk1:
+        condition: service_healthy
+
+  job_scheduler-db:
+    build: 
+      context: ./scheduler/scheduler-db-service
+      dockerfile: Dockerfile
+    container_name: job_scheduler-db
+    healthcheck:
+      test:  echo 'db.runCommand("ping").ok' | mongosh job_scheduler-db:${SCHEDULER_MONGODB_PORT}/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/scheduler-db-user
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/scheduler-db-pass
+    env_file:
+      - ./scheduler/scheduler-db-service/.env
+    command: mongod --port ${SCHEDULER_MONGODB_PORT}
+    ports:
+      - ${SCHEDULER_MONGODB_PORT}:${SCHEDULER_MONGODB_PORT}
+    secrets:
+      - scheduler-db-user
+      - scheduler-db-pass
+      - scheduler-db-dbname 
+    volumes:
+      -  scheduler-db-VL:/data/db
+
+  job_scheduler:
+    build: 
+      context: ./scheduler/scheduler-service
+      dockerfile: Dockerfile.test
+    container_name: job_scheduler
+    restart: always
+    environment:
+      DATABASE_SCHEME: mongodb
+      DATABASE_DOMAIN: job_scheduler-db
+      DATABASE_PORT: ${SCHEDULER_MONGODB_PORT}
+      DATABASE_USER_FILE: /run/secrets/scheduler-db-user
+      DATABASE_PASS_FILE: /run/secrets/scheduler-db-pass
+      DATABASE_DB_NAME_FILE: /run/secrets/scheduler-db-dbname
+      KAFKA_BROKERS: kafka1:${KAFKA1_PORT}
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-access-public-key
+      # TOPICS_FILE: ''
+      ENVIRONMENT: test
+      SERVER_PORT: ${SCHEDULER_SERVICE_PORT}
+    ports:
+      - ${SCHEDULER_SERVICE_PORT}:${SCHEDULER_SERVICE_PORT}
+    secrets:
+      - scheduler-db-user
+      - scheduler-db-pass
+      - scheduler-db-dbname
+      - auth-access-public-key
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      job_scheduler-db:
+        condition: service_healthy
+
+#--------------------------------------------------------------------------------------------
+#                                          EMAI-JOB_EXECUTOR                                #
+#--------------------------------------------------------------------------------------------
+  postfix:
+    build: 
+      context: ./email/postfix-service
+      dockerfile: Dockerfile
+    container_name: postfix
+    restart: always
+    environment:
+      - EMAIL_DOMAIN=yourdomain.com
+      - SMTP_USER=username
+      - SMTP_PASSWORD=password
+    ports:
+      - ${POSTFIX_PORT}:${POSTFIX_PORT}
+
+  emailjob:
+    build: 
+      context: ./email/mailjob-service
+      dockerfile: Dockerfile.test
+    container_name: emailjob
+    restart: always
+    ports:
+      - ${EMAIL_SERVICE_PORT}:${EMAIL_SERVICE_PORT}
+    environment:
+      ENVIRONMENT: test
+      KAFKA_BROKERS: kafka1:${KAFKA1_PORT}
+      # TOPICS_FILE: ''
+      MAIL_SERVER_HOST: postfix
+      MAIL_SERVER_PORT: 25
+      EMAIL_DOMAIN: yourdomain.com
+      SMTP_USER: username
+      SMTP_PASSWORD: password
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      postfix:
+        condition: service_started
+#--------------------------------------------------------------------------------------------
+#                                          REPORT                                           #
+#--------------------------------------------------------------------------------------------
+  report-db:
+    build: 
+      context: ./report/report-db-service
+      dockerfile: Dockerfile
+    container_name: report-db
+    healthcheck:
+      test:  echo 'db.runCommand("ping").ok' | mongosh job_scheduler-db:${SCHEDULER_MONGODB_PORT}/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/report-db-user
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/report-db-pass
+    env_file:
+      - ./report/report-db-service/.env
+    command: mongod --port ${REPORT_MONGODB_PORT}
+    ports:
+      - ${REPORT_MONGODB_PORT}:${REPORT_MONGODB_PORT}
+    secrets:
+      - report-db-user
+      - report-db-pass
+      - report-db-dbname 
+    volumes:
+      -  report-db-VL:/data/db
+
+  report:
+    build: 
+      context: ./report/report-service
+      dockerfile: Dockerfile.test
+    container_name: report
+    restart: always
+    ports:
+      - ${REPORT_SERVICE_PORT}:${REPORT_SERVICE_PORT}
+    environment:
+      ENVIRONMENT: test
+      SERVER_PORT: ${REPORT_SERVICE_PORT}
+      DATABASE_USER_FILE: /run/secrets/report-db-user
+      DATABASE_PASS_FILE: /run/secrets/report-db-pass
+      DATABASE_DB_NAME_FILE: /run/secrets/report-db-dbname
+      DATABASE_SCHEMA: mongodb
+      DATABASE_HOST_NAME: report-db
+      DATABASE_PORT: ${REPORT_MONGODB_PORT}
+      KAFKA_BROKERS: kafka1:${KAFKA1_PORT}
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-access-public-key
+      # TOPICS_FILE: ''
+    depends_on:
+      kafka1:
+        condition: service_healthy
+      report-db:
+        condition: service_healthy
+    secrets:
+      - report-db-user
+      - report-db-pass
+      - report-db-dbname
+      - auth-access-public-key
+
+#--------------------------------------------------------------------------------------------
+#                                          API-GATEWY                                       #
+#--------------------------------------------------------------------------------------------
+  api-gateway:
+    build: 
+      context: ./api-gateway/api-gateway-service
+      dockerfile: Dockerfile.test
+    container_name: api-gateway
+    environment:
+      - SERVER_PORT=${API_GATEWAY_PORT}
+      - CLIENT_DOMAIN=localhost #the domain from which the API is being accessed. this is used to attach cookies.
+      - AUTH_SERVICE_URL=auth:${AUTH_SERVICE_PORT}
+      - SCHEDULER_SERVICE_URL=job_scheduler:${SCHEDULER_SERVICE_PORT}
+      - REPORT_SERVICE_URL=report:${REPORT_SERVICE_PORT}
+      - AUTH_PUBLIC_KEY_FILE=/run/secrets/auth-access-public-key
+    secrets:
+      - auth-access-public-key
+    ports:
+      - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
+    depends_on:
+      - auth
+      - report
+      - job_scheduler
+#--------------------------------------------------------------------------------------------
+#                                          WEB-CLIENT                                       #
+#--------------------------------------------------------------------------------------------
+  client:
+    build: 
+      context: ./client-web/client-service
+      dockerfile: Dockerfile.test
+    container_name: client
+    ports:
+      - ${CLIENT_PORT}:${CLIENT_PORT}
+    environment:
+      - APIGATEWAY_URL=http://api-gateway:${API_GATEWAY_PORT}
+    depends_on:
+      - api-gateway
+
+volumes:
+  auth-db-VL:
+  auth-cache-VL:
+  scheduler-db-VL:
+  zookeeper_data:
+    driver: local
+  kafka_data:
+    driver: local
+  report-db-VL:
+
+secrets:
+  auth-db-user:
+    file: auth/auth-db-service/user.txt
+  auth-db-pass:
+    file: auth/auth-db-service/pass.txt
+  auth-db-db:
+    file: auth/auth-db-service/db.txt
+  auth-db-url:
+    file: auth/auth-db-service/url.txt
+  auth-redis-pass:
+    file: auth/auth-cache-service/pass.txt
+  auth-redis-acl:
+    file: auth/auth-cache-service/users.acl
+  auth-access-public-key:
+    file: auth/auth-service/keys/access_token.public.pem
+  auth-access-private-key:
+    file: auth/auth-service/keys/access_token.private.pem
+  auth-refresh-public-key:
+    file: auth/auth-service/keys/refresh_token.public.pem
+  auth-refresh-private-key:
+    file: auth/auth-service/keys/refresh_token.private.pem
+  report-db-user:
+    file: report/report-db-service/user.txt
+  report-db-pass:
+    file: report/report-db-service/pass.txt
+  report-db-dbname:
+    file: report/report-db-service/db_name.txt
+  scheduler-db-user:
+    file: scheduler/scheduler-db-service/user.txt
+  scheduler-db-pass:
+    file: scheduler/scheduler-db-service/pass.txt
+  scheduler-db-dbname:
+    file: scheduler/scheduler-db-service/db_name.txt
+  zoo-server-pass:
+    file: scheduler/zookeeper-service/server_passwords.properties
