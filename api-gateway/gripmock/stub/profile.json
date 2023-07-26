@@ -1,0 +1,40 @@
+[
+  {
+    "service": "UserProfileService",
+    "method": "GetUser",
+    "inout": {},
+    "output": {
+      "data": {
+        "id": "userd_id_admin",
+        "name": "admin",
+        "email": "admin@admin.com" 
+      }
+    }
+  },
+  {
+    "service": "UserProfileService",
+    "method": "ListUsers",
+    "inout": {},
+    "output": {
+      "data":  {
+        "totalCount": 2,
+        "totalPages": 1,
+        "page": 1,
+        "size": 2,
+        "hasMore": false,
+        "reports": [
+          {
+            "id": "userd_id_admin",
+            "name": "admin",
+            "email": "admin@admin.com" 
+          },
+          {
+            "id": "userd_id_user",
+            "name": "user",
+            "email": "user@user.com" 
+          }
+        ]
+      }
+    }
+  }
+]

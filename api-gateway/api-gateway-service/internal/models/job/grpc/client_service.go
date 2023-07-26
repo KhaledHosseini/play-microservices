@@ -1,11 +1,12 @@
 package grpc
 
 import (
+	"context"
+
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/config"
 	gr "github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/grpc"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/logger"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/proto"
-	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
@@ -28,7 +29,7 @@ func (jc *JobGRPCClient) getClient() (proto.JobsServiceClient, *grpc.ClientConn,
 	return proto.NewJobsServiceClient(conn), conn, nil
 }
 
-func (jc *JobGRPCClient) GRPC_CreateJob(c *gin.Context, createJobRequest *proto.CreateJobRequest) (*proto.CreateJobResponse, error) {
+func (jc *JobGRPCClient) GRPC_CreateJob(c context.Context, createJobRequest *proto.CreateJobRequest) (*proto.CreateJobResponse, error) {
 	client, conn, err := jc.getClient()
 	if err != nil {
 		return nil, err
@@ -37,7 +38,7 @@ func (jc *JobGRPCClient) GRPC_CreateJob(c *gin.Context, createJobRequest *proto.
 	return client.CreateJob(c, createJobRequest)
 }
 
-func (jc *JobGRPCClient) GRPC_GetJob(c *gin.Context, getJobRequest *proto.GetJobRequest) (*proto.Job, error) {
+func (jc *JobGRPCClient) GRPC_GetJob(c context.Context, getJobRequest *proto.GetJobRequest) (*proto.Job, error) {
 
 	client, conn, err := jc.getClient()
 	if err != nil {
@@ -48,7 +49,7 @@ func (jc *JobGRPCClient) GRPC_GetJob(c *gin.Context, getJobRequest *proto.GetJob
 	return client.GetJob(c, getJobRequest)
 }
 
-func (jc *JobGRPCClient) GRPC_ListJobs(c *gin.Context, listJobsRequest *proto.ListJobsRequest) (*proto.ListJobsResponse, error) {
+func (jc *JobGRPCClient) GRPC_ListJobs(c context.Context, listJobsRequest *proto.ListJobsRequest) (*proto.ListJobsResponse, error) {
 	jc.log.Info("Connecting to grpc server.")
 	client, conn, err := jc.getClient()
 	if err != nil {
@@ -59,7 +60,7 @@ func (jc *JobGRPCClient) GRPC_ListJobs(c *gin.Context, listJobsRequest *proto.Li
 	return client.ListJobs(c, listJobsRequest)
 }
 
-func (jc *JobGRPCClient) GRPC_UpdateJob(c *gin.Context, updateJobRequest *proto.UpdateJobRequest) (*proto.UpdateJobResponse, error) {
+func (jc *JobGRPCClient) GRPC_UpdateJob(c context.Context, updateJobRequest *proto.UpdateJobRequest) (*proto.UpdateJobResponse, error) {
 
 	client, conn, err := jc.getClient()
 	if err != nil {
@@ -70,7 +71,7 @@ func (jc *JobGRPCClient) GRPC_UpdateJob(c *gin.Context, updateJobRequest *proto.
 	return client.UpdateJob(c, updateJobRequest)
 }
 
-func (jc *JobGRPCClient) GRPC_DeleteJob(c *gin.Context, deleteJobRequest *proto.DeleteJobRequest) (*proto.DeleteJobResponse, error) {
+func (jc *JobGRPCClient) GRPC_DeleteJob(c context.Context, deleteJobRequest *proto.DeleteJobRequest) (*proto.DeleteJobResponse, error) {
 
 	client, conn, err := jc.getClient()
 	if err != nil {

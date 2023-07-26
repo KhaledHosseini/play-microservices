@@ -1,11 +1,12 @@
 package grpc
 
 import (
+	"context"
+
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/config"
 	gr "github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/grpc"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/logger"
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/proto"
-	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
 )
 
@@ -37,7 +38,7 @@ func (jc *UserGRPCClient) getClient2() (proto.UserProfileServiceClient, *grpc.Cl
 	return proto.NewUserProfileServiceClient(conn), conn, nil
 }
 
-func (uc *UserGRPCClient) GRPC_CreateUser(c *gin.Context, createUserRequest *proto.CreateUserRequest) (*proto.CreateUserResponse, error) {
+func (uc *UserGRPCClient) GRPC_CreateUser(c context.Context, createUserRequest *proto.CreateUserRequest) (*proto.CreateUserResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -49,7 +50,7 @@ func (uc *UserGRPCClient) GRPC_CreateUser(c *gin.Context, createUserRequest *pro
 	return client.CreateUser(c, createUserRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_LoginUser(c *gin.Context, loginUserRequest *proto.LoginUserRequest) (*proto.LoginUserResponse, error) {
+func (uc *UserGRPCClient) GRPC_LoginUser(c context.Context, loginUserRequest *proto.LoginUserRequest) (*proto.LoginUserResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -60,7 +61,7 @@ func (uc *UserGRPCClient) GRPC_LoginUser(c *gin.Context, loginUserRequest *proto
 	return client.LoginUser(c, loginUserRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_RefreshAccessToken(c *gin.Context, refreshTokenRequest *proto.RefreshTokenRequest) (*proto.RefreshTokenResponse, error) {
+func (uc *UserGRPCClient) GRPC_RefreshAccessToken(c context.Context, refreshTokenRequest *proto.RefreshTokenRequest) (*proto.RefreshTokenResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -71,7 +72,7 @@ func (uc *UserGRPCClient) GRPC_RefreshAccessToken(c *gin.Context, refreshTokenRe
 	return client.RefreshAccessToken(c, refreshTokenRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_LogOutUser(c *gin.Context, logOutRequest *proto.LogOutRequest) (*proto.LogOutResponse, error) {
+func (uc *UserGRPCClient) GRPC_LogOutUser(c context.Context, logOutRequest *proto.LogOutRequest) (*proto.LogOutResponse, error) {
 
 	client, conn, err := uc.getClient()
 	if err != nil {
@@ -82,7 +83,7 @@ func (uc *UserGRPCClient) GRPC_LogOutUser(c *gin.Context, logOutRequest *proto.L
 	return client.LogOutUser(c, logOutRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_GetUser(c *gin.Context, getUserRequest *proto.GetUserRequest) (*proto.GetUserResponse, error) {
+func (uc *UserGRPCClient) GRPC_GetUser(c context.Context, getUserRequest *proto.GetUserRequest) (*proto.GetUserResponse, error) {
 
 	client, conn, err := uc.getClient2()
 	if err != nil {
@@ -93,7 +94,7 @@ func (uc *UserGRPCClient) GRPC_GetUser(c *gin.Context, getUserRequest *proto.Get
 	return client.GetUser(c, getUserRequest)
 }
 
-func (uc *UserGRPCClient) GRPC_ListUsers(c *gin.Context, listUsersRequest *proto.ListUsersRequest) (*proto.ListUsersResponse, error) {
+func (uc *UserGRPCClient) GRPC_ListUsers(c context.Context, listUsersRequest *proto.ListUsersRequest) (*proto.ListUsersResponse, error) {
 
 	client, conn, err := uc.getClient2()
 	if err != nil {

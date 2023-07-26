@@ -19,7 +19,7 @@ func NewCookie(cfg *config.Config) *CookieManager {
 }
 
 func (cm *CookieManager) setCookies(c *gin.Context, key string, value string, age int64) {
-	c.SetCookie(key, value, int(age), "/", cm.cfg.ServerDomain, false, true)
+	c.SetCookie(key, value, int(age), "/", cm.cfg.ClientDomain, false, true)
 }
 
 func (cm *CookieManager) SetAccessToken(c *gin.Context, token string, age int64) {

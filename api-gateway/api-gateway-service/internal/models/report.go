@@ -15,19 +15,17 @@ type ListReportsRequest struct {
 
 type Report struct {
 	Id           string
-	Type         int32
 	Topic        string
-	Created_time time.Time
-	Report_data  string
+	CreatedTime time.Time
+	ReportData  string
 }
 
 func ReportFromProto(p *proto.Report) *Report {
 	return &Report{
 		Id:           p.Id,
-		Type:         int32(p.Type),
 		Topic:        p.Topic,
-		Created_time: p.CreatedTime.AsTime(),
-		Report_data:  p.ReportData,
+		CreatedTime: p.CreatedTime.AsTime(),
+		ReportData:  p.ReportData,
 	}
 }
 

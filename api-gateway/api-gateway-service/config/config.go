@@ -13,11 +13,11 @@ const (
 
 	ENVIRONMENT   = "ENVIRONMENT"
 	SERVER_PORT   = "SERVER_PORT"
-	SERVER_DOMAIN = "SERVER_DOMAIN"
+	CLIENT_DOMAIN = "CLIENT_DOMAIN"
 
 	AUTH_SERVICE_URL      = "AUTH_SERVICE_URL"
 	SCHEDULER_SERVICE_URL = "SCHEDULER_SERVICE_URL"
-	REPORT_SERVICE_URL    = "SCHEDULER_SERVICE_URL"
+	REPORT_SERVICE_URL    = "REPORT_SERVICE_URL"
 
 	AUTH_PUBLIC_KEY_FILE = "AUTH_PUBLIC_KEY_FILE"
 )
@@ -27,7 +27,7 @@ type Config struct {
 	Environment string
 
 	ServerPort   string
-	ServerDomain string
+	ClientDomain string
 
 	AuthServiceURL      string
 	SchedulerServiceURL string
@@ -85,7 +85,8 @@ func InitConfig() (*Config, error) {
 	c.AppVersion = goDotEnvVariable(APP_VERSION)
 	c.Environment = goDotEnvVariable(ENVIRONMENT)
 	c.ServerPort = goDotEnvVariable(SERVER_PORT)
-	c.ServerDomain = goDotEnvVariable(SERVER_DOMAIN)
+	//we register cookie for client domain
+	c.ClientDomain = goDotEnvVariable(CLIENT_DOMAIN)
 
 	c.AuthServiceURL = goDotEnvVariable(AUTH_SERVICE_URL)
 	c.SchedulerServiceURL = goDotEnvVariable(SCHEDULER_SERVICE_URL)

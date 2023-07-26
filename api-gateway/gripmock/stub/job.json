@@ -4,10 +4,10 @@
     "method": "CreateJob",
     "input": {
       "equals": {
-        "name": "job1",
-        "description": "send email to example.com",
-        "schedule_time": "2023-06-30T16:50:46.3042086Z",
-        "job_data": {
+        "Name": "job1",
+        "Description": "send email to example.com",
+        "ScheduleTime": "2023-06-30T16:50:46.3042086Z",
+        "JobData": {
           "SourceAddress": "example@example.com",
           "DestinationAddress": "example@example.com",
           "Subject": "Message From example@example.com contact form",

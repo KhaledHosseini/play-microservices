@@ -9,28 +9,28 @@ import (
 )
 
 type Job struct {
-	Id            string
-	Name          string
-	Description   string
-	Schedule_time time.Time
-	Created_time  time.Time
-	Updated_time  time.Time
-	Status        int32
-	Job_type      int32
-	Job_data      string
+	Id           string
+	Name         string
+	Description  string
+	ScheduleTime time.Time
+	CreatedTime  time.Time
+	UpdatedTime  time.Time
+	JobStatus    int32
+	JobType      int32
+	JobData      string
 }
 
 func JobFromProto(p *proto.Job) *Job {
 	return &Job{
-		Id:            p.Id,
-		Name:          p.Name,
-		Description:   p.Description,
-		Schedule_time: p.ScheduleTime.AsTime(),
-		Created_time:  p.CreatedTime.AsTime(),
-		Updated_time:  p.UpdatedTime.AsTime(),
-		Status:        int32(p.Status),
-		Job_type:      int32(p.JobType),
-		Job_data:      p.JobData,
+		Id:           p.Id,
+		Name:         p.Name,
+		Description:  p.Description,
+		ScheduleTime: p.ScheduleTime.AsTime(),
+		CreatedTime:  p.CreatedTime.AsTime(),
+		UpdatedTime:  p.UpdatedTime.AsTime(),
+		JobStatus:    int32(p.Status),
+		JobType:      int32(p.JobType),
+		JobData:      p.JobData,
 	}
 }
 
@@ -131,7 +131,7 @@ type DeleteJobResponse struct {
 	Message string
 }
 
-func DeleteJobRequestFromProto(p *proto.DeleteJobResponse) DeleteJobResponse {
+func DeleteJobResponseFromProto(p *proto.DeleteJobResponse) DeleteJobResponse {
 	return DeleteJobResponse{
 		Message: p.Message,
 	}

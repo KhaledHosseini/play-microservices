@@ -49,23 +49,23 @@ definitions:
     type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job:
     properties:
-      created_time:
+      createdTime:
         type: string
       description:
         type: string
       id:
         type: string
-      job_data:
+      jobData:
         type: string
-      job_type:
+      jobStatus:
+        type: integer
+      jobType:
         type: integer
       name:
         type: string
-      schedule_time:
+      scheduleTime:
         type: string
-      status:
-        type: integer
-      updated_time:
+      updatedTime:
         type: string
     type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.ListJobsResponse:
@@ -151,8 +151,6 @@ definitions:
         type: string
       topic:
         type: string
-      type:
-        type: integer
     type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobRequest:
     properties:
@@ -177,43 +175,6 @@ definitions:
 info:
   contact: {}
 paths:
-  /job/{id}:
-    delete:
-      description: Delete a job by id
-      parameters:
-      - description: some id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse'
-      summary: Delete a job by id
-      tags:
-      - job
-    get:
-      description: Get a job by id
-      parameters:
-      - description: some id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job'
-      summary: Get a job by id
-      tags:
-      - job
   /job/create:
     post:
       consumes:
@@ -234,6 +195,44 @@ paths:
           schema:
             $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateJobResponse'
       summary: Creates and schedule a job
+      tags:
+      - job
+  /job/delete:
+    post:
+      description: Delete a job by id
+      parameters:
+      - description: some id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse'
+      summary: Delete a job by id
+      tags:
+      - job
+  /job/get:
+    get:
+      description: Get a job by id
+      parameters:
+      - description: some id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job'
+      summary: Get a job by id
       tags:
       - job
   /job/list:
@@ -328,25 +327,6 @@ paths:
       summary: Get the list of reports
       tags:
       - report
-  /user/{id}:
-    get:
-      description: Get user by id
-      parameters:
-      - description: some id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse'
-      summary: Get user by id
-      tags:
-      - user
   /user/create:
     post:
       consumes:
@@ -367,6 +347,19 @@ paths:
           schema:
             $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.CreateUserResponse'
       summary: Register a user
+      tags:
+      - user
+  /user/get:
+    get:
+      description: Get user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse'
+      summary: Get user
       tags:
       - user
   /user/list:
@@ -425,17 +418,6 @@ paths:
   /user/logout:
     post:
       description: logout user
-      parameters:
-      - description: 'Authorization: Access token'
-        in: header
-        name: Authorization
-        required: true
-        type: string
-      - description: X-Refresh-Token
-        in: header
-        name: X-Refresh-Token
-        required: true
-        type: string
       responses:
         "200":
           description: OK
@@ -447,21 +429,12 @@ paths:
   /user/refresh_token:
     post:
       description: refresh access token
-      parameters:
-      - description: X-Refresh-Token
-        in: header
-        name: X-Refresh-Token
-        required: true
-        type: string
       responses:
         "200":
           description: OK
           headers:
             Authorization:
               description: Access-Token
-              type: string
-            X-Refresh-Token:
-              description: Refresh-Token
               type: string
           schema:
             $ref: '#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.RefreshTokenResponse'

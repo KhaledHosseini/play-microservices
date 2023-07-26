@@ -69,7 +69,6 @@ type LogOutRequest struct {
 func (lor *LogOutRequest) ToProto() *proto.LogOutRequest {
 	return &proto.LogOutRequest{
 		RefreshToken: lor.RefreshToken,
-		AccessToken:  lor.RefreshToken,
 	}
 }
 

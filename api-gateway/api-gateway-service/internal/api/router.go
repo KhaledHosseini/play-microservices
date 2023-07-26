@@ -48,10 +48,10 @@ func (r *Router) Setup(router *gin.Engine) {
 		api.GET("/v1/user/list", userHandler.ListUsers)
 
 		api.POST("/v1/job/create", jobHandler.CreateJob)
-		api.GET("/v1/job/:id", jobHandler.GetJob)
-		api.GET("/v1/job/list", jobHandler.ListJobs)
 		api.POST("/v1/job/update", jobHandler.UpdateJob)
-		api.DELETE("/v1/job/:id", jobHandler.DeleteJob)
+		api.GET("/v1/job/get", jobHandler.GetJob)
+		api.GET("/v1/job/list", jobHandler.ListJobs)
+		api.POST("/v1/job/delete", jobHandler.DeleteJob)
 
 		api.GET("/v1/report/list", reportHandler.ListReports)
 	}

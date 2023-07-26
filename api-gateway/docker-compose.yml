@@ -17,14 +17,14 @@ services:
       --grpc-listen=0.0.0.0 
       --grpc-port=${GRIPMOCK_GRPC_PORT} 
       --stub=/mock/stub /mock/job.proto /mock/report.proto /mock/user.proto
-  api-gateway:
+  api-gateway-service:
     build: 
       context: ./api-gateway-service
       dockerfile: Dockerfile
-    container_name: api-gateway
+    container_name: api-gateway-service
     environment:
       - SERVER_PORT=${API_GATEWAY_PORT}
-      - SERVER_DOMAIN=api-gateway
+      - CLIENT_DOMAIN=localhost # we call the server from this domain (for cookie registration ,...)
       - AUTH_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
       - SCHEDULER_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}
       - REPORT_SERVICE_URL=gripmock:${GRIPMOCK_GRPC_PORT}

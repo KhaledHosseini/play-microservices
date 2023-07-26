@@ -50,6 +50,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/job/delete": {
+            "post": {
+                "description": "Delete a job by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Delete a job by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "some id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/job/get": {
+            "get": {
+                "description": "Get a job by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Get a job by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "some id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job"
+                        }
+                    }
+                }
+            }
+        },
         "/job/list": {
             "get": {
                 "description": "list jobs by type",
@@ -115,62 +173,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.UpdateJobResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/job/{id}": {
-            "get": {
-                "description": "Get a job by id",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "job"
-                ],
-                "summary": "Get a job by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "some id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete a job by id",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "job"
-                ],
-                "summary": "Delete a job by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "some id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.DeleteJobResponse"
                         }
                     }
                 }
@@ -279,6 +281,26 @@ const docTemplate = `{
                 }
             }
         },
+        "/user/get": {
+            "get": {
+                "description": "Get user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user/list": {
             "get": {
                 "description": "retrieve the list of users",
@@ -366,22 +388,6 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "logout user",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Authorization: Access token",
-                        "name": "Authorization",
-                        "in": "header",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "X-Refresh-Token",
-                        "name": "X-Refresh-Token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -399,15 +405,6 @@ const docTemplate = `{
                     "user"
                 ],
                 "summary": "refresh access token",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "X-Refresh-Token",
-                        "name": "X-Refresh-Token",
-                        "in": "header",
-                        "required": true
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -418,40 +415,7 @@ const docTemplate = `{
                             "Authorization": {
                                 "type": "string",
                                 "description": "Access-Token"
-                            },
-                            "X-Refresh-Token": {
-                                "type": "string",
-                                "description": "Refresh-Token"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/user/{id}": {
-            "get": {
-                "description": "Get user by id",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user"
-                ],
-                "summary": "Get user by id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "some id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.GetUserResponse"
                         }
                     }
                 }
@@ -537,7 +501,7 @@ const docTemplate = `{
         "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Job": {
             "type": "object",
             "properties": {
-                "created_time": {
+                "createdTime": {
                     "type": "string"
                 },
                 "description": {
@@ -546,22 +510,22 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "job_data": {
+                "jobData": {
                     "type": "string"
                 },
-                "job_type": {
+                "jobStatus": {
+                    "type": "integer"
+                },
+                "jobType": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
-                "schedule_time": {
+                "scheduleTime": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "integer"
-                },
-                "updated_time": {
+                "updatedTime": {
                     "type": "string"
                 }
             }
@@ -693,9 +657,6 @@ const docTemplate = `{
                 },
                 "topic": {
                     "type": "string"
-                },
-                "type": {
-                    "type": "integer"
                 }
             }
         },

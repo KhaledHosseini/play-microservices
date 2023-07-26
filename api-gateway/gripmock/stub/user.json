@@ -84,7 +84,21 @@
   },
   {
     "service": "UserService",
-    "method": "RefreshAccessToken",
+    "method": "LogOutUser",
+    "input": {
+      "equals": {
+        "refresh_token": "admin_refresh_token"
+      }
+    },
+    "output": {
+      "data": {
+        "message": "user log out success"
+      }
+    }
+  },
+  {
+    "service": "UserService",
+    "method": "LogOutUser",
     "input": {
       "equals": {
         "refresh_token": "user_refresh_token"
@@ -92,8 +106,7 @@
     },
     "output": {
       "data": {
-        "access_token": "user_access_token",
-        "access_token_age": 60
+        "message": "user log out success"
       }
     }
   }

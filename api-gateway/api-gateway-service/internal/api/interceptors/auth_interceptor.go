@@ -1,6 +1,7 @@
 package interceptors
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/KhaledHosseini/play-microservices/api-gateway/api-gateway-service/pkg/cookie"
@@ -13,7 +14,7 @@ func AuthenticateUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		accessToken, err := cookie.GetAccessToken(c) // Retrieve the access token from the request header
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": false, "error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": false, "error": err.Error()})
 			return
 		}
 		// do authentication if necessary.
@@ -24,10 +25,8 @@ func AuthenticateUser() gin.HandlerFunc {
 		// gRPC methods can’t set HTTP response cookies directly —
 		// they’re running in a different process and don’t have access to the response object.
 		// Create a gRPC context and add the access token to the metadata see: https://github.com/grpc/grpc-go/blob/master/Documentation/grpc-metadata.md
-		md := metadata.Pairs("authorization", accessToken)
-		ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
-
-		// Update the request context with the modified context
+		md := metadata.New(map[string]string{"authorization": accessToken})
+		ctx := metadata.NewOutgoingContext(context.Background(), md)
 		c.Request = c.Request.WithContext(ctx)
 
 		c.Next()
