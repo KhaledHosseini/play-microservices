@@ -56,7 +56,7 @@ class JobConsumerWorker:
     def __init__(self, config: Config, email_sender: EmailSender) -> None:
         self.cfg = config
         self.email_sender = email_sender
-        self.producer = KafkaProducer(bootstrap_servers=self.cfg.KafkaBrokers)
+        self.producer = KafkaProducer(bootstrap_servers=self.cfg.KafkaBrokers,compression_type='snappy')
 
     def run_kafka_consumer(self):
         consumer = KafkaConsumer(self.cfg.TopicJobRun,

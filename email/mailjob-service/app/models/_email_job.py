@@ -1,4 +1,3 @@
-import json
 import logging
 
 from typing import Any
@@ -18,43 +17,43 @@ class JobStatusEnum(IntEnum):
 
 @dataclass
 class EmailJob(JsonObject):
-    job_id: str
-    status: JobStatusEnum
-    job_data: str
+    Id: str
+    Status: JobStatusEnum
+    JobData: str
 
     @staticmethod
     def from_dict(obj: Any) -> 'EmailJob':
         try:
             values = {
-                'job_id': obj.get("job_id"),
-                'status': JobStatusEnum(obj.get("status")),
-                'job_data': obj.get("job_data"),
+                'JobID': obj.get("Id"),
+                'Status': JobStatusEnum(obj.get("Status")),
+                'JobData': obj.get("JobData"),
             }
             logging.info(values.values())
             if any(value is None for value in values.values()):
-                logging.info("Non is found")
+                logging.info("None is found")
                 raise ValueError("Invalid EmailJob json")
             return EmailJob(**values)
         except Exception as e:
             raise e
     def get_email(self):
-        return Email.from_dict(self.job_data)
+        return Email.from_dict(self.JobData)
 
 @dataclass
 class Email(JsonObject):
-    source_address: str
-    destination_address: str
-    subject: str
-    message: str
+    SourceAddress: str
+    DestinationAddress: str
+    Subject: str
+    Message: str
 
     @staticmethod
     def from_dict(obj: Any) -> 'Email':
         try:
             values = {
-                'source_address': obj.get("source_address"),
-                'destination_address': obj.get("destination_address"),
-                'subject': obj.get("subject"),
-                'message': obj.get("message"),
+                'SourceAddress': obj.get("SourceAddress"),
+                'DestinationAddress': obj.get("DestinationAddress"),
+                'Subject': obj.get("Subject"),
+                'Message': obj.get("Message"),
             }
             logging.info("Email values are:")
             logging.info(values)
@@ -64,5 +63,3 @@ class Email(JsonObject):
             return Email(**values)
         except Exception as e:
             raise e
-
-

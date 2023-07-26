@@ -6,3 +6,10 @@ RUN apt-get update \
   && pip install --no-cache-dir pyparsing pydot
 
 WORKDIR /usr/src/app
+
+# Copy the requirements.txt file to the working directory
+COPY . .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+CMD ["python", "main.py"]
