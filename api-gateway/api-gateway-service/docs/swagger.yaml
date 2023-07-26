@@ -143,11 +143,11 @@ definitions:
     type: object
   github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report:
     properties:
-      created_time:
+      createdTime:
         type: string
       id:
         type: string
-      report_data:
+      reportData:
         type: string
       topic:
         type: string
@@ -300,11 +300,6 @@ paths:
     get:
       description: retrieve the reports
       parameters:
-      - description: Report Type
-        in: query
-        name: filter
-        required: true
-        type: integer
       - description: Page
         in: query
         name: page

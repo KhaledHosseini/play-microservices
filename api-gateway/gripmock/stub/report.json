@@ -4,18 +4,17 @@
     "method": "ListReports",
     "input": {
       "equals": {
-        "filter": 1,
         "page": 1,
         "size": 10
       }
     },
     "output": {
       "data": {
-        "totalCount": 4,
-        "totalPages": 1,
+        "total_count": 4,
+        "total_pages": 1,
         "page": 1,
         "size": 4,
-        "hasMore": false,
+        "has_more": false,
         "reports": [
           {
             "id": "0",

@@ -84,7 +84,7 @@ Just run `docker-compose up` from the root directory. Then go to http://localhos
      - In api-gateway, inside `internal/models` folder create a file named `<yourmodelname>` and create the necessary rest layer models and the conversion to/from proto models.
      - Add `<YOURSERVICE>_URL` to the config/config.go
      - Create a folder named `<yourmodelname>` inside `internal/models` 
-     - Inside `<yourmodelname>` folder create a folder named grpc and then a file named client_service.go. Put you grpc service communication logic here.
+     - Inside `<yourmodelname>` folder create a folder named grpc and then a file named client_service.go. Put your grpc service communication logic here (Read `<YOURSERVICE>_URL` from config).
      - Inside `<yourmodelname>` folder create a folder named handler and then a file named handler.go. Put your rest api for your grpc model here.
      - Add your rest-api end points to internal/api/router.go
  - Front-end service

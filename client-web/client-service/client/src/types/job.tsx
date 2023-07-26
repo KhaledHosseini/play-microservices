@@ -58,11 +58,11 @@ function isJob(obj: any): obj is Job {
     const fieldNames: string[] = all_keys(obj)
     return fieldNames.includes('Id') && 
     fieldNames.includes('Name') && 
-    fieldNames.includes('Description')
-    && fieldNames.includes('ScheduleTime')&& 
-    fieldNames.includes('JobStatus')&& 
-    fieldNames.includes('JobType')
-    && fieldNames.includes('JobData');
+    fieldNames.includes('Description') && 
+    fieldNames.includes('ScheduleTime')&& 
+    fieldNames.includes('JobStatus') && 
+    fieldNames.includes('JobType') &&
+    fieldNames.includes('JobData');
 }
 
 function isJobArray(obj: any): obj is JobArray {

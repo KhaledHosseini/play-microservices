@@ -214,13 +214,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Report Type",
-                        "name": "filter",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
                         "description": "Page",
                         "name": "page",
                         "in": "query",
@@ -646,13 +639,13 @@ const docTemplate = `{
         "github_com_KhaledHosseini_play-microservices_api-gateway_api-gateway-service_internal_models.Report": {
             "type": "object",
             "properties": {
-                "created_time": {
+                "createdTime": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
                 },
-                "report_data": {
+                "reportData": {
                     "type": "string"
                 },
                 "topic": {
