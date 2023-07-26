@@ -1,5 +1,5 @@
 use crate::Config;
-use log::info;
+use log::{info, warn, error};
 //grpc models
 use tonic::{Request, Response, Status};
 use crate::proto::{
@@ -34,15 +34,16 @@ impl UserService for MyUserService {
         request: Request<CreateUserRequest>
     ) -> Result<Response<CreateUserResponse>, Status> {
         info!("MyUserService: create_user Got a request: {:#?}", &request);
-       
-    //    let CreateUserRequest { name, email, password, role } = &request.into_inner();
-       let create_user_request: CreateUserRequest = request.into_inner();
-       match create_user_request.validate() {
-            Ok(_)=>{}
-            Err(err)=> {
-                return Err(Status::internal(format!("{}",err)));
+        let create_user_request: CreateUserRequest = request.into_inner();
+        match create_user_request.validate() {
+            Ok(_)=>{
+                info!("MyUserService:create_user Input validation passed for CreateUserRequest")
             }
-       }
+            Err(err)=> {
+                error!("MyUserService:create_user Input validation failed for CreateUserRequest. {:#?}",&err);
+                return Err(Status::invalid_argument("invalid argument"));
+            }
+        }
 
        match self.db.is_user_exists_with_email(&create_user_request.email).await {
             Ok(exists) => {
@@ -52,7 +53,8 @@ impl UserService for MyUserService {
                 }
             },
             Err(err) => {
-                return Err(Status::already_exists(format!("Problem checking user with error: {}",err)));
+                error!("MyUserService:create_user Error checking email existence. check the database. {:#?}",&err);
+                return Err(Status::internal("Problem checking user"));
             }
         };
 
@@ -74,7 +76,8 @@ impl UserService for MyUserService {
                 return Ok(Response::new(reply))
             },
             Err(err)=> {
-                return Err(Status::internal(format!("Problem creating user with error: {}",err)));
+                error!("Problem creating user with error: {:#?}",&err);
+                return Err(Status::internal("Error registering user."));
             }
         };
     }
@@ -88,9 +91,12 @@ impl UserService for MyUserService {
 
         let login_user_request: LoginUserRequest = request.into_inner();
         match login_user_request.validate() {
-            Ok(_)=>{}
+            Ok(_)=>{
+                info!("MyUserService:login_user validation passed for LoginUserRequest");
+            }
             Err(err)=> {
-                return Err(Status::internal(format!("{}",err)));
+                error!("MyUserService:login_user error validating of  LoginUserRequest. {:#?}", &err);
+                return Err(Status::invalid_argument("invalid argument"));
             }
        }
         let user: User = match self.db.get_user_by_email(&login_user_request.email).await {
@@ -102,7 +108,10 @@ impl UserService for MyUserService {
                     return Err(Status::not_found("User not found."))
                 }
             },
-            Err(err)=> return Err(Status::not_found(format!("User not found. error: {}",err)))
+            Err(err)=> {
+                error!("MyUserService:login_user user not found error in db. {:#?}", &err);
+                return Err(Status::not_found("User not found."))
+            }
         };
         
 
@@ -113,7 +122,8 @@ impl UserService for MyUserService {
         .map_or(false, |_| true);
 
         if !is_password_correct {
-            return Err(Status::internal("Invalid password"))
+            warn!("MyUserService:login_user invalid password.");
+            return Err(Status::permission_denied("Invalid password or username"))
         }
 
         let access_token_details = match jwtoken::generate_jwt_token(
@@ -124,7 +134,8 @@ impl UserService for MyUserService {
         ) {
             Ok(token_details) => token_details,
             Err(e) => {
-                return Err(Status::internal(format!("Token generation failed with error: {}", e)))
+                error!("MyUserService:login_user Token generation failed with error:{:#?}", &e);
+                return Err(Status::internal("Token generation failed."))
             }
         };
     
@@ -136,7 +147,8 @@ impl UserService for MyUserService {
         ) {
             Ok(token_details) => token_details,
             Err(e) => {
-                return Err(Status::internal(format!("Token generation failed with error: {}", e)))
+                error!("MyUserService:login_user Token generation failed with error:{:#?}", &e);
+                return Err(Status::internal("Token generation failed."))
             }
         };
 
@@ -144,7 +156,8 @@ impl UserService for MyUserService {
         match self.cache.set_expiration(&refresh_token_details.token_uuid.to_string(), &user.id.to_string(), (self.env.refresh_token_max_age * 60) as usize).await {
             Ok(_)=> {},
             Err(err)=> {
-                return Err(Status::internal(format!("Cache saving failed with error: {}", err)));
+                error!("MyUserService:login_user Cache saving failed with error:{:#?}", &err);
+                return Err(Status::internal("Error with caching."))
             }
         }
 
@@ -152,7 +165,7 @@ impl UserService for MyUserService {
             access_token : access_token_details.token.unwrap(),
             access_token_age : self.env.access_token_max_age * 60,
             refresh_token : refresh_token_details.token.unwrap(),
-            refresh_token_age : self.env.access_token_max_age * 60,
+            refresh_token_age : self.env.refresh_token_max_age * 60,
         };
 
         Ok(Response::new(reply))
@@ -166,9 +179,12 @@ impl UserService for MyUserService {
         
         let refresh_token_request: RefreshTokenRequest = request.into_inner();
         match refresh_token_request.validate() {
-            Ok(_)=>{}
+            Ok(_)=>{
+                info!("MyUserService:refresh_access_token validation passed for RefreshTokenRequest");
+            }
             Err(err)=> {
-                return Err(Status::unauthenticated(format!("{}",err)));
+                error!("MyUserService:refresh_access_token error validating of  RefreshTokenRequest. {:#?}", &err);
+                return Err(Status::invalid_argument("invalid argument"));
             }
        }
 
@@ -177,7 +193,8 @@ impl UserService for MyUserService {
         {
             Ok(token_details) => token_details,
             Err(e) => {
-                return Err(Status::unauthenticated(format!("Token validation failed with error: {}", e)));
+                error!("MyUserService:refresh_access_token error validating of  RefreshTokenRequest. {:#?}", &e);
+                return Err(Status::unauthenticated("Token validation failed"));
             }
         };
 
@@ -187,11 +204,13 @@ impl UserService for MyUserService {
                     value
                 },
                 None => {
-                    return Err(Status::unauthenticated(format!("UserId for this token is not exists in cache: {}",&refresh_token_details.token_uuid.to_string())));
+                    error!("MyUserService:refresh_access_token UserId for this token is not exists in cache: {:#?}", &refresh_token_details.token_uuid.to_string());
+                    return Err(Status::unauthenticated("UserId for this token does not exist"));
                 }
             },
             Err(err)=> {
-                return Err(Status::unauthenticated(format!("User id retrival failed: {}", err)));
+                error!("MyUserService:refresh_access_token User id retrival failed: {:#?}", &err);
+                return Err(Status::unauthenticated("User not found"));
             }
         };
 
@@ -199,8 +218,8 @@ impl UserService for MyUserService {
         let user = match self.db.get_user_by_id(&user_id).await {
             Ok(user) => user,
             Err(err) => {
-                info!("Error finding user: {}", err);
-                return Err(Status::unauthenticated(format!("the user belonging to this token no logger exists.")));
+                error!("MyUserService:refresh_access_token User not found: {:#?}", &err);
+                return Err(Status::unauthenticated("the user belonging to this token no logger exists."));
             }
         };
 
@@ -211,8 +230,9 @@ impl UserService for MyUserService {
             self.env.access_token_private_key.to_owned(),
         ) {
             Ok(token_details) => token_details,
-            Err(e) => {
-                return Err(Status::unauthenticated(format!("Token generation failed with error: {}", e)))
+            Err(err) => {
+                error!("MyUserService:refresh_access_token Token generation failed with error: {:#?}", &err);
+                return Err(Status::unauthenticated("Token generation failed"))
             }
         };
 
@@ -232,24 +252,31 @@ impl UserService for MyUserService {
         
         let log_out_request: LogOutRequest  = request.into_inner();
         match log_out_request.validate() {
-            Ok(_)=>{}
+            Ok(_)=>{
+                info!("MyUserService:log_out_user validation passed for LogOutRequest");
+            }
             Err(err)=> {
-                return Err(Status::unauthenticated(format!("{}",err)));
+                error!("MyUserService:log_out_user error validating of  LogOutRequest. {:#?}", &err);
+                return Err(Status::invalid_argument("invalid argument"));
             }
        }
        let refresh_token_details =
        match jwtoken::verify_jwt_token(self.env.refresh_token_public_key.to_owned(), &log_out_request.refresh_token)
        {
            Ok(token_details) => token_details,
-           Err(e) => {
-               return Err(Status::unauthenticated(format!("Token validation failed with error: {}", e)));
+           Err(err) => {
+            error!("MyUserService:log_out_user error invalid token. {:#?}", &err);
+               return Err(Status::unauthenticated("Token validation failed"));
            }
        };
 
         match self.cache.delete_value_for_key(&refresh_token_details.token_uuid.to_string()).await {
-            Ok(_)=> {},
+            Ok(_)=> {
+                info!("MyUserService:log_out_user tokens deleted from cache");
+            },
             Err(err)=> {
-                return Err(Status::internal(format!("Logout failed with error: {}",err)));
+                error!("MyUserService:log_out_user Logout failed with error: {:#?}", &err);
+                return Err(Status::internal("Logout failed with error in caching"));
             }
         }
 

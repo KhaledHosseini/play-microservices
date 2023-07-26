@@ -7,6 +7,7 @@ use tonic::{Request, Response, Status};
 use crate::proto::{
     user_profile_service_server::UserProfileService, GetUserResponse, GetUserRequest, ListUsersRequest, ListUsersResponse
 };
+use crate::models::user::db::Validate;
 
 pub struct MyUserProfileService {
     pub db: Box<dyn UserDBInterface + Send + Sync>,
@@ -28,8 +29,8 @@ impl UserProfileService for MyUserProfileService {
                         return Ok(Response::new(u))
                     }
                     Err(err) => {
-                        error!("Error finding user: {}", err);
-                        return Err(Status::not_found("User not found."))
+                        error!("Error finding user: {:#?}", &err);
+                        return Err(Status::internal("User not found."))
                     }
                 };
             }
@@ -51,24 +52,34 @@ impl UserProfileService for MyUserProfileService {
         if !authorized {
             return Err(Status::permission_denied("Unauthorized."))
         }
-        let ListUsersRequest { page,size } = request.get_ref();
-        match self.db.get_users_list(page,size).await {
+        let list_users_request: ListUsersRequest = request.into_inner();
+        match list_users_request.validate() {
+            Ok(_)=>{
+                info!("UserProfileService:list_users Input validation passed for ListUsersRequest")
+            }
+            Err(err)=> {
+                error!("UserProfileService:list_users Input validation failed for ListUsersRequest. {:#?}",&err);
+                return Err(Status::invalid_argument(format!("invalid argument: {:#?}",&err)));
+            }
+        }
+
+        match self.db.get_users_list(&list_users_request.page,&list_users_request.size).await {
             Ok(users) => {
                 //convert from orm model to grpc model
                 let users: Vec<GetUserResponse> = users.into_iter().map(|user| user.into()).collect();
                 let result = ListUsersResponse {
                     total_count:0,
                     total_pages: 1,
-                    page:*page,
-                    size:*size,
+                    page:list_users_request.page,
+                    size:list_users_request.size,
                     has_more: true,
                     users: users
                 };
                 return Ok(Response::new(result))
             }
             Err(err) => {
-                error!("Error listin users: {}", err);
-                return Err(Status::not_found("error listi users."))
+                error!("Error in database listing users: {:#?}", &err);
+                return Err(Status::internal("errorlisting users."))
             }
         };
     }

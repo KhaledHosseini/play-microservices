@@ -1,9 +1,8 @@
 syntax = "proto3";// see: https://protobuf.dev/programming-guides/proto3/
 
-//import "google/protobuf/timestamp.proto";
-
 // after compilation, you can access the models under this name.
 package proto;
+option go_package = ".;proto";
 
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}

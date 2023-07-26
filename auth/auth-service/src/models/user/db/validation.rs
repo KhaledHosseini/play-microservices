@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::fmt;
-use crate::proto::{CreateUserRequest, LoginUserRequest,RefreshTokenRequest, LogOutRequest};
+use crate::proto::{CreateUserRequest, LoginUserRequest,RefreshTokenRequest, LogOutRequest, ListUsersRequest};
 
 pub trait Validate {
     fn validate(&self)-> Result<(), ValidationError>;
@@ -58,6 +58,15 @@ impl Validate for LogOutRequest {
     fn validate(&self)-> Result<(),  ValidationError> {
         if self.refresh_token.is_empty() {
             return Err(ValidationError::new("Empty token is not allowed."))
+        }
+        Ok(())
+    }
+}
+
+impl Validate for ListUsersRequest {
+    fn validate(&self)-> Result<(),  ValidationError> {
+        if self.page <= 0 || self.size <= 0 {
+            return Err(ValidationError::new("Zero values are not allowed in parameters."))
         }
         Ok(())
     }
