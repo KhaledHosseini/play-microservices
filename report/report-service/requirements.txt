@@ -1,4 +1,6 @@
 kafka-python==2.0.2
+python-snappy==0.6.1
+crc32c==2.3.post0
 python-dotenv==1.0.0
 pymongo==4.4.0
 grpcio-tools==1.56.0

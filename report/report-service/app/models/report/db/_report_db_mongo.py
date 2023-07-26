@@ -23,13 +23,13 @@ class ReportDBMongo(MongoDB, ReportDBInterface):
             logging.error("error creatin report in database: ", e)
             raise e
 
-    def list(self, type: int, page: int, size: int) -> ReportList:
+    def list(self, page: int, size: int) -> ReportList:
         logging.info("getting reports list...")
         try:
-            find = {"type": type}
             coll = self.db[self.collection]
-            doc_count = coll.count_documents(find)
+            doc_count = coll.count_documents({})
             if doc_count == 0:
+                logging.info(f"list count is zero...")
                 return ReportList()
             pagination = MongoDB.MongoPagination(size=size, page=page)
             limit = pagination.getLimit()
@@ -46,4 +46,5 @@ class ReportDBMongo(MongoDB, ReportDBInterface):
                 reports=reports,
             )
         except Exception as e:
+            logging.info(f"error getting reports list...{e}")
             raise e

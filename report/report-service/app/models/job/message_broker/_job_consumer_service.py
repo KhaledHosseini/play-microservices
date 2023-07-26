@@ -19,12 +19,15 @@ class ConsumerService:
       self.threads = []
 
   def start(self):
-      self.runConsumer(topic = self.cfg.TopicJobRun,consumerGroupId = self.cfg.TopicJobRunConsumerGroupID,workerCount=self.cfg.TopicJobRunWorkerCount)
+      self.runConsumer(topic=self.cfg.TopicJobCreate,consumerGroupId=self.cfg.TopicJobCreateConsumerGroupID,workerCount=self.cfg.TopicJobCreateConsumerWorkerCount)
+      self.runConsumer(topic=self.cfg.TopicJobUpdate,consumerGroupId=self.cfg.TopicJobUpdateConsumerGroupID,workerCount=self.cfg.TopicJobUpdateConsumerWorkerCount)
+      self.runConsumer(topic=self.cfg.TopicJobRun,consumerGroupId=self.cfg.TopicJobRunConsumerGroupID,workerCount=self.cfg.TopicJobRunWorkerCount)
       self.runConsumer(topic=self.cfg.TopicJobRunResult,consumerGroupId=self.cfg.TopicJobRunResultConsumerGroupID,workerCount=self.cfg.TopicJobRunResultConsumerWorkerCount)
+      
       # run other topics
 
-      for t in self.threads:
-        t.join()
+    #   for t in self.threads:
+    #     t.join()
 
   def runConsumer(self, topic: str, consumerGroupId: str, workerCount:int):
         logging.info(f"Starting email job consumers with  {workerCount } workers...")
@@ -56,14 +59,14 @@ class JobConsumerWorker(KafkaConsumerWorker):
         self.reportDB = reportDB
 
     def messageRecieved(self, topic: str, message: any):
+        logging.info(f"JobConsumerWorker.messageRecieved: new message arrived for topic {topic} . message is  {message}")
         try:
             job = Job.from_dict(message)
             report = Report(
-                type=0,
-                topic=topic,
-                created_time=datetime.now(),
-                report_data=job.toJsonStr(),
+                Topic=topic,
+                CreatedTime=datetime.now(),
+                ReportData=job.toJsonStr(),
             )
             self.reportDB.create(report=report)
         except Exception as e:
-            logging.error("Unable to load json for job ", e)
+            logging.error("JobConsumerWorker.messageRecieved: Unable to create report in database ", e)

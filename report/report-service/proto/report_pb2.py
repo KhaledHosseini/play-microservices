@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0creport.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"S\n\x12ListReportsRequest\x12!\n\x06\x66ilter\x18\x01 \x01(\x0e\x32\x11.proto.ReportType\x12\x0c\n\x04page\x18\x02 \x01(\x03\x12\x0c\n\x04size\x18\x03 \x01(\x03\"\x8c\x01\n\x12ListReportResponse\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12\x13\n\x0btotal_pages\x18\x02 \x01(\x03\x12\x0c\n\x04page\x18\x03 \x01(\x03\x12\x0c\n\x04size\x18\x04 \x01(\x03\x12\x10\n\x08has_more\x18\x05 \x01(\x08\x12\x1e\n\x07reports\x18\x06 \x03(\x0b\x32\r.proto.Report\"\x8b\x01\n\x06Report\x12\n\n\x02id\x18\x01 \x01(\t\x12\x1f\n\x04type\x18\x02 \x01(\x0e\x32\x11.proto.ReportType\x12\r\n\x05topic\x18\x03 \x01(\t\x12\x30\n\x0c\x63reated_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x13\n\x0breport_data\x18\x05 \x01(\t*:\n\nReportType\x12\x13\n\x0fREPORT_TYPE_JOB\x10\x00\x12\x17\n\x13REPORT_TYPE_UNKNOWN\x10\x01\x32V\n\rReportService\x12\x45\n\x0bListReports\x12\x19.proto.ListReportsRequest\x1a\x19.proto.ListReportResponse\"\x00\x42\tZ\x07.;protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0creport.proto\x12\x05proto\x1a\x1fgoogle/protobuf/timestamp.proto\"0\n\x12ListReportsRequest\x12\x0c\n\x04page\x18\x01 \x01(\x03\x12\x0c\n\x04size\x18\x02 \x01(\x03\"\x8c\x01\n\x12ListReportResponse\x12\x13\n\x0btotal_count\x18\x01 \x01(\x03\x12\x13\n\x0btotal_pages\x18\x02 \x01(\x03\x12\x0c\n\x04page\x18\x03 \x01(\x03\x12\x0c\n\x04size\x18\x04 \x01(\x03\x12\x10\n\x08has_more\x18\x05 \x01(\x08\x12\x1e\n\x07reports\x18\x06 \x03(\x0b\x32\r.proto.Report\"j\n\x06Report\x12\n\n\x02id\x18\x01 \x01(\t\x12\r\n\x05topic\x18\x02 \x01(\t\x12\x30\n\x0c\x63reated_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x13\n\x0breport_data\x18\x04 \x01(\t2V\n\rReportService\x12\x45\n\x0bListReports\x12\x19.proto.ListReportsRequest\x1a\x19.proto.ListReportResponse\"\x00\x42\tZ\x07.;protob\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,14 +23,12 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'Z\007.;proto'
-  _globals['_REPORTTYPE']._serialized_start=426
-  _globals['_REPORTTYPE']._serialized_end=484
   _globals['_LISTREPORTSREQUEST']._serialized_start=56
-  _globals['_LISTREPORTSREQUEST']._serialized_end=139
-  _globals['_LISTREPORTRESPONSE']._serialized_start=142
-  _globals['_LISTREPORTRESPONSE']._serialized_end=282
-  _globals['_REPORT']._serialized_start=285
-  _globals['_REPORT']._serialized_end=424
-  _globals['_REPORTSERVICE']._serialized_start=486
-  _globals['_REPORTSERVICE']._serialized_end=572
+  _globals['_LISTREPORTSREQUEST']._serialized_end=104
+  _globals['_LISTREPORTRESPONSE']._serialized_start=107
+  _globals['_LISTREPORTRESPONSE']._serialized_end=247
+  _globals['_REPORT']._serialized_start=249
+  _globals['_REPORT']._serialized_end=355
+  _globals['_REPORTSERVICE']._serialized_start=357
+  _globals['_REPORTSERVICE']._serialized_end=443
 # @@protoc_insertion_point(module_scope)

@@ -17,7 +17,12 @@ from app.models.job import ConsumerService
 class Server:
     def run(self, cfg: Config):
         logging.info("Running services...")
+
         db = ReportDBMongo(cfg)
+       
+        consumer = ConsumerService(cfg,db)
+        consumer.start()
+        
         my_report_grpc_service = MyReportService(reportDB=db)
         server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=10),
@@ -28,13 +33,10 @@ class Server:
             ReportGRPCTypes.DESCRIPTOR.services_by_name["ReportService"].full_name,
             reflection.SERVICE_NAME,
         )
+
         reflection.enable_server_reflection(SERVICE_NAMES, server)
+
         port = cfg.ServerPort
         server.add_insecure_port("[::]:" + port)
         server.start()
-
-        consumer = ConsumerService(cfg,db)
-        consumer.start()
-
-
         server.wait_for_termination()
