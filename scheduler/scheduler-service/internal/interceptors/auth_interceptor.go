@@ -2,7 +2,8 @@ package interceptors
 
 import (
 	"context"
-
+	"strings"
+	
 	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/config"
 	"github.com/KhaledHosseini/play-microservices/scheduler/scheduler-service/pkg/logger"
 
@@ -24,6 +25,7 @@ func NewAuthInterceptor(log logger.Logger, cfg *config.Config) *AuthInterceptor 
 }
 
 func (ai *AuthInterceptor) AuthInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	ai.log.Info("AuthInterceptor start")
 	// Extract the Authorization header from metadata
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
@@ -56,13 +58,17 @@ func (ai *AuthInterceptor) AuthInterceptor(ctx context.Context, req interface{},
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		ai.log.Info(claims["nbf"])
 		// Access the role value
-		role := claims["role"]
+		role, ok := claims["role"].(string)
+		if !ok {
+			// Handle the case where the role value is not a string
+			return nil, status.Errorf(codes.Unauthenticated, "Invalid role value")
+		}
 		ai.log.Info(role)
 		//  We can Add the role information to the metadata of the request to be used
 		// by the service method for authorization puroposes. but we do a simple authorization here!
-		if role != "admin" {
+		rolestr := strings.ToLower(role)
+		if rolestr != "admin" {
 			return nil, status.Errorf(codes.PermissionDenied, "Only admins have access!")
 		}
 		// newMD := metadata.New(map[string]string{"role": role})

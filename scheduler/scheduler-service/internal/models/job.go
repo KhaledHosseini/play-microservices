@@ -12,21 +12,21 @@ import (
 )
 
 type Job struct {
-	JobID        primitive.ObjectID `json:"jobId" bson:"_id,omitempty"`
-	Name         string             `json:"name,omitempty" bson:"name,omitempty" validate:"required,min=3,max=250"`
-	Description  string             `json:"description,omitempty" bson:"description,omitempty" validate:"required,min=3,max=500"`
-	ScheduleTime time.Time          `json:"scheduleTime" bson:"scheduleTime,omitempty"`
-	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt,omitempty"`
-	UpdatedAt    time.Time          `json:"updatedAt" bson:"updatedAt,omitempty"`
-	Status       int32              `json:"status,omitempty" bson:"status,omitempty"`
-	JobType      int32              `json:"jobType,omitempty" bson:"jobType,omitempty"`
-	JobData      string             `json:"jobData,omitempty" bson:"jobData,omitempty"`
-	ScheduledKey int                `json:"scheduledKey,omitempty" bson:"scheduledKey,omitempty"`
+	Id        primitive.ObjectID 	`json:"Id" bson:"_id,omitempty"`
+	Name         string             `json:"Name" bson:"name" validate:"required,min=3,max=250"`
+	Description  string             `json:"Description" bson:"description" validate:"required,min=3,max=500"`
+	ScheduleTime time.Time          `json:"ScheduleTime" bson:"scheduleTime"`
+	CreatedAt    time.Time          `json:"CreatedAt" bson:"createdAt"`
+	UpdatedAt    time.Time          `json:"UpdatedAt" bson:"updatedAt"`
+	Status       int32              `json:"Status" bson:"status"`
+	JobType      int32              `json:"JobType" bson:"jobType"`
+	JobData      string             `json:"JobData" bson:"jobData"`
+	ScheduledKey int                `json:"ScheduledKey" bson:"scheduledKey"`
 }
 
 func (j *Job) ToProto() *proto.Job {
 	return &proto.Job{
-		Id:           j.JobID.String(),
+		Id:           j.Id.Hex(),
 		Name:         j.Name,
 		Description:  j.Description,
 		ScheduleTime: timestamppb.New(j.ScheduleTime),
@@ -38,13 +38,14 @@ func (j *Job) ToProto() *proto.Job {
 	}
 }
 
+// Note: 0 values for int and empty strings will be ignored proto.
 func JobFromProto_Job(jb *proto.Job) (*Job, error) {
-	jobID, err := primitive.ObjectIDFromHex(jb.GetId())
+	jobId, err := primitive.ObjectIDFromHex(jb.GetId())
 	if err != nil {
 		return nil, err
 	}
 	return &Job{
-		JobID:        jobID,
+		Id:        	  jobId,
 		Name:         jb.GetName(),
 		Description:  jb.GetDescription(),
 		ScheduleTime: jb.GetScheduleTime().AsTime(),
@@ -57,29 +58,29 @@ func JobFromProto_Job(jb *proto.Job) (*Job, error) {
 	}, nil
 }
 
-func JobFromProto_CreateJobRequest(jbr *proto.CreateJobRequest)  (*Job, error) {
+func JobFromProto_CreateJobRequest(jbr *proto.CreateJobRequest) (*Job, error) {
 	return &Job{
 		Name:         jbr.GetName(),
 		Description:  jbr.GetDescription(),
 		ScheduleTime: jbr.GetScheduleTime().AsTime(),
 		JobType:      int32(jbr.GetJobType()),
 		JobData:      jbr.GetJobData(),
-	},nil
+	}, nil
 }
 
-func JobFromProto_UpdateJobRequest(jbr *proto.UpdateJobRequest)  (*Job, error) {
-	jobID, err := primitive.ObjectIDFromHex(jbr.GetId())
+func JobFromProto_UpdateJobRequest(jbr *proto.UpdateJobRequest) (*Job, error) {
+	jobId, err := primitive.ObjectIDFromHex(jbr.GetId())
 	if err != nil {
 		return nil, err
 	}
 	return &Job{
-		JobID:		  jobID,
+		Id:           jobId,
 		Name:         jbr.GetName(),
 		Description:  jbr.GetDescription(),
 		ScheduleTime: jbr.GetScheduleTime().AsTime(),
 		JobType:      int32(jbr.GetJobType()),
 		JobData:      jbr.GetJobData(),
-	},nil
+	}, nil
 }
 
 type JobsList struct {
@@ -91,18 +92,17 @@ type JobsList struct {
 	Jobs       []*Job `json:"jobs"`
 }
 
-
 func (j *JobsList) ToProto() *proto.ListJobsResponse {
 	jobs := funk.Map(j.Jobs, func(x *Job) *proto.Job {
 		return x.ToProto()
 	}).([]*proto.Job)
 	return &proto.ListJobsResponse{
-		TotalCount:           j.TotalCount,
-		TotalPages:         j.TotalPages,
-		Page:  j.Page,
-		Size: j.Size,
-		HasMore:  j.HasMore,
-		Jobs:  jobs,
+		TotalCount: j.TotalCount,
+		TotalPages: j.TotalPages,
+		Page:       j.Page,
+		Size:       j.Size,
+		HasMore:    j.HasMore,
+		Jobs:       jobs,
 	}
 }
 

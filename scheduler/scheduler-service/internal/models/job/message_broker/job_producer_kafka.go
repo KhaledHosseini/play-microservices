@@ -74,9 +74,10 @@ func (p jobsProducer) Close() {
 //implement models.job.JobsProducer for jobsProducer
 
 func (p *jobsProducer) PublishCreate(ctx context.Context, job *models.Job) error {
-
+	p.log.Infof("jobsProducer:PublishCreate started for job: %v",job)
 	jobBytes, err := json.Marshal(&job)
 	if err != nil {
+		p.log.Errorf("jobsProducer:PublishCreate error: %v",err.Error())
 		return errors.Wrap(err, "json.Marshal")
 	}
 
@@ -87,9 +88,10 @@ func (p *jobsProducer) PublishCreate(ctx context.Context, job *models.Job) error
 }
 
 func (p *jobsProducer) PublishUpdate(ctx context.Context, job *models.Job) error {
-
+	p.log.Infof("jobsProducer:PublishUpdate started for job: %v",job)
 	jobBytes, err := json.Marshal(&job)
 	if err != nil {
+		p.log.Errorf("jobsProducer:PublishUpdate error: %v",err.Error())
 		return errors.Wrap(err, "json.Marshal")
 	}
 
@@ -100,9 +102,10 @@ func (p *jobsProducer) PublishUpdate(ctx context.Context, job *models.Job) error
 }
 
 func (p *jobsProducer) PublishRun(ctx context.Context, job *models.Job) error {
-
+	p.log.Infof("jobsProducer:PublishRun started for job: %v",job)
 	jobBytes, err := json.Marshal(&job)
 	if err != nil {
+		p.log.Errorf("jobsProducer:PublishRun error: %v",err.Error())
 		return errors.Wrap(err, "json.Marshal")
 	}
 
