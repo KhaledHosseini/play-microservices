@@ -81,18 +81,18 @@ Just run `docker-compose up` from the root directory. Then go to http://localhos
    - Create and develop your gRPC service independently. For authentication, consider accepting an environment variable called `AUTH_PUBLIC_KEY_FILE` to read authentication public key for verifying authorization header which is a simple jwt with `role` (admin or user ) for authorization.
    - Do the follwing to the api-gateway service (For more info see [Here](https://dev.to/khaledhosseini/play-microservices-api-gateway-service-4a9j)).
      - Put your .proto file inside proto folder. Run `source build_grpc.sh` to compile your .proto file.
-     - In api-gateway, inside `internal/models` folder create a file named <yourmodelname> and create the necessary rest layer models and the conversion to/from proto models.
+     - In api-gateway, inside `internal/models` folder create a file named `<yourmodelname>` and create the necessary rest layer models and the conversion to/from proto models.
      - Add `<YOURSERVICE>_URL` to the config/config.go
-     - Create a folder named <yourmodelname> inside `internal/models` 
-     - Inside <yourmodelname> folder create a folder named grpc and then a file named client_service.go. Put you grpc service communication logic here.
-     - Inside <yourmodelname> folder create a folder named handler and then a file named handler.go. Put your rest api for your grpc model here.
+     - Create a folder named `<yourmodelname>` inside `internal/models` 
+     - Inside `<yourmodelname>` folder create a folder named grpc and then a file named client_service.go. Put you grpc service communication logic here.
+     - Inside `<yourmodelname>` folder create a folder named handler and then a file named handler.go. Put your rest api for your grpc model here.
      - Add your rest-api end points to internal/api/router.go
  - Front-end service
-   - Check the api-gateway rest api from [here](Here.com).
-   - Develope your client application to communicate with the rest api.
+   - Check the api-gateway rest api from [here](http://localhost:5010/swagger/index.html).
+   - Develop your client application to communicate with the rest api.
 
 
-Finally add your service to the docker-compose.yml of the play-microservices. 
+Finally add your service to the docker-compose.yml of the play-microservices. Add `<YOURSERVICE>_URL` to the api gateway environment variables. Also add `AUTH_PUBLIC_KEY_FILE=/run/secrets/auth-access-public-key` environemt variable to your service.
 
 ---
 
