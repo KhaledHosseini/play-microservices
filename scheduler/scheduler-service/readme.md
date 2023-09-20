@@ -1,58 +1,68 @@
-This is the 3rd part of a series of articles under the name **"Play Microservices"**. Links to other parts:
-Part 1: [Play Microservices: Bird's eye view](https://dev.to/khaledhosseini/play-microservices-birds-eye-view-3d44)
-Part 2: [Play Microservices: Authentication](https://dev.to/khaledhosseini/play-microservices-authentication-4di3)
-Part 3: You are here
 
-The source code for the project can be found [here](https://github.com/KhaledHosseini/play-microservices):
 
 ---
 
-## Contents:
+Contents:
+- [Other parts](#other-parts)
+- [Summary](#summary)
+- [Tools](#tools)
+- [Docker dev environment](#docker-dev-environment)
+- [Database service: Mongo](#database-service-mongo)
+- [Mongo express service](#mongo-express-service)
+- [Metadata service: Zookeeper](#metadata-service-zookeeper)
+- [Zoonavigator service](#zoonavigator-service)
+- [Message broker service: Kafka](#message-broker-service-kafka)
+- [Kafka-ui service](#kafka-ui-service)
+- [Scheduler-grpcui-service](#scheduler-grpcui-service)
+- [Scheduler service: Golang](#scheduler-service-golang)
+- [To DO](#to-do)
 
- - **Summary**
- - **Tools**
- - **Docker dev environment**
- - **Database service: Mongodb**
- - **Mongo express service**
- - **Kafka metadata service: Zookeeper**
- - **Zoonavigator service**
- - **Message broker service: Kafka**
- - **Kafka-ui service**
- - **Scheduler-grpcui-service**
- - **Scheduler service: Golang**
- - **To do**
+
+---
+## Other parts
+This is the 3rd part of a series of articles under the name **"Play Microservices"**. Links to other parts:<br/>
+Part 1: [Play Microservices: Bird's eye view](https://dev.to/khaledhosseini/play-microservices-birds-eye-view-3d44)<br/>
+Part 2: [Play Microservices: Authentication](https://dev.to/khaledhosseini/play-microservices-authentication-4di3)<br/>
+Part 3: You are here<br/>
+Part 4: [Play Microservices: Email service](https://dev.to/khaledhosseini/play-microservices-email-service-1kmc)<br/>
+Part 5: [Play Microservices: Report service](https://dev.to/khaledhosseini/play-microservices-report-service-4jcm)<br/>
+Part 6: [Play Microservices: Api-gateway service](https://dev.to/khaledhosseini/play-microservices-api-gateway-service-4a9j)<br/>
+Part 7: [Play Microservices: Client service](https://dev.to/khaledhosseini/play-microservices-client-service-4jbf)<br/>
+Part 8: [Play Microservices: Integration via docker-compose](https://dev.to/khaledhosseini/play-microservices-integration-via-docker-compose-2ddc)<br/>
+Part 9: [Play Microservices: Security](https://dev.to/khaledhosseini/play-microservices-security-45e4)<br/>
 
 ---
 
-- **Summary**
+## Summary
 
-In the 2nd part we have developed an authentication service. Here our goal is to create a job scheduler service for our microservices application. To accomplish our goal, we require four separate services: a database service, a message broker service , a metadata database service for the message broker and the scheduler service which is a gRPC api service. In the development environment, we include four additional services for debugging purposes. These services are Mongo express to manage our database service, Kafkaui service to manage our kafka service, Zoonavigator for Zookeeper service and grpcui service to test our gRPC api.
+In the second part, we developed an authentication service. Now, our objective is to create a job scheduler service for our microservices application. To achieve this, we need four distinct services: a database service, a message broker service, a metadata database service dedicated to supporting the message broker, and the scheduler service itself, which is a gRPC API service. Additionally, in the development environment, we include four extra services specifically for debugging purposes. These services consist of Mongo Express, used to manage our database service, Kafkaui for managing our Kafka service, Zoonavigator for the Zookeeper service, and grpcui for testing our gRPC API.
 
 
 ![Summary](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/cqdkr25890v08auqfdiz.png)
 
 At the end, the project directory structure will appear as follows:
 
-
 ![Folder structure](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/3p0r2lpw5i4mdd19je0k.PNG)
+
 ---
-- **Tools**
+
+## Tools
 
 The tools required In the host machine:
 
   - [Docker](https://www.docker.com/): Containerization tool
   - [VSCode](https://code.visualstudio.com/): Code editing tool
-  - [Dev containsers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VSCode
+  - [Dev containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VSCode
   - [Docker](https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker) extension for VSCode
   - [Git](https://git-scm.com/)
 
 The tools and technologies that we will use Inside containers for each service:
 
  - Database service: [Mongo](https://hub.docker.com/_/mongo)
- - mongo express service: [Mongo express](https://hub.docker.com/_/mongo-express)
+ - Mongo express service: [Mongo express](https://hub.docker.com/_/mongo-express)
  - Messaging service: [Kafka](https://hub.docker.com/r/bitnami/kafka/)
  - Kafka-ui service: [Kafka-ui](https://hub.docker.com/r/provectuslabs/kafka-ui)
- - metadata service: [Zookeeper](https://hub.docker.com/_/zookeeper)
+ - Metadata service: [Zookeeper](https://hub.docker.com/_/zookeeper)
  - Zoonavigator service: [Zoonavigator](https://hub.docker.com/r/elkozmon/zoonavigator)
  - grpcui service: [grpcui](https://hub.docker.com/r/fullstorydev/grpcui)
  - Scheduler api service: 
@@ -64,7 +74,7 @@ The tools and technologies that we will use Inside containers for each service:
 
 ---
 
-- **Docker dev environment**
+## Docker dev environment
 
 Development inside Docker containers can provide several benefits such as consistent environments, isolated dependencies, and improved collaboration. By using Docker, development workflows can be containerized and shared with team members, allowing for consistent deployments across different machines and platforms. Developers can easily switch between different versions of dependencies and libraries without worrying about conflicts.
 
@@ -74,9 +84,9 @@ When developing inside a Docker container, you only need to install `Docker`, `V
 
 ---
 
-- **Database service: Mongo**
+## Database service: Mongo
 
-> - Create a folder for the project and choose a name for it (such as 'microservice'). Then create a folder named `scheduler`. This folder is the root directory of scheduler service. You can then open the root folder in VS Code by right-clicking on the folder and selecting 'Open with Code'.
+> - Create a folder for the project and choose a name for it (such as 'microservice'). Then create a folder named `scheduler`. This folder is the root directory of current project. You can then open the root folder in VS Code by right-clicking on the folder and selecting 'Open with Code'.
 > - Inside the root directory create a folder with the name scheduler-db-service, then create the following files inside.
 > - Create a Dockerfile and set content to `FROM mongo:7.0.0-rc5`
 > - Create a file named pass.txt and set content to a `password`
@@ -124,7 +134,7 @@ secrets:
 
 ---
 
-- **Mongo express service**
+## Mongo express service
 
 The purpose of this service is solely for debugging and management of our running database server in the development environment.
 
@@ -175,7 +185,7 @@ MONGO_EXPRESS_PORT=8081
 
 ---
 
-- **Metadata service: Zookeeper**
+## Metadata service: Zookeeper
 
 [ZooKeeper ](https://zookeeper.apache.org/) is a centralized service for maintaining configuration information. we use it as metadata storage for our Kafka messaging service.
 > - Inside root directory create a folder with the name zookeeper-service
@@ -227,12 +237,12 @@ ZOOKEEPER_ADMIN_PORT=8078
   zoo-server-pass:
     file: zookeeper-service/server_passwords.properties
 ```
-> -ZooKeeper is a distributed application that allows us to run multiple servers simultaneously. It enables multiple clients to connect to these servers, facilitating communication between them. ZooKeeper servers collaborate to handle data and respond to requests in a coordinated manner. In this case, our zookeeper consumers (clients) are Kafka servers which is again a distributed event streaming platform. We can run multiple zookeeper services as an ensemble of zookeeper servers and attach them together via `ZOO_SERVERS` environment variable.
+> - ZooKeeper is a distributed application that allows us to run multiple servers simultaneously. It enables multiple clients to connect to these servers, facilitating communication between them. ZooKeeper servers collaborate to handle data and respond to requests in a coordinated manner. In this case, our zookeeper consumers (clients) are Kafka servers which is again a distributed event streaming platform. We can run multiple zookeeper services as an ensemble of zookeeper servers and attach them together via `ZOO_SERVERS` environment variable.
 > - The Bitnami ZooKeeper Docker image provides a zoo_client entrypoint, which acts as an internal client and allows us to run the zkCli.sh command-line tool to interact with the ZooKeeper server as a client. But we are going to use a GUI client for debugging purposes: Zoonavigator.
 
 ---
 
- - **Zoonavigator service**
+## Zoonavigator service
 
 This service exists only in the development environment for debugging purposes. We use it to connect to zookeeper-service and manage the data.
 
@@ -263,7 +273,7 @@ This service exists only in the development environment for debugging purposes. 
 
 ![zoonavigatoe](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/h151vcjvlc60lp6hr7lq.PNG)
 
-> - Enter the container name of a zookeeper service (here zk1). If everything go according to plan you can connect to the zookeeper service.
+> - Enter the container name of a zookeeper service (here zk1).  If everything goes according to plan, you should be able to establish a connection to the ZooKeeper service.
 
 ![zoonavigator-zk1](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/aldo17byoo9ef9uppbcc.PNG) 
 
@@ -271,7 +281,7 @@ This service exists only in the development environment for debugging purposes. 
 
 ---
 
-- **Message broker service: Kafka**
+## Message broker service: Kafka
 
 [Apache Kafka](https://kafka.apache.org/)  is an open-source distributed event streaming platform that is well-suited for Microservices architecture. It is an ideal choice for implementing patterns such as event sourcing. Here We use it as an message broker for our scheduler service. 
 
@@ -314,7 +324,7 @@ KAFKA_ENABLE_KRAFT=no
 
 ---
 
- - **Kafka-ui service**
+## Kafka-ui service
 
 This service exists only in the development environment for debugging purposes. We use it to connect to kafka-service and manage the data.
 
@@ -345,7 +355,7 @@ This service exists only in the development environment for debugging purposes. 
 
 ![Kafka-ui](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/gcwqxf16jbig0q3xxzn7.PNG)
 
-> - As you can see, you can view and manage brokers, topics and consumers. We will return to these items later. 
+> - From the interface, you have the ability to view and manage brokers, topics, and consumers. We'll revisit these elements in more detail shortly.
 > - Run `docker-compose down`
 > - Our required services are ready and running. Now it is time to Prepare development environment for our scheduler service. 
 
@@ -353,9 +363,9 @@ This service exists only in the development environment for debugging purposes. 
 
 ---
 
-- **Scheduler-grpcui-service**
+## Scheduler-grpcui-service
 
-Before starting our Scheduler service development, lets add another service to our development environment which we will use to interact with our scheduler-service for debugging purposes.
+Before commencing the development of our Scheduler service, let's incorporate an additional service into our development environment. This service will facilitate interaction with our scheduler-service for debugging purposes.
 > - Create a folder named grpcui-service inside scheduler folder.
 > - Create a Docker file and set contents to `FROM fullstorydev/grpcui:v1.3.1`
 > - Add the following to the services part of the docker-compose.yml file. 
@@ -378,11 +388,11 @@ Before starting our Scheduler service development, lets add another service to o
 
 ---
 
-- **Scheduler service: Golang**
+## Scheduler service: Golang
 
-Our goal is to develop a gRPC server with Go. The typical pipeline for developing a gRPC server is quite straightforward. You define your gRPC schema inside a .proto file (see [here](https://protobuf.dev/) for more info). Then you compile (Actually you transform) the .proto to your target programming language using a protocol buffer compiler tool and import it to your project. .proto models are are business layer models. Then you use a gRPC framework in your target language to run a gRPC server. Then you can define corresponding database layer models and use a converter to transform between them. You receive gRPC models vis gRPC server, convert them to database models and store them in a database. In case of queries, you query the data from the database, transform them to gRPC models and return them to the user.
+Our goal is to develop a gRPC server with Go. The typical pipeline for developing a gRPC server is quite straightforward. You define your gRPC schema inside a .proto file (see [here](https://protobuf.dev/) for more info). Then you compile (Actually you transform) the .proto to your target programming language using a protocol buffer compiler tool and import it to your project. then you use a gRPC framework in your target language to run a gRPC server. This server uses .proto models in the function parameters. Next you can define corresponding database layer models and use a converter to transform between them. You receive gRPC models vis gRPC server, convert them to database models and store them in a database. In case of queries, you query the data from the database, transform them to gRPC models and return them to the user.
 
-Here is a summary of what we are going to do: We first install [protoc](https://github.com/protocolbuffers/protobuf/releases/download/v23.3/protoc-23.3-linux-x86_64.zip) in our development environment. then initial our go project. Define our proto scheme and compile it using the above tool and then running an initial gRPC server. Then we add database layer models and classes. 
+Here is a summary of what we are going to do: We first install [protoc](https://github.com/protocolbuffers/protobuf/releases/download/v23.3/protoc-23.3-linux-x86_64.zip) in our development environment. Then initialize our go project, define our proto scheme and compile it using the above tool and then run an initial gRPC server. Then we add database layer models and classes. 
 
 > - Create a folder named `scheduler-service` inside scheduler folder.
 > - Create a Dockerfile inside `scheduler-service` and set the contents to
@@ -403,6 +413,7 @@ RUN export PATH="$PATH:$(go env GOPATH)/bin"
 
 WORKDIR /usr/src/app
 ```
+> - Create a directory called "keys" within the `scheduler-service` folder and create a file named `access_token.public.pem`. Then go to [here](https://cryptotools.net/rsagen) and generate an rsa 256 Key-Pair. Copy the public key to `access_token.public.pem` and keep the private key somewhere (We will use it later). This file acts as the public key of the auth service. Auth service generate an RSA256 key-pair and sign the JWTs with the private key. Other services verify the signature of the JWT using the public key for authentication purposes. 
 > - Add the following to the service part of our docker-compose.yml file.
 
 ```yaml
@@ -413,15 +424,17 @@ WORKDIR /usr/src/app
     container_name: scheduler-service
     command: sleep infinity
     environment:
-      ENVIRONMENT: development
-      SERVER_PORT: ${SCHEDULER_PORT}
+      DATABASE_SCHEME: mongodb
+      DATABASE_DOMAIN: scheduler-db-service
+      DATABASE_PORT: ${MONGODB_PORT}
       DATABASE_USER_FILE: /run/secrets/scheduler-db-user
       DATABASE_PASS_FILE: /run/secrets/scheduler-db-pass
       DATABASE_DB_NAME_FILE: /run/secrets/scheduler-db-dbname
-      DATABASE_SCHEMA: mongodb
-      DATABASE_HOST_NAME: scheduler-db-service
-      DATABASE_PORT: ${MONGODB_PORT}
       KAFKA_BROKERS: kafka1-service:${KAFKA1_PORT}
+      AUTH_PUBLIC_KEY_FILE: /run/secrets/auth-public-key
+      # TOPICS_FILE: ''
+      ENVIRONMENT: development
+      SERVER_PORT: ${SCHEDULER_PORT}
     ports:
       - ${SCHEDULER_PORT}:${SCHEDULER_PORT}
     volumes:
@@ -430,56 +443,64 @@ WORKDIR /usr/src/app
       - scheduler-db-user
       - scheduler-db-pass
       - scheduler-db-dbname
+      - auth-public-key
+
+...
+
+secrets:
+  # this is temorary for development environment. 
+  auth-public-key:
+    file: scheduler-service/keys/access_token.public.pem
 ```
-> - We are going to do all the development inside a docker container without installing Golang in our host machine. To do so, we run the containers and then attach to scheduler-service container using VSCode. As you may noticed, the dockerfile for scheduler-service has no entry-point therefore we set the command value of scheduler-service to `sleep infinity` to stay the container awake.
+> - We are going to do all the development inside a docker container without installing Golang in our host machine. To do so, we run the containers and then attach VSCode to the scheduler-service container. As you may noticed, the Dockerfile for scheduler-service has no entry-point therefore we set the command value of scheduler-service to `sleep infinity` to keep the container awake.
 > - Now run `docker-compose up -d --build`
-> - While running, attach to the scheduler service by clicking bottom-left icon and then select `attach to running container `. Select scheduler-service and wait for a new instance of VSCode to start. At the beginning the VScode asks us to open a folder inside the container. We have selected  `WORKDIR /usr/src/app` inside our dockerfile, so we will open this folder inside the container. this folder is mounted to scheduler-service folder inside the host machine using docker compose file, therefor whatever change we made will be synced to the host folder too.
+> - While running, attach to the scheduler service by clicking bottom-left icon and then select `attach to running container`. Select scheduler-service and wait for a new instance of VSCode to start. At the beginning the VScode asks us to open a folder inside the container. We have selected  `WORKDIR /usr/src/app` inside our Dockerfile, so we will open this folder inside the container. This folder is mounted to scheduler-service folder inside the host machine using docker compose volume, therefor whatever change we made will be synced to the host folder too.
 > - After opening the folder `/usr/src/app`, open a new terminal and initialize the go project by running `go mod init github.com/<your_username>/play-microservices/scheduler/scheduler-service`. This command will create a go.mod file.
 > - Run `go get -u google.golang.org/grpc`. This is a gRPC framework for running grpc server using Golang.
-> - Run `go get -u google.golang.org/grpc/reflection`. We ad reflection to our gRPC server so that our grpcui-service can connect to it and retrieve the endpoints and messages easily for debugging purposes.
+> - Run `go get -u google.golang.org/grpc/reflection`. We add reflection to our gRPC server so that our grpcui-service can connect to it and retrieve the endpoints and messages easily for debugging purposes.
 > - Now create a folder named proto and create a file named job.proto inside. Set the content from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/proto/job.proto)
-> - Run `protoc --go_out=./proto --go-grpc_out=./proto proto/*.proto`. this will compile our .proto file to Golang. two files will be created. job.pb.go and job_grpc.pb.go. The first contains the proto models and the second contains the code for job service interface (We need to create our service and implement this interface).
+> - Run `protoc --go_out=./proto --go-grpc_out=./proto proto/*.proto`. This command compile our .proto file to Golang. Two files will be created. job.pb.go and job_grpc.pb.go. The first contains the proto models and the second contains the code for job service interface (We need to create our service and implement this interface).
 > - Note: We adopt a Golang project structure that aligns with the recommended guidelines stated [here](https://github.com/golang-standards/project-layout)
 > - Create a folder named config and a file named `config.go`. Set the contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/config/config.go). Also create a file named .env in the same folder. we will put our internal environment variables here. Set contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/config/.env). Create another file named .env.topics for putting kafka topics. For production environment, we pass the topics file via docker compose secrets and send the position of file via `TOPICS_FILE` environment variable. Then we load the contents of the file. 
 > - Create a folder named pkg in the root directory (beside mod.go). We will put general packages here. Inside Create a folder named logger then a file named logger.go and set the contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/pkg/logger/logger.go).
-> - Create this folder tree: `internal/models/job/grpc`. inside grpc folder create a folder named job_service.go and set the contents to
+> - Create this folder tree: `internal/models/job/grpc`. inside grpc folder create a file named job_service.go and set the contents to
 
 ```go
 package grpc
 
 import (
 	context "context"
-	pb "github.com/<your_username>/play-microservices/scheduler/scheduler-service/proto"
+	proto "github.com/<your_username>/play-microservices/scheduler/scheduler-service/proto"
 
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
 )
 
 type JobService struct {
-pb.UnimplementedJobServiceServer
+proto.UnimplementedJobsServiceServer
 }
 
 func NewJobService() *JobService {
 	return &JobService{}
 }
 
-func (j *JobService) CreateJob(ctx context.Context, req *pb.CreateJobRequest) (*pb.CreateJobResponse, error) {
+func (j *JobService) CreateJob(ctx context.Context, req *proto.CreateJobRequest) (*proto.CreateJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateJob not implemented")
 }
 
-func (JobService) GetJob(context.Context, *pb.GetJobRequest) (*pb.GetJobResponse, error) {
+func (JobService) GetJob(context.Context, *proto.GetJobRequest) (*proto.GetJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetJob not implemented")
 }
 
-func (JobService) ListJobs(context.Context, *pb.ListJobsRequest) (*pb.ListJobsResponse, error) {
+func (JobService) ListJobs(context.Context, *proto.ListJobsRequest) (*proto.ListJobsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListJobs not implemented")
 }
 
-func (JobService) UpdateJob(context.Context, *pb.UpdateJobRequest) (*pb.UpdateJobResponse, error) {
+func (JobService) UpdateJob(context.Context, *proto.UpdateJobRequest) (*proto.UpdateJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateJob not implemented")
 }
 
-func (JobService) DeleteJob(context.Context, *pb.DeleteJobRequest) (*pb.DeleteJobResponse, error) {
+func (JobService) DeleteJob(context.Context, *proto.DeleteJobRequest) (*proto.DeleteJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteJob not implemented")
 }
 
@@ -572,7 +593,7 @@ func main() {
 ```
 > - Run `go mod tidy`
 > - Run `go run cmd/main.go`
-> - While our server is running, go to docker desktop and restart grpcui-service. Now go to `http://localhost:5000/`. If everything goes on plan, you can connect the server.
+> - While our server is running, go to docker desktop and restart grpcui-service. Now go to `http://localhost:5000/`. If everything goes on plan, you can connect to the server.
 
 
 ![grpcui-start](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rkff8ngf3rrevkkspbw1.PNG)
@@ -600,7 +621,8 @@ type JobsProducer interface {
 	PublishRun(ctx context.Context, job *Job) error
 }
 ```
-> - We then pass these two interfaces to our JobService model and do our logic there without knowing which database engine or messaging broker we are using. This gives us the flexibility to select whatever database (mongo or postgres) or message broker (kafka or rabitmq) we want.
+> - Create a folder named validation inside job folder. Then a file named validate.go. Set the contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/internal/models/job/validation/validate.go). Inside this file we put the logic for validation of our input models.
+> - We have defined two interfaces for database and message broker operations. We then pass these two interfaces to our JobService model and do our logic there without knowing which database engine or messaging broker we are using. This gives us the flexibility to select whatever database (mongo or postgres) or message broker (kafka or rabitmq) we want.
 > - For scheduling we use this [package](https://github.com/reugn/go-quartz). Run `go get github.com/reugn/go-quartz/quartz`
 > - Now change the definition of JobService inside job_service.go: Final file is [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/internal/models/job/grpc/job_grpc_service.go)
 
@@ -609,7 +631,7 @@ type JobService struct {
 	jobDB         models.JobDB
 	jobsProducer  models.JobsProducer
 	jobsScheduler scheduler.Scheduler
-        pb.UnimplementedJobServiceServer
+        proto.JobsServiceServer
 }
 
 func NewJobService(jobDB models.JobDB, jobsProducer models.JobsProducer, jobsScheduler scheduler.Scheduler) *JobService {
@@ -641,57 +663,51 @@ func NewJobService(jobDB models.JobDB, jobsProducer models.JobsProducer, jobsSch
 > - Set the contents for job_service.go from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/internal/models/job/grpc/job_grpc_service.go). The code for the CreateJob function is as follows:
 
 ```go
-func (j *JobService) CreateJob(ctx context.Context, req *pb.CreateJobRequest) (*pb.CreateJobResponse, error) {
-
-	job := models.JobFromProto_CreateJobRequest(req)
-	job.Status = int32(pb.JobStatus_SCHEDULED)
-	jobFingerPrint := fmt.Sprintf("%s:%s:%s:%p", job.Name, job.Description, job.JobData, &job.ScheduleTime)
-	job.ScheduledKey = int(fnv1a.HashString64(jobFingerPrint)) //We assume 64 bit systems!
-	//cretae job in the database
-	created, err := j.jobDB.Create(ctx, job)
-	if err != nil {
-		return nil, grpcErrors.ErrorResponse(err, err.Error())
+func (js *JobService) CreateJob(ctx context.Context, req *proto.CreateJobRequest) (*proto.CreateJobResponse, error) {
+	js.log.Infof("JobService.CreateJob: grpc message arrived : %v", req)
+	v := validator.CreateJobRequestValidator{CreateJobRequest: req}
+	v_err := v.Validate()
+	if v_err != nil {
+		js.log.Errorf("JobService.CreateJob: input validation failed for request : %v with error %v", req, v_err.Error())
+		return nil, status.Errorf(codes.InvalidArgument, "Invalid request body.")
 	}
 
-	jobID := created.JobID
-	functionJob := jobFucntion.NewFunctionJobWithKey(job.ScheduledKey, func(_ context.Context) (int, error) {
+	job, err0 := models.JobFromProto_CreateJobRequest(req)
+	if err0 != nil {
+		js.log.Errorf("JobService.CreateJob: cannot create proto request")
+		return nil, status.Errorf(codes.InvalidArgument, "Invalid request body.")
+	}
+	js.log.Infof("JobService.CreateJob: proto converted to db model : %v", job)
+	job.Status = int32(proto.JobStatus_JOB_STATUS_SCHEDULED)
+	jobFingerPrint := fmt.Sprintf("%s:%s:%s:%p", job.Name, job.Description, job.JobData, &job.ScheduleTime)
+	job.ScheduledKey = int(fnv1a.HashString64(jobFingerPrint)) //We assume 64 bit systems!
+	//store the job in the database
+	js.log.Infof("JobService.CreateJob: Creating job in the database")
+	created, err := js.jobDB.Create(ctx, job)
+	if err != nil {
+		js.log.Errorf("JobService.CreateJob: %v", err.Error())
+		return nil, status.Errorf(codes.Internal, "Cannot save job. db error")
+	}
 
-		jb, err := j.jobDB.GetByID(ctx, jobID)
-		if err != nil {
-			return 0, grpcErrors.ErrorResponse(err, err.Error())
-		}
-		//set the state of the job to running
-		jb.Status = int32(pb.JobStatus_RUNNING)
-		_, err2 := j.jobDB.Update(ctx, jb)
-		if err2 != nil {
-			return 0, grpcErrors.ErrorResponse(err2, err2.Error())
-		}
+	jobID := created.Id.Hex()
+	js.scheduleJob(ctx, job.ScheduledKey, jobID, job.ScheduleTime)
+	js.jobsProducer.PublishCreate(ctx, created)
 
-		j.jobsProducer.PublishRun(ctx, job)
-
-		return 0, nil
-	})
-
-	triggerTime := time.Duration(time.Until(job.ScheduleTime).Seconds())
-	j.jobsScheduler.ScheduleJob(ctx, functionJob, scheduler.NewSimpleTrigger(triggerTime))
-
-	j.jobsProducer.PublishCreate(ctx, created)
-
-	return &pb.CreateJobResponse{Id: created.JobID.String()}, nil
+	return &proto.CreateJobResponse{Id: jobID}, nil
 }
 ```
-> - We receive createJob in our gRPC server. We first convert .proto model to database layer model in `job := models.JobFromProto_CreateJobRequest(req)`. Then we set the status to SCHEDULED and save it to the database and retrieve the id. We then schedule the job and publish the job created topic to be consumed by other services like reports service and finally we return the CreateJobResponse to the user. Inside the schedule functuin, We retrieve the job from database, then set the jobState to RUNNING and save it again to the database. Then we publish run topic to be consumed by our job runner service. We then listen to run-update event which will be triggered by job runner. If the result was success we change the state of of our job to COMPLETE save it to the database and then publish job update to be recorded by our report service.
+> - We receive createJob in our gRPC server. We first convert .proto model to database layer model in `job := models.JobFromProto_CreateJobRequest(req)`. Then we set the status to SCHEDULED and save it to the database and retrieve the id. We then schedule the job and publish the `topic-job-create` to be consumed by other services like reports service and finally we return the CreateJobResponse to the user. Inside the schedule function, We retrieve the job from database, then set the jobState to RUNNING and save it again to the database. Then we publish `topic-job-run` to be consumed by our job runner service. We then listen to `topic-job-run-result` event which will be triggered by job runner. If the result was success we change the state of our job to COMPLETE save it to the database.
 
 > - Run `go mod tidy`
 > - Run `go run cmd/main.go`
-> - Now go to docker desktop an restart grpcui service. then go to `http://localhost:5000/`. If everything goes according to plan, you can connect to the service. Select CreateJob from method name and fill in the form. For Schedule time if you pass a time before time.Now() the schedule will trigger immediately. For job data depending on the job type we need to send a specific Json string. For email type, we need to send a json with the following structure:
+> - Now go to docker desktop an restart grpcui service. Then go to `http://localhost:5000/`. If everything goes according to plan, you can connect to the service. Select CreateJob from method name and fill in the form. For Schedule time if you pass a time before time.Now() the schedule will trigger immediately. For job data depending on the job type we need to send a specific Json string. For email type, we need to send a json with the following structure:
 
 ```json
 {
 	"SourceAddress": "example@example.com",
 	"DestinationAddress": "example@example.com",
 	"Subject": "Message From example@example.com contact form",
-	"Message": "This is a production test!!!!"
+	"Message": "This is a test!!!!"
 }
 ```
 > - Push Invoke button. You will receive created job id.
@@ -711,32 +727,65 @@ func (j *JobService) CreateJob(ctx context.Context, req *pb.CreateJobRequest) (*
 > - We need to listen to `topic-job-run` results. To accomplish this we have to subscribe for `topic-job-run-result` topic. To accomplish that, create a file named `job_consumer_kafka.go` in the path internal/models/job/message_broker. Then set the contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/internal/models/job/message_broker/job_consumer_kafka.go).
 > - Add the following to server.go file.
 
-```
+```go
 jobsConsumer := kafka.NewJobsConsumerGroup(s.log, job_db)
 jobsConsumer.Run(ctx, cancel, s.kafkaConn, s.cfg)
 ```
 > - Run `go mod tidy` then run `go run cmd/main.go`
-> - Go to `http://localhost:8080/` and under consumers you can see `job-run-result-consumer` which is the group id of our consumer. Now go to Topics-> topic-job-create and in the messages tab click the preview of the value of the message and copy the json structure of the message. Something like this (You need to copy yours because when listening, we search the database for jobId):
+> - Go to `http://localhost:8080/` and under consumers you can see `job-run-result-consumer-scheduler` which is the group id of our consumer. Now go to Topics-> topic-job-create and in the messages tab click the preview of the value of the message and copy the json structure of the message. Something like this (You need to copy yours because when listening, we search the database for job by the Id):
 
 ```json
 {
-	"jobId": "649f07e619fca8aa63d842f6",
-	"name": "job1",
-	"scheduleTime": "1970-01-01T00:00:00Z",
-	"createdAt": "2023-06-30T16:50:46.3042083Z",
-	"updatedAt": "2023-06-30T16:50:46.3042086Z",
-	"status": 2,
-	"scheduledKey": 6072375870331110000
+	"Id": "64c07994fcf987a39313754f",
+	"Name": "n1",
+	"Description": "s1",
+	"ScheduleTime": "1970-01-01T00:00:00Z",
+	"CreatedAt": "2023-07-26T01:40:36.888841Z",
+	"UpdatedAt": "2023-07-26T01:40:36.8888412Z",
+	"Status": 2,
+	"JobType": 0,
+	"JobData": "d1",
+	"ScheduledKey": 2534671878703447000
 }
 ```
 > - Set the value of job status of json string to 4. 
 > - Now go to topics -> topic-job-run-result and click produce message from top right corner. Paste the json string into value and click on produce message. If everything goes according to plan, you can see the results from the terminal of VSCode. Also you can go to mongo express at http://localhost:8081/ and see that job status has changed to 4.
 
+> - Now lets add authentication to our grpc server. Create a folder named interceptors inside internal folder. then a file named auth_interceptor.go. Set the contents from [here](https://github.com/KhaledHosseini/play-microservices/blob/master/scheduler/scheduler-service/internal/interceptors/auth_interceptor.go).
+> - Change the grpc_server creation inside server.go to match the following:
+
+```go
+auth_interceptor := Interceptors.NewAuthInterceptor(s.log,s.cfg)
+	grpc_server := grpc.NewServer(
+		grpc.UnaryInterceptor(auth_interceptor.AuthInterceptor),
+	)
+```
+> - Run `go run cmd/main.go`. Now an auth interceptor in active and protect our grpc server. If you invoke any method, the response would be `Missing Authorization header`
+> - go to [this site](https://dinochiesa.github.io/jwt/) and put your generated rsa key-pairs in the corresponding boxes. Then define a simple jwt like this:
+
+```json
+{
+  "iss": "microservice-scheduler.com",
+  "sub": "sheniqua",
+  "aud": "maxine",
+  "iat": 1689904636,
+  "exp": 1689910603,
+  "role": "admin"
+}
+```
+> - Set other configs as shown in the following image and then click the left arrow. Copy the encoded token to the clipboard.
+
+
+![JWT generate](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ilj0hn6tsm4y0igikj8j.PNG)
+
+> - Now go to docker desktop and restart `grpcui-service` then go to http://localhost:5000/. For each request you make, set a metadata with name= authorization and the value= `<token_copied>`
+> - This time when you invoke the methods, authentication will pass. happy debugging :)
+
 
 ---
 
 
-- **To DO**
+## To DO
 
 > - Add tests
 > - Add tracing using Jaeger
