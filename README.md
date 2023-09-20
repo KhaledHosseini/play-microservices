@@ -1,3 +1,5 @@
+![Play microservice](pms.png)
+
 # play-microservices
 A simple job scheduler app using microservices architecture. Users can sign up (as admin or normal role).
  - Admins can query the list of all users.
@@ -18,6 +20,8 @@ Just run `docker-compose up` from the root directory. Then go to http://localhos
  - Report service: Python [Read](https://dev.to/khaledhosseini/play-microservices-report-service-4jcm)
  - API gateway service: Go [Read](https://dev.to/khaledhosseini/play-microservices-api-gateway-service-4a9j)
  - Client service: Typescript [Read](https://dev.to/khaledhosseini/play-microservices-client-service-4jbf)
+ - Integration via docker-compose: [Read](https://dev.to/khaledhosseini/play-microservices-integration-via-docker-compose-2ddc)
+ - Security: [Read](https://dev.to/khaledhosseini/play-microservices-security-45e4)
 
 ---
 
