@@ -6,7 +6,7 @@ A simple job scheduler app using microservices architecture. Users can sign up (
  - Admins can schedule email jobs to be run in the future.
  - Admins can query the reports.
 
-Just run `docker-compose up` from the root directory. Then go to http://localhost:3000/
+Just run `docker-compose up` from the root directory(This downloads half of the internet onto your computer! A considerable amount of disk space is needed!). Then go to http://localhost:3000/
 
 ![Image1](https://github.com/KhaledHosseini/play-microservices/blob/master/plan/image1.png)
 
