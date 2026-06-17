@@ -1,1 +1,1 @@
-FROM bitnami/kafka:3.9
+FROM soldevelo/kafka:3.9
